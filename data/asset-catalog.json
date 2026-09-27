@@ -1,21 +1,70 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "assets": {
-    "aegis_x_mbt": {"kind":"vehicle","path":"assets/vehicles/aegis_x_mbt_v2.glb"},
-    "aegis_hmmwv50": {"kind":"vehicle","path":"assets/vehicles/aegis_hmmwv50_v2.glb"},
-    "aegis_field_harvester": {"kind":"vehicle","path":"assets/vehicles/aegis_field_harvester_v2.glb"},
-    "aegis_talon_ahx": {"kind":"aircraft","path":"assets/vehicles/aegis_talon_ahx.glb"},
-    "legacy_btr82": {"kind":"vehicle","path":"assets/vehicles/low_poly_btr_82.glb","status":"reference"},
-    "aegis_rifleman": {"kind":"infantry","path":"assets/infantry/aegis_rifleman_v03.glb"},
-    "aegis_command_nexus_hq": {"kind":"building","path":"assets/buildings/aegis_command_nexus_hq_v13.glb"},
-    "aegis_field_barracks": {"kind":"building","path":"assets/buildings/aegis_field_barracks_v023.glb"},
-    "aegis_field_power_node": {"kind":"building","path":"assets/buildings/aegis_field_power_node_v1.glb"},
-    "aegis_field_refinery": {"kind":"building","path":"assets/buildings/aegis_field_refinery_v2.glb"},
-    "aegis_grid_bastion_power_plant": {"kind":"building","path":"assets/buildings/aegis_grid_bastion_power_plant_v1.glb"},
-    "aegis_guardian_turret": {"kind":"building","path":"assets/buildings/aegis_guardian_turret_v031.glb"},
-    "aegis_tactical_command_post": {"kind":"building","path":"assets/buildings/aegis_tactical_command_post_v21.glb"},
-    "aegis_vehicle_factory": {"kind":"building","path":"assets/buildings/aegis_vehicle_factory_v021.glb"},
-    "mineral_rich": {"kind":"resource","path":"assets/resources/worldforge_mineral_rich_crystal_cluster_v0.3_flatfacets.glb"},
-    "mineral_dense": {"kind":"resource","path":"assets/resources/worldforge_mineral_dense_crystal_cluster_v0.1.glb"}
+    "aegis_x_mbt": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/aegis_x_mbt_v2.glb"
+    },
+    "aegis_hmmwv50": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/aegis_hmmwv50_v2.glb"
+    },
+    "aegis_field_harvester": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/aegis_field_harvester_v2.glb"
+    },
+    "aegis_talon_ahx": {
+      "kind": "aircraft",
+      "path": "assets/vehicles/aegis_talon_ahx.glb"
+    },
+    "legacy_btr82": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/low_poly_btr_82.glb",
+      "status": "reference"
+    },
+    "aegis_rifleman": {
+      "kind": "infantry",
+      "path": "assets/infantry/aegis_rifleman_v03.glb"
+    },
+    "aegis_command_nexus_hq": {
+      "kind": "building",
+      "path": "assets/buildings/aegis_command_nexus_hq_v13.glb"
+    },
+    "aegis_field_barracks": {
+      "kind": "building",
+      "path": "assets/buildings/aegis_field_barracks_v023.glb"
+    },
+    "aegis_field_power_node": {
+      "kind": "building",
+      "path": "assets/buildings/aegis_field_power_node_v1.glb"
+    },
+    "aegis_field_refinery": {
+      "kind": "building",
+      "path": "assets/buildings/aegis_field_refinery_v2.glb"
+    },
+    "aegis_grid_bastion_power_plant": {
+      "kind": "building",
+      "path": "assets/buildings/aegis_grid_bastion_power_plant_v1.glb"
+    },
+    "aegis_guardian_turret": {
+      "kind": "building",
+      "path": "assets/buildings/aegis_guardian_turret_v031.glb"
+    },
+    "aegis_tactical_command_post": {
+      "kind": "building",
+      "path": "assets/buildings/aegis_tactical_command_post_v21.glb"
+    },
+    "aegis_vehicle_factory": {
+      "kind": "building",
+      "path": "assets/buildings/aegis_vehicle_factory_v021.glb"
+    },
+    "mineral_rich": {
+      "kind": "resource",
+      "path": "assets/resources/worldforge_mineral_rich_crystal_cluster_v0.3_flatfacets.glb"
+    },
+    "mineral_dense": {
+      "kind": "resource",
+      "path": "assets/resources/worldforge_mineral_dense_crystal_cluster_v0.1.glb"
+    }
   }
 }

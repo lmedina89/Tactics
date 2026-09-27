@@ -6,5 +6,12 @@
   "locomotor": "infantry_basic",
   "selectable": true,
   "maxHealth": 100,
-  "model": {"scale": 1.0, "headingOffset": 0.0}
+  "model": {
+    "scale": 1.0,
+    "headingOffset": 0.0
+  },
+  "modules": [
+    "UnitAIUpdate",
+    "Locomotor"
+  ]
 }

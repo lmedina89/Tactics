@@ -1,0 +1,10 @@
+{
+  "id": "command_nexus",
+  "name": "Command Nexus HQ",
+  "kind": "building",
+  "asset": "aegis_command_nexus_hq",
+  "selectable": false,
+  "maxHealth": 4200,
+  "modules": ["Structure"],
+  "footprint": {"width": 30, "depth": 26}
+}

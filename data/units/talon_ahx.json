@@ -1,0 +1,11 @@
+{
+  "id": "talon_ahx",
+  "name": "Talon AH-X",
+  "kind": "aircraft",
+  "asset": "aegis_talon_ahx",
+  "locomotor": "rotary_air",
+  "selectable": true,
+  "maxHealth": 650,
+  "modules": ["UnitAIUpdate", "Locomotor"],
+  "model": {"scale": 1.0, "headingOffset": 0.0}
+}

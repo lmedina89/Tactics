@@ -1,0 +1,17 @@
+{
+  "id": "rotary_air",
+  "appearance": "WINGS",
+  "kind": "air",
+  "maxSpeed": 28.0,
+  "acceleration": 10.0,
+  "braking": 12.0,
+  "turnRate": 2.7,
+  "radius": 2.6,
+  "pathfindRadius": 0.0,
+  "arrivalRadius": 2.0,
+  "preferredHeight": 18,
+  "maxSlopeDeg": 90,
+  "canMoveBackward": false,
+  "turnInPlace": true,
+  "speedTurnPenalty": 0.35
+}

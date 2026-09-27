@@ -16,23 +16,26 @@ export class DataRegistry {
     const catalog = await get('data/asset-catalog.json');
     for (const [id, value] of Object.entries(catalog.assets)) this.assets.set(id, { id, ...value });
 
-    for (const p of ['aegis','crimson']) {
-      const value = await get(`data/factions/${p}.json`);
-      this.factions.set(value.id, value);
+    const registry = await get('data/registry.json');
+    for (const p of registry.factions || []) {
+      const value = await get(p);
+      this._insertUnique(this.factions, value, p);
     }
-    for (const p of ['infantry','wheeled','tracked']) {
-      const value = await get(`data/locomotors/${p}.json`);
-      this.locomotors.set(value.id, value);
+    for (const p of registry.locomotors || []) {
+      const value = await get(p);
+      this._insertUnique(this.locomotors, value, p);
     }
-    for (const p of ['aegis_x','hmmwv50','rifleman']) {
-      const value = await get(`data/units/${p}.json`);
-      this.definitions.set(value.id, value);
-    }
-    for (const p of ['command_post','vehicle_factory','guardian_turret']) {
-      const value = await get(`data/buildings/${p}.json`);
-      this.definitions.set(value.id, value);
+    for (const p of registry.definitions || []) {
+      const value = await get(p);
+      this._insertUnique(this.definitions, value, p);
     }
     return this;
+  }
+
+  _insertUnique(map, value, source) {
+    if (!value?.id) throw new Error(`Definition missing id: ${source}`);
+    if (map.has(value.id)) throw new Error(`Duplicate definition id ${value.id}: ${source}`);
+    map.set(value.id, value);
   }
 
   asset(id) { return this.assets.get(id); }

@@ -1,0 +1,10 @@
+{
+  "id": "mineral_rich",
+  "name": "Rich Mineral Field",
+  "kind": "resource",
+  "asset": "mineral_rich",
+  "selectable": false,
+  "capacity": 1250,
+  "resourceType": "mineral",
+  "model": {"scale": 1.0, "headingOffset": 0.0}
+}

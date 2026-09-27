@@ -1,0 +1,11 @@
+{
+  "id": "harvester",
+  "name": "Field Harvester",
+  "kind": "vehicle",
+  "asset": "aegis_field_harvester",
+  "locomotor": "wheeled_light",
+  "selectable": true,
+  "maxHealth": 950,
+  "modules": ["UnitAIUpdate", "Locomotor", "ResourceCollector"],
+  "model": {"scale": 1.0, "headingOffset": 1.5707963268}
+}

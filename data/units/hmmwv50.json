@@ -6,5 +6,12 @@
   "locomotor": "wheeled_light",
   "selectable": true,
   "maxHealth": 450,
-  "model": {"scale": 1.0, "headingOffset": 0.0}
+  "model": {
+    "scale": 1.0,
+    "headingOffset": 0.0
+  },
+  "modules": [
+    "UnitAIUpdate",
+    "Locomotor"
+  ]
 }

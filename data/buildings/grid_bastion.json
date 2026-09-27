@@ -1,0 +1,10 @@
+{
+  "id": "grid_bastion",
+  "name": "Grid Bastion Power Plant",
+  "kind": "building",
+  "asset": "aegis_grid_bastion_power_plant",
+  "selectable": false,
+  "maxHealth": 2600,
+  "modules": ["Structure"],
+  "footprint": {"width": 30, "depth": 24}
+}

@@ -1,10 +1,16 @@
 {
   "id": "wheeled_light",
+  "appearance": "FOUR_WHEELS",
   "kind": "wheels",
   "maxSpeed": 14.0,
   "acceleration": 8.0,
   "braking": 12.0,
   "turnRate": 2.8,
   "radius": 1.35,
-  "arrivalRadius": 0.9
+  "pathfindRadius": 1.65,
+  "arrivalRadius": 0.9,
+  "maxSlopeDeg": 27,
+  "canMoveBackward": true,
+  "turnInPlace": false,
+  "speedTurnPenalty": 0.92
 }

@@ -1,0 +1,10 @@
+{
+  "id": "barracks",
+  "name": "Field Barracks",
+  "kind": "building",
+  "asset": "aegis_field_barracks",
+  "selectable": false,
+  "maxHealth": 1400,
+  "modules": ["Structure"],
+  "footprint": {"width": 22, "depth": 18}
+}

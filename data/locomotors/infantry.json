@@ -1,10 +1,16 @@
 {
   "id": "infantry_basic",
+  "appearance": "TWO_LEGS",
   "kind": "legs",
   "maxSpeed": 7.5,
   "acceleration": 18.0,
   "braking": 24.0,
   "turnRate": 6.5,
   "radius": 0.42,
-  "arrivalRadius": 0.45
+  "pathfindRadius": 0.5,
+  "arrivalRadius": 0.45,
+  "maxSlopeDeg": 38,
+  "canMoveBackward": false,
+  "turnInPlace": true,
+  "speedTurnPenalty": 0.45
 }

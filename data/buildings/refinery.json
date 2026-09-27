@@ -1,0 +1,10 @@
+{
+  "id": "refinery",
+  "name": "Field Refinery",
+  "kind": "building",
+  "asset": "aegis_field_refinery",
+  "selectable": false,
+  "maxHealth": 1800,
+  "modules": ["Structure"],
+  "footprint": {"width": 24, "depth": 20}
+}

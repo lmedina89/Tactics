@@ -1,0 +1,29 @@
+{
+  "factions": [
+    "data/factions/aegis.json",
+    "data/factions/crimson.json"
+  ],
+  "locomotors": [
+    "data/locomotors/infantry.json",
+    "data/locomotors/wheeled.json",
+    "data/locomotors/tracked.json",
+    "data/locomotors/rotary_air.json"
+  ],
+  "definitions": [
+    "data/units/aegis_x.json",
+    "data/units/hmmwv50.json",
+    "data/units/rifleman.json",
+    "data/units/harvester.json",
+    "data/units/talon_ahx.json",
+    "data/buildings/command_post.json",
+    "data/buildings/vehicle_factory.json",
+    "data/buildings/guardian_turret.json",
+    "data/buildings/power_node.json",
+    "data/buildings/refinery.json",
+    "data/buildings/barracks.json",
+    "data/buildings/command_nexus.json",
+    "data/buildings/grid_bastion.json",
+    "data/resources/mineral_rich.json",
+    "data/resources/mineral_dense.json"
+  ]
+}

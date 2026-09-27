@@ -1,0 +1,10 @@
+{
+  "id": "power_node",
+  "name": "Field Power Node",
+  "kind": "building",
+  "asset": "aegis_field_power_node",
+  "selectable": false,
+  "maxHealth": 900,
+  "modules": ["Structure"],
+  "footprint": {"width": 14, "depth": 12}
+}

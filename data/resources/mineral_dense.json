@@ -1,0 +1,10 @@
+{
+  "id": "mineral_dense",
+  "name": "Dense Mineral Field",
+  "kind": "resource",
+  "asset": "mineral_dense",
+  "selectable": false,
+  "capacity": 3000,
+  "resourceType": "mineral",
+  "model": {"scale": 1.0, "headingOffset": 0.0}
+}
