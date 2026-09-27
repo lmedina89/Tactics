@@ -2,9 +2,31 @@
   "id": "barracks",
   "name": "Field Barracks",
   "kind": "building",
-  "asset": "aegis_field_barracks",
-  "selectable": false,
-  "maxHealth": 1400,
-  "modules": ["Structure"],
-  "footprint": {"width": 22, "depth": 18}
+  "modules": [
+    {
+      "type": "Body",
+      "maxHealth": 1400
+    },
+    {
+      "type": "Footprint",
+      "width": 22,
+      "depth": 18
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_field_barracks",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "barracks_provider"
+      ]
+    },
+    {
+      "type": "Production",
+      "queueType": "infantry"
+    }
+  ]
 }

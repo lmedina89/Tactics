@@ -2,9 +2,32 @@
   "id": "refinery",
   "name": "Field Refinery",
   "kind": "building",
-  "asset": "aegis_field_refinery",
-  "selectable": false,
-  "maxHealth": 1800,
-  "modules": ["Structure"],
-  "footprint": {"width": 24, "depth": 20}
+  "modules": [
+    {
+      "type": "Body",
+      "maxHealth": 1800
+    },
+    {
+      "type": "Footprint",
+      "width": 24,
+      "depth": 20
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_field_refinery",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "resource_dock_provider"
+      ]
+    },
+    {
+      "type": "DockingProvider",
+      "protocol": "resource_docking",
+      "capacity": 1
+    }
+  ]
 }

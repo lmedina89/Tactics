@@ -1,0 +1,15 @@
+{
+  "id": "factory_rollout",
+  "requesterRole": "production_unit",
+  "providerRole": "vehicle_factory_provider",
+  "initialState": "SPAWNED",
+  "terminalStates": ["COMPLETE", "REJECTED"],
+  "transitions": [
+    {"from":"SPAWNED","event":"GRANT_EXIT","to":"EXIT_GRANTED"},
+    {"from":"SPAWNED","event":"REJECT","to":"REJECTED"},
+    {"from":"EXIT_GRANTED","event":"BEGIN_EXIT","to":"EXITING"},
+    {"from":"EXITING","event":"CLEAR_BUILDING","to":"CLEAR"},
+    {"from":"CLEAR","event":"RALLY","to":"RALLYING"},
+    {"from":"RALLYING","event":"ARRIVE","to":"COMPLETE"}
+  ]
+}

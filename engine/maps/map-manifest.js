@@ -9,6 +9,12 @@ export function validateMapManifest(raw) {
 
   const map = clone(raw);
   map.region ??= { id: map.id, streamable: false, neighbors: [] };
+  map.region.strategic ??= {};
+  map.region.strategic.owner ??= null;
+  map.region.strategic.threat ??= 0;
+  map.region.strategic.resourceValue ??= 0;
+  map.region.strategic.aiActivity ??= 0;
+  map.region.strategic.discoveredBy ??= [];
   map.players ??= [];
   map.objects ??= [];
   map.roads ??= [];

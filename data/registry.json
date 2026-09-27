@@ -25,5 +25,9 @@
     "data/buildings/grid_bastion.json",
     "data/resources/mineral_rich.json",
     "data/resources/mineral_dense.json"
+  ],
+  "interactions": [
+    "data/interactions/resource_docking.json",
+    "data/interactions/factory_rollout.json"
   ]
 }

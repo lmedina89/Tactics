@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.2.1 — GameObject Modules + Interaction Core
+
+- Migrated all production object definitions to explicit composable GameObject modules.
+- Added `engine/entities/game-object.js` for generic module parsing, validation, runtime creation, rendering/footprint lookup, and transitional v0.2 compatibility.
+- Added serializable `InteractionManager` with role-checked, data-defined state transitions.
+- Added `resource_docking` and `factory_rollout` interaction protocols.
+- Added `GestureResolver` so TAP / LONG_PRESS / PAN / PINCH are classified before gameplay commands are emitted.
+- Added persistent region strategic state: owner, threat, resource value, AI activity, discovered-by factions/players.
+- Snapshot format advanced to v3 and includes runtime module state, interaction sessions, and region state.
+- Renderer now obtains model asset/scale/heading from the Render module rather than unit-specific top-level fields.
+- Navigation obtains structure footprints through the Footprint module.
+- Expanded the C&C parity matrix to combine Red Alert, Generals/Zero Hour, and RA3-style data lessons.
+- Preserved all v0.2.0 terrain/map foundations and all existing production GLBs unchanged.
+
 ## v0.2.0 — Core Parity + World Foundation
 
 - Added Generals parity matrix and stricter architecture contract.

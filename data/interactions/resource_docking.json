@@ -1,0 +1,17 @@
+{
+  "id": "resource_docking",
+  "requesterRole": "resource_dock_requester",
+  "providerRole": "resource_dock_provider",
+  "initialState": "REQUEST_DOCK",
+  "terminalStates": ["COMPLETE", "REJECTED"],
+  "transitions": [
+    {"from":"REQUEST_DOCK","event":"GRANT","to":"DOCK_GRANTED"},
+    {"from":"REQUEST_DOCK","event":"REJECT","to":"REJECTED"},
+    {"from":"DOCK_GRANTED","event":"APPROACH","to":"APPROACH"},
+    {"from":"APPROACH","event":"ARRIVE","to":"DOCKED"},
+    {"from":"DOCKED","event":"BEGIN_UNLOAD","to":"UNLOADING"},
+    {"from":"UNLOADING","event":"UNLOAD_COMPLETE","to":"RELEASE"},
+    {"from":"RELEASE","event":"EXIT","to":"EXITING"},
+    {"from":"EXITING","event":"CLEAR","to":"COMPLETE"}
+  ]
+}

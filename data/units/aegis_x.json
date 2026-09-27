@@ -2,16 +2,37 @@
   "id": "aegis_x",
   "name": "Aegis-X MBT",
   "kind": "vehicle",
-  "asset": "aegis_x_mbt",
-  "locomotor": "tracked_heavy",
-  "selectable": true,
-  "maxHealth": 1800,
-  "model": {
-    "scale": 1.0,
-    "headingOffset": 0.0
-  },
   "modules": [
-    "UnitAIUpdate",
-    "Locomotor"
+    {
+      "type": "Body",
+      "maxHealth": 1800
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "UnitAIUpdate"
+    },
+    {
+      "type": "Locomotor",
+      "locomotor": "tracked_heavy"
+    },
+    {
+      "type": "Vision",
+      "range": 90
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "production_unit"
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_x_mbt",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    }
   ]
 }

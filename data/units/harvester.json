@@ -2,10 +2,45 @@
   "id": "harvester",
   "name": "Field Harvester",
   "kind": "vehicle",
-  "asset": "aegis_field_harvester",
-  "locomotor": "wheeled_light",
-  "selectable": true,
-  "maxHealth": 950,
-  "modules": ["UnitAIUpdate", "Locomotor", "ResourceCollector"],
-  "model": {"scale": 1.0, "headingOffset": 1.5707963268}
+  "modules": [
+    {
+      "type": "Body",
+      "maxHealth": 950
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "UnitAIUpdate"
+    },
+    {
+      "type": "Locomotor",
+      "locomotor": "wheeled_light"
+    },
+    {
+      "type": "Vision",
+      "range": 90
+    },
+    {
+      "type": "ResourceCollector",
+      "cargoCapacity": 1200,
+      "resourceTypes": [
+        "mineral"
+      ]
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "resource_dock_requester",
+        "production_unit"
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_field_harvester",
+      "scale": 1.0,
+      "headingOffset": 1.5707963268
+    }
+  ]
 }

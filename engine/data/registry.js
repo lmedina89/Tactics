@@ -1,9 +1,12 @@
+import {moduleConfig,moduleBindings} from '../entities/game-object.js';
+
 export class DataRegistry {
   constructor() {
     this.assets = new Map();
     this.factions = new Map();
     this.locomotors = new Map();
     this.definitions = new Map();
+    this.interactions = new Map();
   }
 
   async load(base = '.') {
@@ -17,18 +20,10 @@ export class DataRegistry {
     for (const [id, value] of Object.entries(catalog.assets)) this.assets.set(id, { id, ...value });
 
     const registry = await get('data/registry.json');
-    for (const p of registry.factions || []) {
-      const value = await get(p);
-      this._insertUnique(this.factions, value, p);
-    }
-    for (const p of registry.locomotors || []) {
-      const value = await get(p);
-      this._insertUnique(this.locomotors, value, p);
-    }
-    for (const p of registry.definitions || []) {
-      const value = await get(p);
-      this._insertUnique(this.definitions, value, p);
-    }
+    for (const p of registry.factions || []) this._insertUnique(this.factions, await get(p), p);
+    for (const p of registry.locomotors || []) this._insertUnique(this.locomotors, await get(p), p);
+    for (const p of registry.definitions || []) { const value=await get(p); moduleBindings(value); this._insertUnique(this.definitions, value, p); }
+    for (const p of registry.interactions || []) this._insertUnique(this.interactions, await get(p), p);
     return this;
   }
 
@@ -42,4 +37,9 @@ export class DataRegistry {
   faction(id) { return this.factions.get(id); }
   locomotor(id) { return this.locomotors.get(id); }
   definition(id) { return this.definitions.get(id); }
+  interaction(id) { return this.interactions.get(id); }
+  module(definitionOrId,type){
+    const def=typeof definitionOrId==='string'?this.definition(definitionOrId):definitionOrId;
+    return def?moduleConfig(def,type):null;
+  }
 }

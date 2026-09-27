@@ -1,17 +1,29 @@
 import * as THREE from 'three';
+import {GestureResolver,GestureType} from './gesture-resolver.js';
 
 export class InputController{
   constructor({canvas,renderer,sim,onSelection,onStatus}){
     this.canvas=canvas;this.renderer=renderer;this.sim=sim;this.onSelection=onSelection;this.onStatus=onStatus;this.selectedId=null;
-    this.raycaster=new THREE.Raycaster();this.ndc=new THREE.Vector2();this.pointers=new Map();this.dragging=false;this.lastPinch=0;this._bind();
+    this.raycaster=new THREE.Raycaster();this.ndc=new THREE.Vector2();
+    this.gestures=new GestureResolver({tapMovePx:30,panStartPx:34,longPressMs:520,tapMaxMs:720});
+    this._bind();
   }
   selected(){return this.selectedId?this.sim.entities.get(this.selectedId):null;}
   clear(){this.selectedId=null;this.onSelection(null);}
-  _bind(){const c=this.canvas;c.style.touchAction='none';c.addEventListener('pointerdown',e=>this._down(e));c.addEventListener('pointermove',e=>this._move(e));c.addEventListener('pointerup',e=>this._up(e));c.addEventListener('pointercancel',e=>this._up(e));c.addEventListener('wheel',e=>{e.preventDefault();this._zoom(Math.sign(e.deltaY)*12);},{passive:false});}
-  _down(e){this.canvas.setPointerCapture?.(e.pointerId);this.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:performance.now()});if(this.pointers.size===2)this.lastPinch=this._pinchDistance();}
-  _move(e){const p=this.pointers.get(e.pointerId);if(!p)return;const ox=p.x,oy=p.y;p.x=e.clientX;p.y=e.clientY;if(this.pointers.size===2){const d=this._pinchDistance();if(this.lastPinch)this._zoom((this.lastPinch-d)*.2);this.lastPinch=d;return;}const dist=Math.hypot(p.x-p.sx,p.y-p.sy);if(dist>28){this.dragging=true;this._pan(p.x-ox,p.y-oy);}}
-  _up(e){const p=this.pointers.get(e.pointerId);if(!p)return;const dist=Math.hypot(e.clientX-p.sx,e.clientY-p.sy),duration=performance.now()-p.t;this.pointers.delete(e.pointerId);if(this.pointers.size<2)this.lastPinch=0;const wasDrag=this.dragging;if(this.pointers.size===0)this.dragging=false;if(!wasDrag&&dist<32&&duration<700)this._tap(e.clientX,e.clientY);}
-  _pinchDistance(){const a=[...this.pointers.values()];return a.length<2?0:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);}
+  _bind(){
+    const c=this.canvas;c.style.touchAction='none';
+    c.addEventListener('pointerdown',e=>{c.setPointerCapture?.(e.pointerId);this._consume(this.gestures.down(e.pointerId,e.clientX,e.clientY,performance.now()));});
+    c.addEventListener('pointermove',e=>this._consume(this.gestures.move(e.pointerId,e.clientX,e.clientY,performance.now())));
+    c.addEventListener('pointerup',e=>this._consume(this.gestures.up(e.pointerId,e.clientX,e.clientY,performance.now())));
+    c.addEventListener('pointercancel',e=>this._consume(this.gestures.cancel(e.pointerId)));
+    c.addEventListener('wheel',e=>{e.preventDefault();this._zoom(Math.sign(e.deltaY)*12);},{passive:false});
+  }
+  _consume(events){for(const g of events||[]){
+    if(g.type===GestureType.TAP)this._tap(g.x,g.y);
+    else if(g.type===GestureType.LONG_PRESS)this.onStatus('LONG PRESS · RESERVED FOR CONTEXT COMMANDS');
+    else if(g.type===GestureType.PAN)this._pan(g.dx,g.dy);
+    else if(g.type===GestureType.PINCH)this._zoom(g.delta*.2);
+  }}
   _mouseNdc(x,y){const r=this.canvas.getBoundingClientRect();this.ndc.x=((x-r.left)/r.width)*2-1;this.ndc.y=-((y-r.top)/r.height)*2+1;}
 
   _screenDistance(entity,x,y){const v=this.renderer.entityViews.get(entity.id);if(!v)return Infinity;const p=new THREE.Vector3();v.getWorldPosition(p);p.project(this.renderer.camera);const r=this.canvas.getBoundingClientRect(),sx=r.left+(p.x*.5+.5)*r.width,sy=r.top+(-p.y*.5+.5)*r.height;return Math.hypot(x-sx,y-sy);}

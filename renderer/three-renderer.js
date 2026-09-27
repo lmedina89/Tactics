@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {clone as skeletonClone} from 'three/addons/utils/SkeletonUtils.js';
 import {TerrainRenderer} from './terrain-renderer.js';
+import {renderConfigOf} from '../engine/entities/game-object.js';
 
 export class ThreeRenderer{
   constructor({canvas,registry,map}){
@@ -28,15 +29,15 @@ export class ThreeRenderer{
 
   async buildViews(sim){
     for(const e of sim.entities.values()){
-      if(this.entityViews.has(e.id))continue;const def=this.registry.definition(e.definitionId);if(!def?.asset)continue;
-      const base=await this._loadAsset(def.asset),obj=skeletonClone(base);obj.name=e.id;obj.userData.entityId=e.id;
+      if(this.entityViews.has(e.id))continue;const def=this.registry.definition(e.definitionId),render=renderConfigOf(def);if(!render?.asset)continue;
+      const base=await this._loadAsset(render.asset),obj=skeletonClone(base);obj.name=e.id;obj.userData.entityId=e.id;
       const faction=e.factionId?this.registry.faction(e.factionId):null;
       obj.traverse(n=>{if(!n.isMesh)return;n.userData.entityId=e.id;n.material=n.material.clone();if(faction?.id==='crimson'){const c=n.material.color?.clone?.();if(c){c.lerp(new THREE.Color(faction.color),.34);n.material.color.copy(c);}if(n.material.emissive)n.material.emissive.lerp(new THREE.Color(faction.accent),.08);}});
-      obj.scale.setScalar(def.model?.scale??1);this.scene.add(obj);this.entityViews.set(e.id,obj);
+      obj.scale.setScalar(render.scale??1);this.scene.add(obj);this.entityViews.set(e.id,obj);
     }
   }
 
-  sync(sim){for(const e of sim.entities.values()){const v=this.entityViews.get(e.id);if(!v)continue;v.position.set(e.x,e.y??0,e.z);v.rotation.y=e.yaw+(this.registry.definition(e.definitionId).model?.headingOffset||0);}}
+  sync(sim){for(const e of sim.entities.values()){const v=this.entityViews.get(e.id);if(!v)continue;const render=renderConfigOf(this.registry.definition(e.definitionId));v.position.set(e.x,e.y??0,e.z);v.rotation.y=e.yaw+(render?.headingOffset||0);}}
   setSelection(entity){if(!entity){this.selectionRing.visible=false;return;}this.selectionRing.visible=true;this.selectionRing.position.set(entity.x,(entity.y??0)+.14,entity.z);const r=Math.max(1.3,(entity.radius||1)*1.25);this.selectionRing.scale.setScalar(r);}
   showDestination(p){this.destinationRing.visible=true;this.destinationRing.position.set(p.x,(this.terrain?.heightAt(p.x,p.z)??0)+.16,p.z);this.destinationRing.scale.setScalar(1.2);clearTimeout(this._destTimer);this._destTimer=setTimeout(()=>this.destinationRing.visible=false,900);}
   resize(){const w=this.canvas.clientWidth||innerWidth,h=this.canvas.clientHeight||innerHeight;this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}

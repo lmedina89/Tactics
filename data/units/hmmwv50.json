@@ -2,16 +2,37 @@
   "id": "hmmwv50",
   "name": "HMMWV-50",
   "kind": "vehicle",
-  "asset": "aegis_hmmwv50",
-  "locomotor": "wheeled_light",
-  "selectable": true,
-  "maxHealth": 450,
-  "model": {
-    "scale": 1.0,
-    "headingOffset": 0.0
-  },
   "modules": [
-    "UnitAIUpdate",
-    "Locomotor"
+    {
+      "type": "Body",
+      "maxHealth": 450
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "UnitAIUpdate"
+    },
+    {
+      "type": "Locomotor",
+      "locomotor": "wheeled_light"
+    },
+    {
+      "type": "Vision",
+      "range": 90
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "production_unit"
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_hmmwv50",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    }
   ]
 }

@@ -15,7 +15,7 @@ d35f2e15d7206db175e178d98e7f9b06d74b6fb95c59e4ae877fa4e0c75dda14  assets/vehicle
 d76d1b45ba6ae5f8c4629a284380810d7b542d46726b9a5436f83b0729ee125a  assets/vehicles/aegis_x_mbt_v2.glb
 3d967364747005d041be274407188f0a714141fb5aa595256005ccc40e45065c  assets/vehicles/low_poly_btr_82.glb
 
-# ForgeRTS v0.2.0 terrain textures
+# ForgeRTS v0.2.1 terrain textures (unchanged from v0.2.0)
 613fb6d324af553f90b5b3e1455db657e9f169920ed4512bfef288c0c05b9185  assets/terrain/road_asphalt.png
 0c6ec4699e0a81719b90cb7686176e3701a718a2cecd767bf96c4c068a702ea1  assets/terrain/road_shoulders.png
 580f2d4cb4726ba39dd7a13085ce2e200ad877d126b6535c9a3a2b69a2a01a19  assets/terrain/temperate_dirt.png

@@ -2,9 +2,17 @@
   "id": "mineral_rich",
   "name": "Rich Mineral Field",
   "kind": "resource",
-  "asset": "mineral_rich",
-  "selectable": false,
-  "capacity": 1250,
-  "resourceType": "mineral",
-  "model": {"scale": 1.0, "headingOffset": 0.0}
+  "modules": [
+    {
+      "type": "Resource",
+      "capacity": 1250,
+      "resourceType": "mineral"
+    },
+    {
+      "type": "Render",
+      "asset": "mineral_rich",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    }
+  ]
 }

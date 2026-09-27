@@ -2,8 +2,32 @@
   "id": "vehicle_factory",
   "name": "Vehicle Factory",
   "kind": "building",
-  "asset": "aegis_vehicle_factory",
-  "selectable": false,
-  "maxHealth": 2200,
-  "footprint": {"width": 28, "depth": 24}
+  "modules": [
+    {
+      "type": "Body",
+      "maxHealth": 2200
+    },
+    {
+      "type": "Footprint",
+      "width": 28,
+      "depth": 24
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_vehicle_factory",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "vehicle_factory_provider"
+      ]
+    },
+    {
+      "type": "Production",
+      "queueType": "vehicle",
+      "rolloutProtocol": "factory_rollout"
+    }
+  ]
 }

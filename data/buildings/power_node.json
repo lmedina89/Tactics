@@ -2,9 +2,21 @@
   "id": "power_node",
   "name": "Field Power Node",
   "kind": "building",
-  "asset": "aegis_field_power_node",
-  "selectable": false,
-  "maxHealth": 900,
-  "modules": ["Structure"],
-  "footprint": {"width": 14, "depth": 12}
+  "modules": [
+    {
+      "type": "Body",
+      "maxHealth": 900
+    },
+    {
+      "type": "Footprint",
+      "width": 14,
+      "depth": 12
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_field_power_node",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    }
+  ]
 }

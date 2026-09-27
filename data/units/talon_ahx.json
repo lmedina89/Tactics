@@ -2,10 +2,37 @@
   "id": "talon_ahx",
   "name": "Talon AH-X",
   "kind": "aircraft",
-  "asset": "aegis_talon_ahx",
-  "locomotor": "rotary_air",
-  "selectable": true,
-  "maxHealth": 650,
-  "modules": ["UnitAIUpdate", "Locomotor"],
-  "model": {"scale": 1.0, "headingOffset": 0.0}
+  "modules": [
+    {
+      "type": "Body",
+      "maxHealth": 650
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "UnitAIUpdate"
+    },
+    {
+      "type": "Locomotor",
+      "locomotor": "rotary_air"
+    },
+    {
+      "type": "Vision",
+      "range": 120
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "production_unit"
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_talon_ahx",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    }
+  ]
 }

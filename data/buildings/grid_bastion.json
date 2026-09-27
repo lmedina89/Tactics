@@ -2,9 +2,21 @@
   "id": "grid_bastion",
   "name": "Grid Bastion Power Plant",
   "kind": "building",
-  "asset": "aegis_grid_bastion_power_plant",
-  "selectable": false,
-  "maxHealth": 2600,
-  "modules": ["Structure"],
-  "footprint": {"width": 30, "depth": 24}
+  "modules": [
+    {
+      "type": "Body",
+      "maxHealth": 2600
+    },
+    {
+      "type": "Footprint",
+      "width": 30,
+      "depth": 24
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_grid_bastion_power_plant",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    }
+  ]
 }

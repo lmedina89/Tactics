@@ -2,8 +2,21 @@
   "id": "command_post",
   "name": "Tactical Command Post",
   "kind": "building",
-  "asset": "aegis_tactical_command_post",
-  "selectable": false,
-  "maxHealth": 3500,
-  "footprint": {"width": 22, "depth": 18}
+  "modules": [
+    {
+      "type": "Body",
+      "maxHealth": 3500
+    },
+    {
+      "type": "Footprint",
+      "width": 22,
+      "depth": 18
+    },
+    {
+      "type": "Render",
+      "asset": "aegis_tactical_command_post",
+      "scale": 1.0,
+      "headingOffset": 0.0
+    }
+  ]
 }
