@@ -13,8 +13,12 @@ const view=new ThreeRenderer({canvas,registry,map});
 await view.buildWorld(sim.terrain);await view.buildViews(sim);
 
 const selectionLabel=$('#selection'),status=$('#status'),tickLabel=$('#tick');
+function selectionText(e){
+  if(!e)return 'NONE';const def=registry.definition(e.definitionId),hp=`${Math.ceil(e.health)} / ${e.maxHealth}`;
+  return `${def.name.toUpperCase()} · HP ${hp}`;
+}
 const input=new InputController({canvas,renderer:view,sim,
-  onSelection:e=>{view.setSelection(e);selectionLabel.textContent=e?`${registry.definition(e.definitionId).name} · ${e.health}/${e.maxHealth}`:'NONE';},
+  onSelection:e=>{view.setSelection(e);selectionLabel.textContent=selectionText(e);},
   onStatus:s=>status.textContent=s
 });
 
@@ -26,10 +30,10 @@ let accumulator=0,last=performance.now();
 function frame(now){
   const dt=Math.min(.1,(now-last)/1000);last=now;accumulator+=dt;
   while(accumulator>=FIXED_DT){sim.step(FIXED_DT);accumulator-=FIXED_DT;}
-  view.sync(sim);view.setSelection(input.selected());view.render();
-  const selected=input.selected(),aiState=selected?.ai?.state?` · ${selected.ai.state}`:'';tickLabel.textContent=`TICK ${sim.tick}${aiState}`;
+  view.sync(sim);const selected=input.selected();view.setSelection(selected);selectionLabel.textContent=selectionText(selected);view.render();
+  const aiState=selected?.ai?.state?` · ${selected.ai.state}`:'';const target=selected?.combat?.activeTargetId?` · TARGET ${selected.combat.activeTargetId}`:'';tickLabel.textContent=`TICK ${sim.tick}${aiState}${target}`;
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-status.textContent='READY · LOCOMOTOR FACING CORE · SELECT A FRIENDLY UNIT';
+status.textContent='READY · COMBAT CORE · SELECT FRIENDLY · TAP HOSTILE TO ATTACK';
 window.ForgeRTS={sim,view,input,registry,map,snapshot:()=>sim.snapshot(),restore:s=>sim.restore(s)};

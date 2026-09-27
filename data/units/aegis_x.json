@@ -8,6 +8,27 @@
       "maxHealth": 1800
     },
     {
+      "type": "TurretAI",
+      "turnRate": 1.75,
+      "aimTolerance": 0.07,
+      "autoAcquire": false,
+      "acquisitionRange": 92,
+      "scanIntervalTicks": 8
+    },
+    {
+      "type": "WeaponSet",
+      "slots": [
+        {
+          "slot": "PRIMARY",
+          "weapon": "aegis_120mm"
+        }
+      ]
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "heavy_tank"
+    },
+    {
       "type": "Selectable",
       "enabled": true
     },
@@ -32,7 +53,10 @@
       "type": "Render",
       "asset": "aegis_x_mbt",
       "scale": 1.0,
-      "headingOffset": -1.5707963267948966
+      "headingOffset": -1.5707963267948966,
+      "turretNode": "TurretRoot",
+      "gunPitchNode": "GunPitchRoot",
+      "muzzleNode": "MuzzleSocket"
     }
   ]
 }

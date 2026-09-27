@@ -1,0 +1,9 @@
+{
+  "id": "structure",
+  "name": "Structure Armor",
+  "multipliers": {
+    "SMALL_ARMS": 0.05,
+    "HEAVY_MACHINE_GUN": 0.24,
+    "CANNON": 0.78
+  }
+}

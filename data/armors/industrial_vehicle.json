@@ -1,0 +1,9 @@
+{
+  "id": "industrial_vehicle",
+  "name": "Industrial Vehicle Armor",
+  "multipliers": {
+    "SMALL_ARMS": 0.08,
+    "HEAVY_MACHINE_GUN": 0.50,
+    "CANNON": 1.10
+  }
+}

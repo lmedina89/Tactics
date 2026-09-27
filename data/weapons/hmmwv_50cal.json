@@ -1,0 +1,19 @@
+{
+  "id": "hmmwv_50cal",
+  "name": ".50 Cal Heavy Machine Gun",
+  "damageType": "HEAVY_MACHINE_GUN",
+  "damage": 12,
+  "range": 62,
+  "minimumRange": 0,
+  "delayBetweenShots": 0.18,
+  "prefireDelay": 0.12,
+  "clipSize": 40,
+  "clipReloadTime": 2.4,
+  "delivery": "HITSCAN",
+  "aimTolerance": 0.13,
+  "targetDomains": ["GROUND"],
+  "targetKinds": ["infantry", "vehicle", "building"],
+  "muzzleHeight": 2.2,
+  "muzzleForwardOffset": 1.6,
+  "tracerColor": "#ffe5a6"
+}

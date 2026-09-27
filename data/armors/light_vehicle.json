@@ -1,0 +1,9 @@
+{
+  "id": "light_vehicle",
+  "name": "Light Vehicle Armor",
+  "multipliers": {
+    "SMALL_ARMS": 0.10,
+    "HEAVY_MACHINE_GUN": 0.65,
+    "CANNON": 1.25
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "aircraft_light",
+  "name": "Light Aircraft Armor",
+  "multipliers": {
+    "SMALL_ARMS": 0.18,
+    "HEAVY_MACHINE_GUN": 0.70,
+    "CANNON": 0.85
+  }
+}

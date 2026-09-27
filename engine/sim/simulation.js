@@ -3,9 +3,11 @@ import {GridPathfinder} from '../pathfinding/grid-pathfinder.js';
 import {stepLocomotor} from '../locomotion/locomotor.js';
 import {SeededRng} from './rng.js';
 import {TerrainSampler} from '../maps/terrain-sampler.js';
-import {assignMoveOrder,clearOrders,stepUnitAI} from '../ai/unit-ai-update.js';
+import {assignMoveOrder,assignAttackOrder,clearOrders,stepUnitAI} from '../ai/unit-ai-update.js';
 import {createGameObjectRuntime,footprintOf} from '../entities/game-object.js';
 import {InteractionManager} from '../interactions/interaction-protocol.js';
+import {ProjectileSystem} from '../combat/projectile-system.js';
+import {CombatSystem} from '../combat/weapon-system.js';
 
 export const FIXED_DT=1/30;
 
@@ -22,6 +24,8 @@ export class Simulation{
     this.pathfinder=new GridPathfinder(this.navigationMap,this.terrain,map.navigation?.cellSize??4);
     this._spawnMap();
     this.interactions=new InteractionManager({registry:this.registry,entityLookup:id=>this.entities.get(id)});
+    this.projectiles=new ProjectileSystem();
+    this.combat=new CombatSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),projectiles:this.projectiles}).bindEntitiesProvider(()=>this.entities.values());
   }
 
   _buildNavigationMap(map){
@@ -46,26 +50,32 @@ export class Simulation{
 
   issueMove(entityIds,destination){return this.commandBus.issue({type:CommandType.MOVE,entityIds,destination});}
   issueStop(entityIds){return this.commandBus.issue({type:CommandType.STOP,entityIds});}
+  issueAttack(entityIds,targetId){return this.commandBus.issue({type:CommandType.ATTACK,entityIds,targetId});}
 
   step(dt=FIXED_DT){
     for(const c of this.commandBus.drain())this._apply(c);
     for(const e of this.entities.values()){
-      if(!e.locomotorId)continue;
+      if(!e.alive||!e.locomotorId)continue;
       const cfg=this.registry.locomotor(e.locomotorId);
-      if(e.modules?.UnitAIUpdate)stepUnitAI(e,cfg,this.pathfinder,this.tick);
+      if(e.modules?.UnitAIUpdate)stepUnitAI(e,cfg,this.pathfinder,this.tick,{registry:this.registry,entityLookup:id=>this.entities.get(id)});
       stepLocomotor(e,cfg,dt,this.terrain);
     }
     this._separateFriendlies();
+    this.combat.step(dt,this.tick);
     this.tick++;
   }
 
   _apply(c){
-    if(c.type===CommandType.STOP){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.locomotorId)clearOrders(e);}return;}
-    if(c.type===CommandType.MOVE){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.locomotorId)assignMoveOrder(e,c);}return;}
+    if(c.type===CommandType.STOP){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId)clearOrders(e);}return;}
+    if(c.type===CommandType.MOVE){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId)assignMoveOrder(e,c);}return;}
+    if(c.type===CommandType.ATTACK){
+      const target=this.entities.get(c.targetId);if(!target?.alive)return;
+      for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId&&e.weaponSlots?.slots?.length&&e.playerId&&target.playerId&&e.playerId!==target.playerId)assignAttackOrder(e,c);}
+    }
   }
 
   _separateFriendlies(){
-    const movers=[...this.entities.values()].filter(e=>e.locomotorId&&e.playerId);
+    const movers=[...this.entities.values()].filter(e=>e.alive&&e.locomotorId&&e.playerId);
     for(let i=0;i<movers.length;i++)for(let j=i+1;j<movers.length;j++){
       const a=movers[i],b=movers[j];if(a.playerId!==b.playerId)continue;
       const dx=b.x-a.x,dz=b.z-a.z,d=Math.hypot(dx,dz)||0.001,min=(a.radius+b.radius)*0.82;
@@ -80,22 +90,24 @@ export class Simulation{
 
   snapshot(){
     return {
-      version:4,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),
+      version:5,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),
       players:[...this.players.values()].map(p=>structuredClone(p)),regionStates:[...this.regionStates.values()].map(r=>structuredClone(r)),
       entities:[...this.entities.values()].map(e=>({
         id:e.id,definitionId:e.definitionId,playerId:e.playerId,factionId:e.factionId,kind:e.kind,
-        x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,angularSpeed:e.angularSpeed??0,steeringAngle:e.steeringAngle??0,movingBackward:!!e.movingBackward,health:e.health,maxHealth:e.maxHealth,
-        resourceRemaining:e.resourceRemaining,ai:e.ai?structuredClone(e.ai):null,modules:structuredClone(e.modules||{})
+        x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,angularSpeed:e.angularSpeed??0,steeringAngle:e.steeringAngle??0,movingBackward:!!e.movingBackward,
+        health:e.health,maxHealth:e.maxHealth,alive:e.alive,damageState:e.damageState,destroyedTick:e.destroyedTick,lastDamagedBy:e.lastDamagedBy,lastDamagedTick:e.lastDamagedTick,
+        armorId:e.armorId,weaponSlots:structuredClone(e.weaponSlots),turretYaw:e.turretYaw,turretAngularSpeed:e.turretAngularSpeed??0,combat:structuredClone(e.combat),
+        selectable:e.selectable,resourceRemaining:e.resourceRemaining,ai:e.ai?structuredClone(e.ai):null,modules:structuredClone(e.modules||{})
       }))
     };
   }
 
   restore(snapshot){
-    if((snapshot?.version??0)!==4)throw new Error('Unsupported ForgeRTS snapshot version');
+    if((snapshot?.version??0)!==5)throw new Error('Unsupported ForgeRTS snapshot version');
     this.tick=snapshot.tick??0;this.rng.restore(snapshot.rngState??1);this.commandBus.restore(snapshot.commandBus??{});
     this.players=new Map((snapshot.players||[]).map(p=>[p.id,structuredClone(p)]));
     this.regionStates=new Map((snapshot.regionStates||[]).map(r=>[r.id,structuredClone(r)]));
     for(const s of snapshot.entities||[]){const e=this.entities.get(s.id);if(!e)continue;Object.assign(e,structuredClone(s));}
-    this.interactions.restore(snapshot.interactions??{});
+    this.interactions.restore(snapshot.interactions??{});this.projectiles.restore(snapshot.projectiles??{});this.combat.restore(snapshot.combat??{});
   }
 }

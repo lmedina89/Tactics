@@ -1,0 +1,9 @@
+{
+  "id": "infantry",
+  "name": "Infantry Armor",
+  "multipliers": {
+    "SMALL_ARMS": 1.0,
+    "HEAVY_MACHINE_GUN": 0.95,
+    "CANNON": 1.35
+  }
+}

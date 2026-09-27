@@ -1,0 +1,24 @@
+{
+  "id": "guardian_cannon",
+  "name": "Guardian Twin Cannon",
+  "damageType": "CANNON",
+  "damage": 150,
+  "range": 74,
+  "minimumRange": 3,
+  "delayBetweenShots": 1.55,
+  "prefireDelay": 0.20,
+  "clipSize": 2,
+  "clipReloadTime": 1.55,
+  "delivery": "PROJECTILE",
+  "aimTolerance": 0.08,
+  "targetDomains": ["GROUND"],
+  "targetKinds": ["infantry", "vehicle", "building"],
+  "projectile": {
+    "speed": 118,
+    "hitRadius": 2.2,
+    "radius": 0.20,
+    "color": "#ffb76d"
+  },
+  "muzzleHeight": 4.0,
+  "muzzleForwardOffset": 2.8
+}

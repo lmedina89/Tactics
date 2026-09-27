@@ -8,6 +8,10 @@
       "maxHealth": 650
     },
     {
+      "type": "ArmorSet",
+      "armor": "aircraft_light"
+    },
+    {
       "type": "Selectable",
       "enabled": true
     },

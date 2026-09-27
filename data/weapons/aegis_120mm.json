@@ -1,0 +1,24 @@
+{
+  "id": "aegis_120mm",
+  "name": "120mm Main Cannon",
+  "damageType": "CANNON",
+  "damage": 320,
+  "range": 78,
+  "minimumRange": 4,
+  "delayBetweenShots": 2.8,
+  "prefireDelay": 0.35,
+  "clipSize": 1,
+  "clipReloadTime": 2.8,
+  "delivery": "PROJECTILE",
+  "aimTolerance": 0.07,
+  "targetDomains": ["GROUND"],
+  "targetKinds": ["infantry", "vehicle", "building"],
+  "projectile": {
+    "speed": 95,
+    "hitRadius": 2.4,
+    "radius": 0.22,
+    "color": "#ffd985"
+  },
+  "muzzleHeight": 2.4,
+  "muzzleForwardOffset": 4.0
+}

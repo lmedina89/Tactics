@@ -40,6 +40,9 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
   const selectable=modules.get('Selectable');
   const locoBinding=modules.get('Locomotor');
   const resource=modules.get('Resource');
+  const armor=modules.get('ArmorSet');
+  const weaponSet=modules.get('WeaponSet');
+  const turretAI=modules.get('TurretAI');
   const loco=locoBinding?registry.locomotor(locoBinding.locomotor):null;
   if(locoBinding&&!loco)throw new Error(`Unknown locomotor ${locoBinding.locomotor} on ${definition.id}`);
   const ground=terrain.heightAt(spawn.x,spawn.z);
@@ -53,11 +56,15 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
     factionId:player?.factionId??null,
     kind:definition.kind,
     x:spawn.x,z:spawn.z,y,yaw:spawn.yaw||0,speed:0,angularSpeed:0,steeringAngle:0,movingBackward:false,
-    health:body?.maxHealth??1,maxHealth:body?.maxHealth??1,
+    health:body?.maxHealth??1,maxHealth:body?.maxHealth??1,alive:true,damageState:'PRISTINE',destroyedTick:null,lastDamagedBy:null,lastDamagedTick:null,
     selectable:selectable?.enabled??false,
     locomotorId:locoBinding?.locomotor??null,
+    armorId:armor?.armor??null,
     radius:loco?.radius??0,
     ai:modules.has('UnitAIUpdate')?createUnitAIState():null,
+    weaponSlots:weaponSet?{slots:(weaponSet.slots||[]).map(s=>({slot:s.slot||'PRIMARY',weaponId:s.weapon,ammoInClip:null,nextFireTick:0,reloadUntilTick:0,prefireUntilTick:0,targetId:null}))}:null,
+    turretYaw:turretAI?(spawn.yaw||0):null,turretAngularSpeed:0,
+    combat:{manualTargetId:null,autoTargetId:null,activeTargetId:null,nextScanTick:0},
     resourceRemaining:spawn.resourceRemaining??resource?.capacity??null,
     modules:runtimeModules
   };

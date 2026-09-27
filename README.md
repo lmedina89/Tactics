@@ -1,39 +1,65 @@
-# ForgeRTS v0.2.2 — Locomotor Facing + Vehicle Steering
+# ForgeRTS v0.3.0 — Combat Core
 
 ForgeRTS is a clean, separate browser-native RTS engine. It does **not** modify the existing WorldForge / Skirmish project.
 
-This milestone finishes the vehicle-facing foundation before combat. The implementation remains data-driven and browser-native while following the same architectural lesson found in Generals/Zero Hour: locomotion owns facing/turning behavior, with separate movement rules for treads, wheels, legs, and air units. No EA art/assets or copied EA source are included.
+v0.3.0 is the first combat milestone. The implementation follows the same broad separation we have been studying in Command & Conquer: Generals / Zero Hour: ATTACK is persistent UnitAI intent, weapons are data-driven templates with runtime reload state, armor adjusts incoming damage, projectiles are simulation objects, and turret facing is independent from hull locomotion. The implementation is original ForgeRTS JavaScript; no EA game assets or copied EA source are included.
 
-## v0.2.2 scope
+## Player-facing changes
 
-- corrected authored model-forward metadata without modifying any GLB bytes:
-  - Aegis-X local forward is `+X`, so Render heading offset is now `-90°`
-  - HMMWV-50 local forward is `+X`, so Render heading offset is now `-90°`
-  - Field Harvester local forward is `+Z`, so Render heading offset is now `0°`
-- refactored locomotion into separate tread, wheel, leg, and air stepping paths
-- tracked vehicles now support low-speed/pivot turning, moving turn rate, pivot turn rate, and backward movement while preserving hull orientation
-- wheeled vehicles now use steering-angle + wheelbase curvature instead of rotating around their center like a tank
-- reversing a wheeled vehicle inverts steering response correctly so the hull remains physically coherent
-- added a dedicated `wheeled_heavy` locomotor profile for the Field Harvester
-- runtime state now includes `angularSpeed`, `steeringAngle`, and `movingBackward`
-- snapshot format advanced to v4 so facing/steering state remains deterministic across save/restore
-- added locomotor-facing regression tests covering tread pivoting, wheeled arc steering, reverse behavior, and GLB heading calibration
-- retained the v0.2.1 GameObject modules, interaction protocols, gesture resolver, strategic-region state, terrain, roads, river, and persistent UnitAI foundations
-- all 16 production GLBs remain byte-for-byte unchanged
+- select a green friendly combat unit, then tap a red hostile to issue **ATTACK**
+- Aegis-X and HMMWV turrets rotate independently from their moving hulls
+- Riflemen stop and turn their bodies to aim
+- Guardian Turrets automatically acquire hostile ground targets in range
+- rifle/HMMWV fire uses hitscan/tracer delivery
+- Aegis-X and Guardian Turret cannon fire uses deterministic projectile objects
+- targets take armor-adjusted damage, transition through damage states, and become non-selectable wrecks at zero HP
+- selected-unit HUD health updates continuously
 
-## Why this comes before weapons
+## Data-driven combat foundation
 
-Facing cannot be cosmetic once combat exists. Hull orientation affects movement, reverse behavior, firing arcs, target approach, formation behavior, and eventually independent turret orientation. Locking simulation-owned vehicle facing now prevents the future Weapon/Attack system from depending on renderer-derived rotation.
+New content families:
 
-## Current validation focus
+- `data/weapons/` — damage type, range, minimum range, cadence, prefire, clip/reload, delivery type, aim tolerance, targeting masks, projectile parameters
+- `data/armors/` — damage-type multipliers for infantry, light vehicles, heavy tanks, industrial vehicles, aircraft, structures, heavy structures, and fortified targets
+- `WeaponSet`, `ArmorSet`, `TurretAI`, and `BodyAim` GameObject modules
 
-Select the Aegis-X and HMMWV and give each multiple destinations that require 45°, 90°, and 180° changes in direction. The tank should pivot/turn its hull toward the route. The HMMWV should follow a visible arc rather than spinning in place. Order the HMMWV to a point directly behind it and it should reverse without visually flipping the hull.
+Initial weapon set:
 
-The Harvester now has a slower/heavier wheeled profile, but harvesting/production gameplay is still intentionally deferred to the economy milestone.
+- Rifleman Service Rifle — SMALL_ARMS / hitscan
+- HMMWV-50 .50 Cal — HEAVY_MACHINE_GUN / hitscan
+- Aegis-X 120mm — CANNON / projectile
+- Guardian Twin Cannon — CANNON / projectile
 
-## Next milestone
+The initial balance intentionally relies on armor coefficients rather than inflated HP. Rifle fire is dangerous to infantry, reduced against light vehicles, and nearly irrelevant against heavy tank armor. The 120mm cannon is a heavy anti-vehicle weapon.
 
-Once v0.2.2 is visually validated, the recommended next milestone is **ForgeRTS v0.3.0 — Weapons / Armor / Damage Core**: ATTACK commands, WeaponSet data, target state, range/facing/reload, projectile/hitscan execution, damage types versus ArmorSet data, health/death state, autonomous Guardian Turret behavior, and sensible unit/building durability.
+## Simulation architecture
+
+The combat chain is now:
+
+`ATTACK command → UnitAI persistent target → attack approach position → independent turret/body aim → weapon runtime → hitscan/projectile delivery → armor adjustment → Body health/damage state → destruction`
+
+Weapons support primary/secondary/tertiary-style slot data even though the current units use only a primary slot. Weapon selection already estimates armor-adjusted damage so later multi-weapon units can choose sensibly without unit-name branching.
+
+Snapshot format is now **v5** and preserves weapon runtime, turret state, damage state, explicit attack intent, and in-flight projectile state.
+
+## What remains intentionally deferred
+
+- full line-of-fire collision masks and terrain/building occlusion
+- splash/radius damage
+- secondary/tertiary weapon switching in production content
+- anti-air targeting and Talon weapons
+- reactive unit auto-acquisition/guard behavior beyond Guardian Turrets
+- economy, harvesting, production queues, strategic enemy AI, fog/radar, veterancy, upgrades
+
+Those systems now have a combat substrate to build on instead of requiring bespoke unit logic.
+
+## Validation focus
+
+1. Select Aegis-X, HMMWV, or Rifleman and tap a red hostile.
+2. Confirm the unit approaches only until it reaches weapon range rather than moving onto the target.
+3. Watch Aegis-X/HMMWV turret orientation independently from the hull.
+4. Approach an enemy Guardian Turret and confirm it automatically defends its base.
+5. Destroy a target and confirm it stops acting/selecting while remaining visually as a darkened wreck.
 
 ## Run
 

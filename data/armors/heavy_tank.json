@@ -1,0 +1,9 @@
+{
+  "id": "heavy_tank",
+  "name": "Heavy Tank Armor",
+  "multipliers": {
+    "SMALL_ARMS": 0.01,
+    "HEAVY_MACHINE_GUN": 0.08,
+    "CANNON": 1.0
+  }
+}

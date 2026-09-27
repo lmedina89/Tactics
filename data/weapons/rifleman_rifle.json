@@ -1,0 +1,19 @@
+{
+  "id": "rifleman_rifle",
+  "name": "Service Rifle",
+  "damageType": "SMALL_ARMS",
+  "damage": 10,
+  "range": 44,
+  "minimumRange": 0,
+  "delayBetweenShots": 0.34,
+  "prefireDelay": 0.08,
+  "clipSize": 24,
+  "clipReloadTime": 1.8,
+  "delivery": "HITSCAN",
+  "aimTolerance": 0.16,
+  "targetDomains": ["GROUND"],
+  "targetKinds": ["infantry", "vehicle", "building"],
+  "muzzleHeight": 1.5,
+  "muzzleForwardOffset": 0.7,
+  "tracerColor": "#ffd78a"
+}

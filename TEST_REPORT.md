@@ -1,17 +1,25 @@
-# ForgeRTS v0.2.2 Validation Report
+# ForgeRTS v0.3.0 Validation Report
 
 ## Automated tests
 
-`npm test` passes **26/26** tests.
+`npm test` passes **32/32** tests.
 
-Coverage includes:
+Combat coverage includes:
+
+- armor data and weapon data registry families
+- meaningful armor coefficients: rifle fire is nearly ineffective against heavy tank armor while cannon damage remains significant
+- persistent ATTACK order with attack-range approach behavior
+- independent Aegis-X turret aiming and deterministic projectile fire
+- HMMWV hitscan weapon defeating infantry and destruction-state cleanup
+- autonomous Guardian Turret target acquisition and firing
+- projectile/weapon/combat snapshot and restore determinism
+
+Existing regression coverage remains intact for:
 
 - deterministic persistent MOVE / STOP behavior
 - static building clearance and destination correction
-- snapshot / restore determinism
 - MapManifest v2 persistent-world fields
 - splat terrain normalization and water passability
-- registry and asset-catalog integrity
 - gesture classification before gameplay command emission
 - GameObject module composition
 - explicit resource-docking and factory-rollout interaction protocols
@@ -27,13 +35,19 @@ All project JavaScript and MJS sources pass `node --check`. All JSON data files 
 
 ## Asset integrity
 
-`sha256sum -c ASSET_HASHES.sha256` passes. All **16 production GLBs** are byte-for-byte unchanged from v0.2.1. Terrain textures are unchanged as well.
+`sha256sum -c ASSET_HASHES.sha256` passes. All **16 production GLBs** are byte-for-byte unchanged from v0.2.2. Existing terrain textures are unchanged.
 
-## Implementation notes
+## Combat implementation notes
 
-- Simulation yaw uses `0 = +Z` world-forward.
-- Aegis-X and HMMWV were authored with local `+X` as forward, so their Render modules now apply `-π/2` heading offsets.
-- Field Harvester was authored with local `+Z` as forward and therefore uses zero heading offset.
-- The renderer continues to consume simulation-owned `yaw`; it does not invent vehicle orientation.
-- Tracked vehicles may pivot at low speed while wheeled vehicles use steering curvature based on wheel angle and wheelbase.
-- Hull/turret separation is intentionally reserved for the Weapon/Attack milestone.
+- `ATTACK` is a serialized command and persists as UnitAI target intent.
+- UnitAI computes a firing-position approach point rather than simply moving onto the victim.
+- Aegis-X, HMMWV, and Guardian use independent world-space `turretYaw`; Rifleman uses a high-rate body aim module.
+- hitscan and projectile delivery are distinct simulation paths.
+- ArmorSet coefficients transform weapon damage before Body health changes.
+- Guardian Turrets are the first auto-acquiring defensive objects.
+- destroyed objects remain present as darkened wrecks but are no longer selectable or active combatants.
+- snapshot format is v5 and includes attack intent, weapon runtime, turret state, damage state, and in-flight projectiles.
+
+## Intentionally deferred
+
+Full projectile collision masks, line-of-fire occlusion, splash/radius damage, anti-air weapons, reactive guard behavior, and production/economy are deferred so the initial combat layer can be validated independently.

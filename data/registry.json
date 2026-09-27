@@ -30,5 +30,21 @@
   "interactions": [
     "data/interactions/resource_docking.json",
     "data/interactions/factory_rollout.json"
+  ],
+  "armors": [
+    "data/armors/infantry.json",
+    "data/armors/light_vehicle.json",
+    "data/armors/heavy_tank.json",
+    "data/armors/industrial_vehicle.json",
+    "data/armors/aircraft_light.json",
+    "data/armors/structure.json",
+    "data/armors/heavy_structure.json",
+    "data/armors/fortified.json"
+  ],
+  "weapons": [
+    "data/weapons/rifleman_rifle.json",
+    "data/weapons/hmmwv_50cal.json",
+    "data/weapons/aegis_120mm.json",
+    "data/weapons/guardian_cannon.json"
   ]
 }

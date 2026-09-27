@@ -8,6 +8,24 @@
       "maxHealth": 100
     },
     {
+      "type": "BodyAim",
+      "turnRate": 8.5,
+      "aimTolerance": 0.16
+    },
+    {
+      "type": "WeaponSet",
+      "slots": [
+        {
+          "slot": "PRIMARY",
+          "weapon": "rifleman_rifle"
+        }
+      ]
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "infantry"
+    },
+    {
       "type": "Selectable",
       "enabled": true
     },
@@ -32,7 +50,8 @@
       "type": "Render",
       "asset": "aegis_rifleman",
       "scale": 1.0,
-      "headingOffset": 0.0
+      "headingOffset": 0.0,
+      "muzzleNode": "MuzzleFlash"
     }
   ]
 }

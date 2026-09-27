@@ -4,18 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>ForgeRTS v0.2.2</title>
+  <title>ForgeRTS v0.3.0</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
   <canvas id="game"></canvas>
   <div class="hud">
-    <div class="chip brand">FORGERTS <span class="version">v0.2.2</span></div>
+    <div class="chip brand">FORGERTS <span class="version">v0.3.0</span></div>
     <div class="chip" id="selection">NONE</div>
     <div class="chip"><span id="status">LOADING…</span> · <span id="tick">TICK 0</span></div>
   </div>
-  <div class="help">Tap a green friendly unit to select it. Tap the battlefield to issue a persistent MOVE order. Drag to pan, pinch to zoom. Gesture-classified input + data-driven GameObjects now sit on the deterministic parity/world foundation. Tap selects/orders; deliberate drag pans; pinch zooms. Module/interaction architecture is now ready for combat, production, and harvesting.</div>
+  <div class="help">Tap a green friendly unit to select it. Tap open terrain to MOVE. Tap a red hostile to ATTACK. Tanks/HMMWVs use independent turret aim; Riflemen turn their bodies to aim; Guardian Turrets autonomously defend their faction. Weapon range, reload, projectiles/hitscan, armor multipliers, health and destruction are simulation-owned and data-driven.</div>
   <div class="controls"><button id="stop">STOP</button><button id="center">CENTER</button><button id="clear">CLEAR</button></div>
 </div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>

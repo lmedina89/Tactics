@@ -6,26 +6,29 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.2.2 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.3.0 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
-| Serializable commands | mission/action orders | `MessageStream` / GUI commands | behavior receives data, not UI events | `engine/commands/CommandBus` | MOVE / STOP implemented |
-| GameObject composition | object classes + explicit state | object/update-module architecture | `GameObject` composed from Body/AI/Draw/Behaviors/etc. | `engine/entities/game-object.js` + JSON modules | **Implemented foundation** |
-| Unit AI requested destination/state | mission/state handling | `AIUpdate` module family | AI behavior as module | `engine/ai/unit-ai-update.js` | MOVE state + repath implemented |
-| Locomotor templates | movement classes | `Locomotor.h` family (`FOUR_WHEELS`, `TREADS`, turn rate, wheel angle, reverse state) | locomotor set data | `engine/locomotion/locomotor.js` + JSON | **Tracks pivot/turn; wheels steer on curvature; legs/air separate; facing is simulation state** |
-| Pathfinder destination correction | cell movement | AI/pathfinder family | geometry/pathing data separate | `engine/pathfinding/grid-pathfinder.js` | nearest-valid destination + clearance |
-| Interaction protocols | refinery/harvester radio/docking handshakes | production/contain/dock behavior families | behavior modules/endpoints | `engine/interactions/interaction-protocol.js` | **Dock + rollout protocol foundation** |
-| Gesture/context input | classic click orders | selection/context translation | client behavior separate from simulation | `ui/gesture-resolver.js` + InputController | **TAP/LONG_PRESS/PAN/PINCH classification** |
+| Serializable commands | mission/action orders | `MessageStream` / GUI commands | behavior receives data, not UI events | `engine/commands/CommandBus` | MOVE / STOP / **ATTACK** implemented |
+| GameObject composition | object classes + explicit state | object/update-module architecture | `GameObject` composed from Body/AI/Draw/Behaviors/etc. | `engine/entities/game-object.js` + JSON modules | Implemented foundation |
+| Unit AI requested destination/state | mission/state handling | `AIUpdate` module family | AI behavior as module | `engine/ai/unit-ai-update.js` | MOVE + **persistent ATTACK approach/engage state** |
+| Locomotor templates | movement classes | `Locomotor.h` family (`FOUR_WHEELS`, `TREADS`, turn rate, wheel angle, reverse state) | locomotor set data | `engine/locomotion/locomotor.js` + JSON | Tracks pivot/turn; wheels steer on curvature; legs/air separate; facing simulation-owned |
+| Pathfinder destination correction | cell movement | AI/pathfinder family | geometry/pathing data separate | `engine/pathfinding/grid-pathfinder.js` | nearest-valid destination + clearance + attack approach point |
+| Weapons / Weapon templates/runtime | projectile/warhead behavior | `WeaponTemplate` / `Weapon` | `WeaponSet` modules | `engine/combat/weapon-system.js` + `data/weapons` | **Implemented initial hitscan/projectile, prefire, cadence, clip/reload, target masks** |
+| Weapon slots / selection | weapon/warhead choices | primary/secondary/tertiary weapon slots + damage estimation | WeaponSet data | `engine/combat/targeting.js` | **Generic slots + armor-adjusted best-weapon scoring implemented** |
+| Armor/damage | armor/warhead relationships | `ArmorTemplate` / DamageType / Body | `ArmorSet` | `engine/combat/damage-system.js` + `data/armors` | **Implemented coefficients, health states, destruction** |
+| Turret/body aim | turreted vehicle fire logic | `TurretAI` under AIUpdate | turret behavior module | CombatSystem + Render turret bindings | **Independent turret yaw; body-aim infantry; Guardian auto-acquire** |
+| Projectile objects | projectile classes | projectile Thing/Object weapon delivery | projectile behavior data | `engine/combat/projectile-system.js` | **Deterministic projectile runtime + snapshot** |
+| Interaction protocols | refinery/harvester radio/docking handshakes | production/contain/dock behavior families | behavior modules/endpoints | `engine/interactions/interaction-protocol.js` | Dock + rollout protocol foundation |
+| Gesture/context input | classic click orders | selection/context translation | client behavior separate from simulation | `ui/gesture-resolver.js` + InputController | TAP/LONG_PRESS/PAN/PINCH + hostile ATTACK context |
 | Terrain/passability separation | map cells/regions | `MapReaderWriterInfo.h` | terrain appearance vs gameplay data | `MapManifest` + TerrainSampler + Pathfinder | Implemented foundation |
 | Height/blend terrain | tile/cell terrain | WorldBuilder blend terrain | layered terrain data | `renderer/terrain-renderer.js` | 3-layer splat terrain |
 | Roads | map overlays | WorldBuilder roads | data-defined terrain feature | map `roads[]` + renderer | Foundation implemented |
 | Rivers/water | map cells/water logic | terrain/water systems | water as independent feature data | map `water` + renderer | Foundation implemented |
-| Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | **Owner/threat/resources/activity/discovery implemented** |
+| Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | Owner/threat/resources/activity/discovery implemented |
 | Stable starts/waypoints | cell/waypoint mission logic | player start/rally waypoints | named anchors | map `waypoints[]` | Data implemented |
-| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | v4 includes modules/interactions/regions/facing-steering state |
-| Weapons | weapon/projectile behavior | `WeaponTemplate` / `Weapon` | WeaponSet modules | `engine/combat` | NEXT major system |
-| Armor/damage | armor/warhead relationships | damage/armor definitions | ArmorSet | `engine/combat` | NEXT major system |
-| Player economy/power | house/resources | `Player` | player/faction data | `FactionState` | Planned |
+| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v5 includes combat/weapon/turret/projectile state** |
+| Player economy/power | house/resources | `Player` | player/faction data | `FactionState` | NEXT after combat validation |
 | Production | factory queues/service | production update modules | Production behavior | `ProductionSystem` | Data hooks added; runtime planned |
 | Teams/attack groups | teams/groups | `Team` / `AIGroup` | team data | `TeamManager` | Planned |
 | Strategic AI | house AI | `AIPlayer` | AI modules/data | `AIController` | Planned |
@@ -37,6 +40,10 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 ## Current implementation rule
 
 Before implementing a major system, update this matrix with the source/reference family and intended ForgeRTS owner. Do not add a bespoke unit-specific system if a general C&C-style subsystem can own the behavior.
+
+## v0.3.0 combat reference boundary
+
+ForgeRTS v0.3.0 follows the *system separation* observed in the released Generals/Zero Hour `Weapon`, `Armor/Damage`, `AIUpdate/TurretAI`, and weapon-slot/object interfaces: ATTACK intent is separate from pathing, turret aim is separate from hull locomotion, WeaponRuntime is separate from damage application, and projectile travel is separate from rendering. The code in ForgeRTS is an original browser-native implementation rather than a direct translation.
 
 ## Licensing / content boundary
 

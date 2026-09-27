@@ -8,6 +8,10 @@
       "maxHealth": 950
     },
     {
+      "type": "ArmorSet",
+      "armor": "industrial_vehicle"
+    },
+    {
       "type": "Selectable",
       "enabled": true
     },

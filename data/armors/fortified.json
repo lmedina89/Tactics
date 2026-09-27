@@ -1,0 +1,9 @@
+{
+  "id": "fortified",
+  "name": "Fortified Armor",
+  "multipliers": {
+    "SMALL_ARMS": 0.02,
+    "HEAVY_MACHINE_GUN": 0.18,
+    "CANNON": 0.72
+  }
+}

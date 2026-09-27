@@ -8,6 +8,10 @@
       "maxHealth": 2200
     },
     {
+      "type": "ArmorSet",
+      "armor": "heavy_structure"
+    },
+    {
       "type": "Footprint",
       "width": 28,
       "depth": 24

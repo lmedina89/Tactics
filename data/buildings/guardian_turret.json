@@ -8,6 +8,27 @@
       "maxHealth": 1150
     },
     {
+      "type": "TurretAI",
+      "turnRate": 1.9,
+      "aimTolerance": 0.08,
+      "autoAcquire": true,
+      "acquisitionRange": 78,
+      "scanIntervalTicks": 8
+    },
+    {
+      "type": "WeaponSet",
+      "slots": [
+        {
+          "slot": "PRIMARY",
+          "weapon": "guardian_cannon"
+        }
+      ]
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "fortified"
+    },
+    {
       "type": "Footprint",
       "width": 8,
       "depth": 8
@@ -16,7 +37,11 @@
       "type": "Render",
       "asset": "aegis_guardian_turret",
       "scale": 1.0,
-      "headingOffset": 0.0
+      "headingOffset": 0.0,
+      "turretNode": "TurretRoot",
+      "gunPitchNode": "GunPitchRoot",
+      "muzzleNode": "MuzzleSocket",
+      "turretHeadingOffset": -1.5707963267948966
     }
   ]
 }

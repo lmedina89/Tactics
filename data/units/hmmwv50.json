@@ -8,6 +8,27 @@
       "maxHealth": 450
     },
     {
+      "type": "TurretAI",
+      "turnRate": 2.9,
+      "aimTolerance": 0.12,
+      "autoAcquire": false,
+      "acquisitionRange": 78,
+      "scanIntervalTicks": 8
+    },
+    {
+      "type": "WeaponSet",
+      "slots": [
+        {
+          "slot": "PRIMARY",
+          "weapon": "hmmwv_50cal"
+        }
+      ]
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "light_vehicle"
+    },
+    {
       "type": "Selectable",
       "enabled": true
     },
@@ -32,7 +53,10 @@
       "type": "Render",
       "asset": "aegis_hmmwv50",
       "scale": 1.0,
-      "headingOffset": -1.5707963267948966
+      "headingOffset": -1.5707963267948966,
+      "turretNode": "TurretRoot",
+      "gunPitchNode": "GunPitchRoot",
+      "muzzleNode": "MuzzleSocket"
     }
   ]
 }

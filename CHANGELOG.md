@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.3.0 — Combat Core
+
+- Added serializable `ATTACK` CommandBus command and persistent UnitAI attack intent.
+- Added target approach routing that moves units to a valid firing position instead of treating ATTACK as MOVE-to-target.
+- Added generic `WeaponSet` runtime with slot, prefire, cadence, clip, and reload state.
+- Added four initial data-defined weapons: Rifleman rifle, HMMWV .50 cal, Aegis-X 120mm cannon, Guardian twin cannon.
+- Added data-driven ArmorSet definitions and damage-type multipliers.
+- Added hitscan and deterministic projectile delivery paths.
+- Added independent `TurretAI` world-facing state for Aegis-X, HMMWV, and Guardian Turret; Rifleman uses body aiming.
+- Added autonomous Guardian Turret hostile acquisition.
+- Added Body damage states and destruction behavior; destroyed units are non-selectable and retain darkened wreck visuals.
+- Added projectile and tracer rendering without giving rendering ownership of gameplay damage.
+- Added hostile tap resolution and red ATTACK feedback ring on mobile/desktop input.
+- Snapshot format advanced to v5 and includes combat, weapon, turret, damage, and projectile state.
+- DataRegistry now validates references from GameObject definitions to assets, locomotors, interactions, weapons, and armors.
+- Added combat regression tests covering armor relationships, ATTACK persistence, tank projectile combat, HMMWV hitscan, autonomous Guardian Turret fire, destruction, and snapshot determinism.
+- Preserved all v0.2.2 locomotion/facing, GameObject modules, interaction protocols, map/terrain, and persistent-world foundations.
+- All production GLBs remain byte-for-byte unchanged.
+
 ## v0.2.2 — Locomotor Facing + Vehicle Steering
 
 - Corrected Aegis-X and HMMWV Render heading offsets to match their authored `+X` forward axes; corrected Harvester to its authored `+Z` forward axis.
