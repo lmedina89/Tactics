@@ -85,7 +85,7 @@ export class CombatSystem{
   }
   step(dt,tick){
     for(const entity of this._allEntities()){
-      if(!entity.alive||!entity.weaponSlots?.slots?.length)continue;
+      if(!entity.alive||entity.operational===false||!entity.weaponSlots?.slots?.length)continue;
       const target=this.targetFor(entity,tick);entity.combat.activeTargetId=target?.id??null;if(!target)continue;
       const choice=chooseBestWeapon(entity,target,this.registry);if(!choice)continue;
       const distance=Math.hypot(target.x-entity.x,target.z-entity.z),aimError=this._turnAim(entity,target,dt);

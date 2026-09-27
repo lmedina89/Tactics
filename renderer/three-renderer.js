@@ -14,7 +14,7 @@ export class ThreeRenderer{
     if(env.fogFar)this.scene.fog=new THREE.Fog(new THREE.Color(env.fogColor||env.skyColor||0x87958a),env.fogNear??300,env.fogFar);
     this.camera=new THREE.PerspectiveCamera(47,1,.1,2200);this.camera.position.set(-85,165,185);this.camera.lookAt(0,0,0);
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));this.renderer.shadowMap.enabled=false;
-    this.loader=new GLTFLoader();this.assetPromises=new Map();this.entityViews=new Map();this.projectileViews=new Map();this.effectViews=[];this.lastCombatEventSerial=0;this.terrain=null;this.ground=null;
+    this.loader=new GLTFLoader();this.assetPromises=new Map();this.entityViews=new Map();this.projectileViews=new Map();this.effectViews=[];this.lastCombatEventSerial=0;this.terrain=null;this.ground=null;this.placementGhost=null;this.placementDefinitionId=null;
     this.selectionRing=this._makeRing(0x9de06d);this.destinationRing=this._makeRing(0xf1d35d);this.attackRing=this._makeRing(0xff665c);this.destinationRing.visible=false;this.attackRing.visible=false;this.selectionRing.visible=false;this.scene.add(this.selectionRing,this.destinationRing,this.attackRing);
     this.projectileGeometry=new THREE.SphereGeometry(1,8,6);
     this._setupLights();this.resize();addEventListener('resize',()=>this.resize());
@@ -35,13 +35,31 @@ export class ThreeRenderer{
       if(this.entityViews.has(e.id))continue;const def=this.registry.definition(e.definitionId),render=renderConfigOf(def);if(!render?.asset)continue;
       const base=await this._loadAsset(render.asset),obj=skeletonClone(base);obj.name=e.id;obj.userData.entityId=e.id;
       const faction=e.factionId?this.registry.faction(e.factionId):null;
-      obj.traverse(n=>{if(!n.isMesh)return;n.userData.entityId=e.id;n.material=n.material.clone();if(n.material.color)n.material.userData.baseColor=n.material.color.clone();if(n.material.emissive)n.material.userData.baseEmissive=n.material.emissive.clone();if(faction?.id==='crimson'){const c=n.material.color?.clone?.();if(c){c.lerp(new THREE.Color(faction.color),.34);n.material.color.copy(c);n.material.userData.baseColor=n.material.color.clone();}if(n.material.emissive){n.material.emissive.lerp(new THREE.Color(faction.accent),.08);n.material.userData.baseEmissive=n.material.emissive.clone();}}});
+      obj.traverse(n=>{if(!n.isMesh)return;n.userData.entityId=e.id;n.material=n.material.clone();n.material.userData.baseOpacity=n.material.opacity;n.material.userData.baseTransparent=n.material.transparent;if(n.material.color)n.material.userData.baseColor=n.material.color.clone();if(n.material.emissive)n.material.userData.baseEmissive=n.material.emissive.clone();if(faction?.id==='crimson'){const c=n.material.color?.clone?.();if(c){c.lerp(new THREE.Color(faction.color),.34);n.material.color.copy(c);n.material.userData.baseColor=n.material.color.clone();}if(n.material.emissive){n.material.emissive.lerp(new THREE.Color(faction.accent),.08);n.material.userData.baseEmissive=n.material.emissive.clone();}}});
       obj.userData.baseScale=render.scale??1;obj.scale.setScalar(obj.userData.baseScale);
       const turret=render.turretNode?obj.getObjectByName(render.turretNode):null;
       if(turret){turret.userData.baseRotationY=turret.rotation.y;obj.userData.turretNodeRef=turret;}
       const muzzle=render.muzzleNode?obj.getObjectByName(render.muzzleNode):null;if(muzzle)obj.userData.muzzleNodeRef=muzzle;
       this.scene.add(obj);this.entityViews.set(e.id,obj);
     }
+  }
+
+
+  async beginPlacementGhost(definitionId){
+    this.endPlacementGhost();const def=this.registry.definition(definitionId),render=renderConfigOf(def);if(!render?.asset)return;
+    const base=await this._loadAsset(render.asset),obj=skeletonClone(base);obj.name='placement-ghost';obj.userData.baseScale=render.scale??1;obj.scale.setScalar(obj.userData.baseScale);
+    obj.traverse(n=>{if(!n.isMesh)return;n.material=n.material.clone();n.material.transparent=true;n.material.opacity=.46;n.material.depthWrite=false;if(n.material.color)n.material.userData.ghostBaseColor=n.material.color.clone();});
+    obj.visible=false;this.scene.add(obj);this.placementGhost=obj;this.placementDefinitionId=definitionId;
+  }
+  updatePlacementGhost(point,yaw,valid){
+    const v=this.placementGhost;if(!v||!point)return;const render=renderConfigOf(this.registry.definition(this.placementDefinitionId));v.visible=true;v.position.set(point.x,(this.terrain?.heightAt(point.x,point.z)??0)+.08,point.z);v.rotation.y=yaw+(render?.headingOffset||0);
+    const tint=new THREE.Color(valid?0x72df7e:0xff6a62);v.traverse(n=>{if(!n.isMesh||!n.material?.color)return;const base=n.material.userData.ghostBaseColor;if(base)n.material.color.copy(base).lerp(tint,.58);});
+  }
+  endPlacementGhost(){if(!this.placementGhost)return;const v=this.placementGhost;this.scene.remove(v);v.traverse(n=>{if(n.isMesh)n.material?.dispose?.();});this.placementGhost=null;this.placementDefinitionId=null;}
+
+  _applyConstructionLook(view,entity){
+    const constructing=entity.operational===false&&entity.construction&&entity.alive;if(view.userData.constructingApplied===constructing)return;view.userData.constructingApplied=constructing;
+    view.traverse(n=>{if(!n.isMesh||!n.material)return;const op=n.material.userData.baseOpacity??1,tr=n.material.userData.baseTransparent??false;n.material.opacity=constructing?Math.min(op,.62):op;n.material.transparent=constructing?true:tr;n.material.depthWrite=!constructing;});
   }
 
   _applyDestroyedLook(view,dead){
@@ -76,11 +94,12 @@ export class ThreeRenderer{
 
   sync(sim){
     this.ensureViews(sim);
+    for(const [id,v] of [...this.entityViews])if(!sim.entities.has(id)){this.scene.remove(v);v.traverse(n=>{if(n.isMesh)n.material?.dispose?.();});this.entityViews.delete(id);}
     for(const e of sim.entities.values()){
       const v=this.entityViews.get(e.id);if(!v)continue;const render=renderConfigOf(this.registry.definition(e.definitionId));v.position.set(e.x,e.y??0,e.z);v.rotation.y=e.yaw+(render?.headingOffset||0);
       if(e.initialResourceCapacity!=null){const ratio=Math.max(0,Math.min(1,(e.resourceRemaining??0)/Math.max(1,e.initialResourceCapacity)));v.visible=ratio>0.001;const scale=(v.userData.baseScale??1)*(0.35+0.65*Math.sqrt(ratio));v.scale.setScalar(scale);}else v.visible=true;
       const turret=v.userData.turretNodeRef;if(turret&&e.turretYaw!=null){const relative=wrapPi(e.turretYaw-e.yaw)+(render?.turretHeadingOffset||0);turret.rotation.y=(turret.userData.baseRotationY||0)+relative;}
-      this._applyDestroyedLook(v,!e.alive);
+      this._applyConstructionLook(v,e);this._applyDestroyedLook(v,!e.alive);
     }
     this._syncProjectiles(sim);this._consumeCombatEvents(sim);this._cleanupEffects();
   }

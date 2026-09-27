@@ -14,12 +14,20 @@ export class ProductionSystem{
   _costCfg(def){return moduleConfig(def,'ProductionCost');}
   _pointAround(provider,distance,side=0){const f={x:Math.sin(provider.yaw),z:Math.cos(provider.yaw)},r={x:Math.cos(provider.yaw),z:-Math.sin(provider.yaw)};return {x:provider.x+f.x*distance+r.x*side,z:provider.z+f.z*distance+r.z*side};}
 
-  queue(producerId,definitionId,tick){
-    const producer=this.entityLookup(producerId),def=this.registry.definition(definitionId);if(!producer?.alive||!def||producer.playerId==null)return {ok:false,reason:'INVALID'};
+  canQueue(producerId,definitionId){
+    const producer=this.entityLookup(producerId),def=this.registry.definition(definitionId);if(!producer?.alive||producer.operational===false||!def||producer.playerId==null)return {ok:false,reason:'INVALID'};
     const cfg=this._prodCfg(producer),cost=this._costCfg(def);if(!cfg||!cost)return {ok:false,reason:'NOT_PRODUCIBLE'};
     if(!(cfg.buildable||[]).includes(definitionId)||cost.queueType!==cfg.queueType)return {ok:false,reason:'NOT_ALLOWED'};
     const queue=producer.production?.queue;if(!queue)return {ok:false,reason:'NO_QUEUE'};
     if(queue.length>=(cfg.queueLimit??5))return {ok:false,reason:'QUEUE_FULL'};
+    if(!this.economy.canAfford(producer.playerId,cost.credits??0))return {ok:false,reason:'INSUFFICIENT_CREDITS'};
+    return {ok:true,reason:'OK',cost:cost.credits??0};
+  }
+
+  queue(producerId,definitionId,tick){
+    const check=this.canQueue(producerId,definitionId);if(!check.ok)return check;
+    const producer=this.entityLookup(producerId),def=this.registry.definition(definitionId);
+    const cfg=this._prodCfg(producer),cost=this._costCfg(def),queue=producer.production.queue;
     if(!this.economy.withdraw(producer.playerId,cost.credits??0))return {ok:false,reason:'INSUFFICIENT_CREDITS'};
     const entry={id:`prod:${producer.id}:${++this.serial}`,definitionId,cost:cost.credits??0,buildTimeTicks:Math.max(1,Math.round((cost.buildTimeSeconds??5)*30)),progressTicks:0,state:'QUEUED',queuedTick:tick};queue.push(entry);return {ok:true,entry};
   }
@@ -58,7 +66,7 @@ export class ProductionSystem{
 
   step(tick){
     for(const producer of this.entitiesProvider()){
-      if(!producer.alive||!producer.production?.queue?.length)continue;const cfg=this._prodCfg(producer),entry=producer.production.queue[0];if(!cfg)continue;
+      if(!producer.alive||producer.operational===false||!producer.production?.queue?.length)continue;const cfg=this._prodCfg(producer),entry=producer.production.queue[0];if(!cfg)continue;
       entry.state='BUILDING';entry.progressTicks+=this.economy.productionRateFactor(producer.playerId);
       if(entry.progressTicks+1e-6<entry.buildTimeTicks)continue;
       entry.state='WAITING_EXIT';const unit=this._spawnCompleted(producer,entry,cfg);if(!unit)continue;producer.production.queue.shift();

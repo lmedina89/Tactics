@@ -34,6 +34,37 @@
       "depth": 8
     },
     {
+      "type": "Construction",
+      "credits": 600,
+      "buildTimeSeconds": 6.0,
+      "refundFraction": 0.75,
+      "prerequisites": [
+        "barracks"
+      ],
+      "buildLimit": 12,
+      "maxSlopeDeg": 15,
+      "maxHeightVariation": 4.0,
+      "startHealthFraction": 0.08,
+      "sockets": [
+        {
+          "x": 0,
+          "z": -7
+        },
+        {
+          "x": 7,
+          "z": 0
+        },
+        {
+          "x": 0,
+          "z": 7
+        },
+        {
+          "x": -7,
+          "z": 0
+        }
+      ]
+    },
+    {
       "type": "Render",
       "asset": "aegis_guardian_turret",
       "scale": 1.0,

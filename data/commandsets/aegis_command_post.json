@@ -1,0 +1,35 @@
+{
+  "id": "aegis_command_post",
+  "commands": [
+    {
+      "id": "build_power_node",
+      "type": "BUILD_STRUCTURE",
+      "definition": "power_node",
+      "label": "POWER NODE"
+    },
+    {
+      "id": "build_refinery",
+      "type": "BUILD_STRUCTURE",
+      "definition": "refinery",
+      "label": "REFINERY"
+    },
+    {
+      "id": "build_barracks",
+      "type": "BUILD_STRUCTURE",
+      "definition": "barracks",
+      "label": "BARRACKS"
+    },
+    {
+      "id": "build_vehicle_factory",
+      "type": "BUILD_STRUCTURE",
+      "definition": "vehicle_factory",
+      "label": "VEHICLE FACTORY"
+    },
+    {
+      "id": "build_guardian_turret",
+      "type": "BUILD_STRUCTURE",
+      "definition": "guardian_turret",
+      "label": "GUARDIAN TURRET"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.4.0 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.5.0 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI commands | behavior receives data, not UI events | `engine/commands/CommandBus` | MOVE / STOP / **ATTACK** implemented |
@@ -27,9 +27,15 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Rivers/water | map cells/water logic | terrain/water systems | water as independent feature data | map `water` + renderer | Foundation implemented |
 | Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | Owner/threat/resources/activity/discovery implemented |
 | Stable starts/waypoints | cell/waypoint mission logic | player start/rally waypoints | named anchors | map `waypoints[]` | Data implemented |
-| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v7 includes dynamic production, economy, resources, interactions, combat and locomotion** |
+| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v8 adds construction sites, operational state and construction-system state to prior economy/combat/locomotion state** |
 | Player economy/power | house/resources | `Player` | player/faction data | `FactionEconomySystem` / player state | **Credits + power + low-power policy implemented** |
 | Production | factory queues/service | production update modules | Production behavior | `engine/production/production-system.js` | **Generic queues, costs, build time, cancellation, dynamic spawn, rollout/rally implemented** |
+| Command sets / contextual UI | sidebar/build lists | `CommandButton` / control bar / GUI command staging | `CommandSet` on `GameObject` | `data/commandsets/*` + HUD renderer | **Data-driven BUILD / PRODUCE / RETURN / CANCEL command presentation implemented** |
+| Build eligibility / tech tree | house build rules | `Player` buildability / affordability / prerequisite checks | `Buildable`, prerequisites, build cost | `engine/construction/tech-tree.js` | **Builder permission, prerequisites, build limits and affordability implemented** |
+| Structure placement | cell legality | `InGameUI` build-place mode / legal build feedback | `StructurePlacementBehavior`, projected buildability | `engine/construction/placement-validator.js` + placement ghost | **Client ghost + authoritative terrain/footprint/radius validation implemented** |
+| Construction state | building creation | `DozerAIUpdate` build task / structure construction lifecycle | `BuildTime`, `RefundValue`, construction-yard/placement modules | `engine/construction/construction-system.js` | **Real damageable sites, progress, cancellation/refund, completion/activation implemented** |
+| Construction approach sockets | docking/build approach points | `DozerAIUpdate` build dock locations | structure behavior data | `Construction.sockets[]` | **Data foundation implemented; current Command Post uses yard style, mobile-builder path is scaffolded** |
+| Dynamic structure occupancy | cell occupancy | pathing/object footprint integration | geometry/placement separate from art | `GridPathfinder` dynamic obstacles | **New/cancelled structures update navigation at runtime** |
 | Teams/attack groups | teams/groups | `Team` / `AIGroup` | team data | `TeamManager` | Planned |
 | Strategic AI | house AI | `AIPlayer` | AI modules/data | `AIController` | Planned |
 | Mission conditions/actions | triggers/actions | Scripts / Conditions / Actions | script data | `MissionSystem` | Planned; never owns world lifetime |
@@ -49,6 +55,10 @@ ForgeRTS v0.3.1 preserves the v0.3.0 combat separation and tightens locomotor be
 ## v0.4.0 economy / production reference boundary
 
 ForgeRTS v0.4.0 activates the interaction and module foundations that were intentionally laid down earlier. Harvester/Refinery behavior uses an explicit docking workflow instead of collision inference; production is a generic queue driven by GameObject modules and ProductionCost data; faction credits and power are simulation state; produced units use explicit rollout state before ordinary movement resumes. Enemy strategic decision-making remains deferred, so enemy economy structures currently exist as passive test-world content rather than a full AI economy. The implementation remains original browser-native JavaScript rather than a direct C&C source translation.
+
+## v0.5.0 construction / command reference boundary
+
+ForgeRTS v0.5.0 follows the released C&C separation between player build eligibility, client-side build placement interaction, builder/construction behavior, and data-defined GameObject commands. Generals `Player` is the reference for centralized build permission/affordability/prerequisite checks; `InGameUI` is the reference for a pending build-place interaction that is separate from simulation authority; `DozerAIUpdate` is the reference for explicit construction task/approach state; RA3 `GameObject` schemas reinforce data-driven `CommandSet`, `BuildTime`, `RefundValue`, buildability and placement behavior. ForgeRTS keeps those boundaries but implements them as compact browser-native systems (`TechTreeSystem`, `PlacementValidator`, `ConstructionSystem`) and does not directly translate EA source code.
 
 ## Licensing / content boundary
 

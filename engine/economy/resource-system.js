@@ -35,7 +35,7 @@ export class ResourceSystem{
   _nearestOwnedRefinery(entity){
     let best=null,bestD=Infinity;
     for(const other of this.entitiesProvider()){
-      if(!other.alive||other.playerId!==entity.playerId)continue;const cfg=this._dockCfg(other);if(!cfg)continue;
+      if(!other.alive||other.operational===false||other.playerId!==entity.playerId)continue;const cfg=this._dockCfg(other);if(!cfg)continue;
       const d=dist(entity,other);if(d<bestD){bestD=d;best=other;}
     }
     return best;
@@ -85,7 +85,7 @@ export class ResourceSystem{
       }
 
       if(c.state==='RETURNING'||c.state==='WAIT_DOCK'){
-        let refinery=this.entityLookup(c.targetRefineryId);if(!refinery?.alive){refinery=this._nearestOwnedRefinery(entity);c.targetRefineryId=refinery?.id??null;}
+        let refinery=this.entityLookup(c.targetRefineryId);if(!refinery?.alive||refinery.operational===false){refinery=this._nearestOwnedRefinery(entity);c.targetRefineryId=refinery?.id??null;}
         if(!refinery){c.state='IDLE';clearOrders(entity);continue;}
         const dock=this._dockCfg(refinery),foot=moduleConfig(this._def(refinery),'Footprint');
         const approachDistance=dock?.approachDistance??((foot?.depth??18)/2+8),approach=this._pointAround(refinery,approachDistance,dock?.approachSideOffset??0);
@@ -101,7 +101,7 @@ export class ResourceSystem{
       }
 
       if(c.state==='UNLOADING'){
-        const refinery=this.entityLookup(c.targetRefineryId),dock=refinery?this._dockCfg(refinery):null;if(!refinery?.alive||!dock){if(c.sessionId)this.interactions.cancel(c.sessionId,'PROVIDER_LOST');c.sessionId=null;this._startReturn(entity);continue;}
+        const refinery=this.entityLookup(c.targetRefineryId),dock=refinery?this._dockCfg(refinery):null;if(!refinery?.alive||refinery.operational===false||!dock){if(c.sessionId)this.interactions.cancel(c.sessionId,'PROVIDER_LOST');c.sessionId=null;this._startReturn(entity);continue;}
         const amount=Math.min(c.cargo,(dock.unloadRatePerSecond??300)*dt);c.cargo-=amount;this.economy.deposit(entity.playerId,amount*(dock.creditPerUnit??1));
         if(c.cargo<=0.001){
           c.cargo=0;this.interactions.advance(c.sessionId,'UNLOAD_COMPLETE');this.interactions.advance(c.sessionId,'EXIT');c.state='EXITING';

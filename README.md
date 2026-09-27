@@ -1,74 +1,153 @@
-# ForgeRTS v0.4.0 — Faction Economy + Production + Docking
+# ForgeRTS v0.5.0 — Base Construction + Tech Tree + Command Sets
 
 ForgeRTS is a clean, separate browser-native RTS engine. It does **not** modify the existing WorldForge / Skirmish project.
 
-v0.4.0 adds the first complete C&C-style economy loop on top of the v0.3.1 combat and locomotor foundation:
+v0.5.0 adds the missing base-construction layer on top of v0.4.0 economy/production and the existing combat/locomotor systems:
 
-`crystal field → harvest cargo → refinery docking/unload → credits → production queue → controlled rollout → battlefield`
+`select Command Post → choose build command → placement ghost → authoritative validation → construction site → completion → existing building modules activate`
 
-The implementation remains original ForgeRTS JavaScript. The architecture follows the system boundaries established in the released C&C references: player/faction economy is simulation state, harvesting and docking are explicit object interactions, production is a generic module-driven queue, and factory/barracks rollout is an explicit protocol rather than a spawn-and-collision workaround.
+The implementation remains original ForgeRTS JavaScript. The architecture follows the released C&C family at the system-boundary level: build eligibility belongs to player/faction state, build commands are data, placement preview is client-side only, construction creates a real simulation object, and completed structures activate existing production/power/docking/combat modules rather than spawning a second bespoke behavior path.
 
 ## Player-facing changes
 
-- The HUD now shows **credits and power** for the human faction.
-- The training map starts with a **Power Node, Refinery, Barracks, Field Harvester, Rich field, and Dense field** in addition to the existing combat objects.
-- Select the **Harvester**, then tap a crystal field to issue `HARVEST`.
-- The Harvester mines finite resource capacity, fills its cargo, returns to the nearest owned Refinery, requests docking, unloads into credits, exits, and resumes the previous field when resources remain.
-- Select the **Vehicle Factory** to queue HMMWV-50, Field Harvester, or Aegis-X.
-- Select the **Barracks** to queue Riflemen.
-- Production deducts credits when queued; cancelling the last queued item refunds its cost.
-- Completed units use an explicit rollout protocol, clear the producer footprint, then move to a rally point before returning to normal command behavior.
-- Crystal deposits visibly shrink with depletion and disappear when exhausted.
-- Low power is represented in faction state and currently reduces production speed to 50%.
+- Select the **Tactical Command Post** to open the first data-driven base build menu.
+- Initial build commands:
+  - Field Power Node — **$500 / 5 s**
+  - Field Refinery — **$1200 / 9 s**
+  - Field Barracks — **$700 / 7 s**
+  - Vehicle Factory — **$1500 / 11 s**
+  - Guardian Turret — **$600 / 6 s**
+- Selecting a build command enters placement mode with a translucent world-space ghost.
+- Valid placement is shown green; invalid placement is shown red.
+- `ROTATE 90°` and `CANCEL BUILD` are available while placing.
+- Placement is validated against:
+  - builder radius
+  - map bounds
+  - water
+  - slope / height variation
+  - static blocked terrain
+  - existing building footprints
+  - resource-field blockers
+  - tech prerequisites
+  - build limits
+  - available credits
+- Confirmed placement deducts credits and creates a real, selectable **construction site**.
+- Construction sites immediately reserve their building footprint for pathfinding.
+- Under-construction structures do **not** provide power, production, refinery docking, or weapon fire.
+- Structure health grows with build progress while preserving damage taken during construction.
+- A destroyed construction site never activates.
+- Construction can be cancelled for the configured partial refund.
+- When construction completes, the same existing modules from earlier milestones turn on automatically:
+  - Power Node contributes power
+  - Refinery accepts Harvester docking
+  - Barracks exposes Rifleman production
+  - Vehicle Factory exposes HMMWV / Harvester / Aegis-X production
+  - Guardian Turret becomes an autonomous combat structure
 
-## Economy / production data
+## CommandSet foundation
 
-Initial data-driven values include:
+Object UI commands are now defined in data instead of being hard-wired into the HUD.
 
-- Rifleman: **$150 / 3 s**
-- HMMWV-50: **$450 / 5 s**
-- Field Harvester: **$800 / 7 s**
-- Aegis-X: **$1100 / 9 s**
-- Field Harvester cargo: **1200 units**
-- Harvest rate: **120 units/s**
-- Refinery unload rate: **300 units/s**
-- Rich mineral field: **1250 units**
-- Dense mineral field: **3000 units**
+Current CommandSets include:
 
-These values live in data modules rather than concrete unit-specific engine branches.
+- **Command Post:** build Power Node / Refinery / Barracks / Vehicle Factory / Guardian Turret
+- **Barracks:** produce Rifleman / cancel queued production
+- **Vehicle Factory:** produce HMMWV-50 / Harvester / Aegis-X / cancel queued production
+- **Harvester:** return cargo
 
-## Simulation architecture
+The UI asks the selected object for its `CommandSet`, then renders the applicable commands. This gives later upgrades, abilities, repair, sell, stances, special powers, and faction-specific command layouts a generic home.
 
-The economy chain is intentionally split into reusable systems:
+## Tech tree foundation
 
-`CommandBus → ResourceSystem / ProductionSystem → InteractionManager → FactionEconomySystem → GameObject module state`
+Construction requirements are data-driven through each structure's `Construction` module.
 
-The existing v0.3.1 combat chain remains intact:
+Current initial prerequisite chain:
 
-`ATTACK intent → UnitAI route/engage state → body/turret aim → WeaponRuntime → projectile/hitscan → ArmorSet → Body health/destruction`
+- Power Node: Command Post builder only
+- Refinery: requires Power Node
+- Barracks: requires Power Node
+- Vehicle Factory: requires Power Node + Refinery
+- Guardian Turret: requires Barracks
 
-Snapshot format is now **v7** and preserves credits, power state, resource depletion, Harvester cargo/docking state, production queues, active rollout sessions, dynamically produced entities, combat state, and locomotor maneuver state.
+The engine does not branch on concrete building names. Prerequisites, cost, build time, build limit, refund fraction, terrain rules, and future construction sockets are all data.
+
+## Construction architecture
+
+v0.5.0 adds three focused systems:
+
+`TechTreeSystem`
+- checks builder permission, operational prerequisites, build limits, and affordability
+
+`PlacementValidator`
+- validates world-space footprint placement independently from the UI ghost
+
+`ConstructionSystem`
+- reserves credits and footprint
+- owns construction progress/state
+- supports cancellation/refund
+- supports static construction-yard style builders now and contains the socket/state foundation for future mobile builders
+- activates the finished object's existing modules instead of reimplementing them
+
+Dynamic structure footprints are now registered in the pathfinder at runtime, so newly built and cancelled structures affect navigation immediately without rebuilding the entire navigation map.
+
+## Existing systems preserved
+
+v0.5.0 keeps the earlier validated chains intact:
+
+**Economy / production**
+
+`crystal field → Harvester cargo → Refinery docking/unload → faction credits → production queue → rollout → battlefield`
+
+**Combat**
+
+`ATTACK → UnitAI approach → hull/turret aim → weapon runtime → projectile/hitscan → armor → Body health/destruction`
+
+**Locomotion**
+
+- tracked pivot behavior
+- wheeled steering arcs
+- bounded tactical reverse
+- three-point turnaround for long behind-orders
+
+## Snapshot format
+
+Snapshot format is now **v8**.
+
+It preserves:
+
+- credits / power
+- resource depletion
+- Harvester cargo and docking state
+- production queues and rollout sessions
+- dynamically produced units
+- construction sites, progress, builder source, refund data, operational state
+- combat / projectile state
+- locomotor maneuver state
+- persistent region state
 
 ## Intentionally deferred
 
-- full construction/dozer/base-placement gameplay
-- strategic enemy production AI
-- automated enemy harvesting decisions
-- tech-tree prerequisites and upgrades
-- multiple simultaneous docking bays
-- repair/rearm/service interactions
-- selling structures
-- advanced rally-point editing
+- dedicated mobile dozer/construction vehicle art and production
+- multi-builder assisted construction
+- repair / rearm / service commands
+- structure selling
+- advanced projected buildability / base-expansion radii
+- upgrades / sciences / veterancy
+- strategic enemy base-construction decisions
+- full team/skirmish AI
+- missions / trigger scripting
 
-Those can now build on the generic economy/interaction/production foundation rather than bespoke behavior.
+The v0.5.0 architecture is designed so those systems can use the same CommandBus, CommandSet, tech-tree, placement, and construction state rather than adding parallel special-case code.
 
 ## Validation focus
 
-1. Select the player Harvester and tap either crystal field. Verify cargo fills, the Harvester returns to the Refinery, credits rise, then the Harvester exits and resumes harvesting.
-2. Select the Vehicle Factory and queue several different vehicles. Verify costs, progress, rollout, and selectable produced units.
-3. Select the Barracks and queue Riflemen.
-4. Cancel a queued production item and verify credits are refunded.
-5. Continue testing v0.3.1 combat/movement to ensure economy integration did not regress those systems.
+1. Select the Command Post and build a Power Node in a clear area.
+2. Try placing on top of another structure, outside the build radius, on steep/water terrain, and near a mineral field; invalid placement should stay red and should not spend credits.
+3. Rotate a building before placement.
+4. Select the construction site and cancel it; confirm the partial refund and that the removed footprint no longer blocks movement.
+5. Complete a Barracks or Vehicle Factory and immediately use its production CommandSet.
+6. Damage/destroy a construction site during a combat test and verify it does not magically complete.
+7. Re-test Harvester economy, unit production, combat, and vehicle movement for regressions.
 
 ## Run
 

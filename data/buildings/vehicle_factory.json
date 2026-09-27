@@ -17,6 +17,38 @@
       "depth": 24
     },
     {
+      "type": "Construction",
+      "credits": 1500,
+      "buildTimeSeconds": 11.0,
+      "refundFraction": 0.75,
+      "prerequisites": [
+        "power_node",
+        "refinery"
+      ],
+      "buildLimit": 3,
+      "maxSlopeDeg": 10,
+      "maxHeightVariation": 3.0,
+      "startHealthFraction": 0.08,
+      "sockets": [
+        {
+          "x": 0,
+          "z": -16
+        },
+        {
+          "x": 17,
+          "z": 0
+        },
+        {
+          "x": 0,
+          "z": 16
+        },
+        {
+          "x": -17,
+          "z": 0
+        }
+      ]
+    },
+    {
       "type": "Render",
       "asset": "aegis_vehicle_factory",
       "scale": 1.0,
@@ -46,6 +78,10 @@
     {
       "type": "Selectable",
       "enabled": true
+    },
+    {
+      "type": "CommandSet",
+      "id": "aegis_vehicle_factory"
     },
     {
       "type": "PowerConsumer",

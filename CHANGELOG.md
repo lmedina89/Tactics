@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.5.0 — Base Construction + Tech Tree + Command Sets
+
+- Added data-driven `CommandSet` registry and selected-object command rendering for construction, production, cargo return, and queue cancellation.
+- Added serializable `BUILD_STRUCTURE` and `CANCEL_CONSTRUCTION` CommandBus commands.
+- Added `TechTreeSystem` for builder permission, operational prerequisites, build limits, and affordability.
+- Added `PlacementValidator` with authoritative builder-radius, map-bounds, water, slope, height-variation, blocked-terrain, building-footprint, and resource-blocker checks.
+- Added translucent valid/invalid placement ghost, 90° rotation, and build-placement cancellation on mobile/desktop input.
+- Added `ConstructionSystem` with real selectable/damageable construction-site GameObjects, deterministic progress, partial refund, completion state, and operational module activation.
+- Added data-defined construction costs/times/prerequisites/build limits/refund fractions and construction sockets for Power Node, Refinery, Barracks, Vehicle Factory, and Guardian Turret.
+- Added a generic `Builder` module to the Tactical Command Post using construction-yard style placement; mobile-builder socket approach logic is scaffolded for a future dedicated builder unit.
+- Under-construction Power/Production/Docking/Weapon systems are gated until completion.
+- Construction health grows with progress while preserving combat damage; destroyed sites never activate.
+- Pathfinder building occupancy is now dynamic: runtime structures register footprint obstacles and cancelled sites remove them without rebuilding authored map data.
+- Added resource placement blockers so mineral fields reject structure overlap without becoming movement obstacles.
+- Snapshot format advanced to **v8**, preserving construction/operational state and the new construction-system serial state in addition to prior economy/combat/locomotion data.
+- Added construction regression coverage for CommandSets, valid/invalid placement, credit reservation, module gating, cancellation/refunds, prerequisites, damage preservation, destroyed sites, and v8 deterministic restore.
+- Full automated suite now passes **49/49** tests.
+- All production GLBs remain byte-for-byte unchanged.
+
 ## v0.4.0 — Faction Economy + Production + Docking
 
 - Added deterministic `FactionEconomySystem` with credits, data-driven power production/consumption, low-power state, deposits, withdrawals, and production-rate effects.

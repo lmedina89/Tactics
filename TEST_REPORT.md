@@ -1,22 +1,32 @@
-# ForgeRTS v0.4.0 Validation Report
+# ForgeRTS v0.5.0 Validation Report
 
 ## Automated tests
 
-`npm test` passes **40/40** tests.
+`npm test` passes **49/49** tests.
 
-New economy / production coverage includes:
+New construction / tech-tree coverage includes:
 
-- faction starts with deterministic credits and a data-driven power budget
-- power production/consumption is recalculated from live GameObject modules
-- Harvester mines a finite mineral field into a bounded cargo hold
-- Harvester uses the explicit resource-docking interaction protocol
-- unloading deposits credits into faction state and returns/resumes harvesting
-- resource capacity depletes deterministically
-- Vehicle Factory charges credits at queue time and produces a data-defined HMMWV
-- completed vehicles use the rollout/clear/rally protocol
-- Barracks uses the same generic production runtime for Riflemen
-- cancellation refunds queued production cost
-- snapshot v7 restores dynamically produced entities, queues, Harvester cargo, resource capacity, faction economy, interaction state, combat, and locomotion state
+- CommandSet data exposes HQ construction and existing Barracks/Vehicle Factory production through generic commands
+- authoritative placement accepts clear terrain and rejects occupied footprints / out-of-radius locations
+- construction deducts credits and creates a real non-operational site
+- under-construction power and production modules remain inactive
+- completed Power Node activates its power module
+- cancellation removes the runtime pathfinding footprint and returns the configured partial refund
+- operational prerequisites can lock construction when a prerequisite structure is lost
+- damage taken during construction remains damage after completion rather than being healed away
+- destroyed construction sites never activate completed-building modules
+- snapshot **v8** restores active construction and continues deterministically
+
+Economy / production coverage remains intact for:
+
+- faction credits and data-driven power budget
+- finite mineral harvesting
+- explicit Refinery docking/unloading protocol
+- credit income and resource depletion
+- Barracks and Vehicle Factory production
+- queue-time costs and cancellation refunds
+- controlled rollout / rally behavior
+- dynamically produced entity snapshot restore
 
 Combat regression coverage remains intact for:
 
@@ -31,9 +41,9 @@ Locomotion/input/map regression coverage remains intact for:
 
 - tracked pivot behavior
 - bounded short reverse and long-route forward preference
-- wheeled turn-around / three-point maneuver state
+- wheeled three-point turnaround state
 - persistent MOVE / STOP
-- building-aware path clearance
+- dynamic building-aware path clearance
 - real-map repeated movement
 - TAP / PAN / LONG_PRESS / PINCH classification
 - GameObject module validation
@@ -41,21 +51,23 @@ Locomotion/input/map regression coverage remains intact for:
 
 ## Syntax / data validation
 
-All project JavaScript and MJS sources pass `node --check`. All JSON data files parse successfully.
+All JavaScript and MJS files pass `node --check`. All JSON files parse successfully. The browser `DataRegistry` was also loaded under a file-backed test `fetch` implementation and successfully validated all definitions and **4 CommandSets**.
 
 ## Asset integrity
 
-`sha256sum -c ASSET_HASHES.sha256` passes. All **16 production GLBs** remain byte-for-byte unchanged from v0.3.1. Existing terrain textures are unchanged.
+`sha256sum -c ASSET_HASHES.sha256` passes. All **16 production GLBs** remain byte-for-byte unchanged. Existing terrain textures remain unchanged.
 
-## Economy implementation notes
+## Construction implementation notes
 
-- CommandBus now carries `HARVEST`, `RETURN_CARGO`, `PRODUCE`, and `CANCEL_PRODUCTION`.
-- ResourceSystem owns collector state and uses InteractionManager for refinery docking.
-- FactionEconomySystem owns credits/power and exposes the current low-power production policy.
-- ProductionSystem is generic across infantry and vehicles and uses data-defined queue types, costs, build times, and rollout protocols.
-- map resource fields are simulation GameObjects with persistent capacity; rendering only reflects their state.
-- snapshot format is **v7**.
+- CommandBus now carries `BUILD_STRUCTURE` and `CANCEL_CONSTRUCTION` in addition to the previous movement/combat/economy/production commands.
+- `TechTreeSystem` owns builder permission, prerequisites, build limits, and affordability.
+- `PlacementValidator` is the authoritative placement rule owner; the renderer ghost is prediction/presentation only.
+- `ConstructionSystem` owns construction-site progress, health growth, cancellation/refund, source builder linkage, and completion.
+- under-construction objects exist as real GameObjects and reserve their footprint immediately.
+- runtime building obstacles are registered dynamically in `GridPathfinder`, allowing construction cancellation to remove occupancy cleanly.
+- `operational === false` gates power, production, Refinery docking, and autonomous weapon use until completion.
+- snapshot format is **v8**.
 
 ## Intentionally deferred
 
-Full construction/dozer logic, strategic enemy harvesting/production decisions, team AI, mission scripting, repair/rearm service, tech prerequisites/upgrades, selling, advanced multi-bay docking, and open-world regional simulation remain deferred.
+A dedicated mobile builder/dozer asset, assisted construction, repair/rearm, structure selling, advanced projected buildability/base expansion, upgrades/sciences, enemy base-building AI, teams, and mission scripting remain deferred.

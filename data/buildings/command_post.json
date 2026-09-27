@@ -17,6 +17,23 @@
       "depth": 18
     },
     {
+      "type": "Builder",
+      "style": "yard",
+      "placementRadius": 155,
+      "buildRate": 1.0,
+      "buildable": [
+        "power_node",
+        "refinery",
+        "barracks",
+        "vehicle_factory",
+        "guardian_turret"
+      ]
+    },
+    {
+      "type": "CommandSet",
+      "id": "aegis_command_post"
+    },
+    {
       "type": "Render",
       "asset": "aegis_tactical_command_post",
       "scale": 1.0,

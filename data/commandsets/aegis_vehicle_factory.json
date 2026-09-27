@@ -1,0 +1,28 @@
+{
+  "id": "aegis_vehicle_factory",
+  "commands": [
+    {
+      "id": "produce_hmmwv",
+      "type": "PRODUCE",
+      "definition": "hmmwv50",
+      "label": "HMMWV-50"
+    },
+    {
+      "id": "produce_harvester",
+      "type": "PRODUCE",
+      "definition": "harvester",
+      "label": "HARVESTER"
+    },
+    {
+      "id": "produce_aegis_x",
+      "type": "PRODUCE",
+      "definition": "aegis_x",
+      "label": "AEGIS-X"
+    },
+    {
+      "id": "cancel_production",
+      "type": "CANCEL_PRODUCTION",
+      "label": "CANCEL LAST"
+    }
+  ]
+}

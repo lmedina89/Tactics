@@ -16,6 +16,10 @@
       "enabled": true
     },
     {
+      "type": "CommandSet",
+      "id": "aegis_harvester"
+    },
+    {
       "type": "UnitAIUpdate"
     },
     {

@@ -17,6 +17,35 @@
       "depth": 12
     },
     {
+      "type": "Construction",
+      "credits": 500,
+      "buildTimeSeconds": 5.0,
+      "refundFraction": 0.75,
+      "prerequisites": [],
+      "buildLimit": 6,
+      "maxSlopeDeg": 13,
+      "maxHeightVariation": 3.6,
+      "startHealthFraction": 0.08,
+      "sockets": [
+        {
+          "x": 0,
+          "z": -10
+        },
+        {
+          "x": 10,
+          "z": 0
+        },
+        {
+          "x": 0,
+          "z": 10
+        },
+        {
+          "x": -10,
+          "z": 0
+        }
+      ]
+    },
+    {
       "type": "Render",
       "asset": "aegis_field_power_node",
       "scale": 1.0,

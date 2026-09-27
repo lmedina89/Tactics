@@ -29,4 +29,10 @@
 27. **Spawn is not rollout.** A produced entity may be created before it is operationally clear of the producer; controlled rollout/clear/rally state must complete before ordinary movement owns the unit.
 28. **Resource depletion is persistent world state.** Resource capacity changes belong to the simulation/snapshot and must not be inferred from visual scale or renderer state.
 29. **Low power affects systems through policy.** Power shortage is faction state; individual systems query a policy such as production-rate factor rather than hard-coding power logic into each producer.
-
+30. **CommandSets are data.** The selected object exposes generic commands through data-defined CommandSets; UI renders those commands but does not own their gameplay effects.
+31. **Placement preview is never authoritative.** The client ghost may predict validity, but `BUILD_STRUCTURE` is accepted only after simulation-side tech and placement validation.
+32. **Construction sites are real GameObjects.** Placement creates a selectable, damageable, footprint-reserving simulation object before completion rather than a renderer-only placeholder.
+33. **Operational state gates modules.** Power, production, docking, autonomous weapons, and other finished-building systems remain inactive while `operational === false`.
+34. **Structure occupancy is dynamic navigation state.** Built/cancelled structures register/remove runtime pathfinding obstacles without rebuilding the authored map or baking construction into static terrain data.
+35. **Prerequisites and build limits are centralized.** Tech-tree eligibility is resolved from player-owned operational objects and data-defined requirements rather than individual buttons or concrete building names.
+36. **Construction sockets belong to structure data.** Even when the current Command Post uses construction-yard style placement, structure definitions carry reusable approach sockets for future mobile builders, repair, and service workflows.

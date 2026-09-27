@@ -6,7 +6,8 @@ export class GridPathfinder {
     this.cellSize=cellSize ?? map.navigation?.cellSize ?? 4;
     this.halfW=map.size.width/2; this.halfD=map.size.depth/2;
     this.cols=Math.ceil(map.size.width/this.cellSize); this.rows=Math.ceil(map.size.depth/this.cellSize);
-    this.baseBlocked=new Set(); this.inflateCache=new Map(); this.terrainCellCache=new Map();
+    this.baseBlocked=new Set(); this.dynamicBlockedCounts=new Map(); this.dynamicObstacleCells=new Map();
+    this.inflateCache=new Map(); this.terrainCellCache=new Map();
     this._buildBlocked();
   }
 
@@ -15,29 +16,60 @@ export class GridPathfinder {
   _inBounds(x,z){return x>=0&&z>=0&&x<this.cols&&z<this.rows;}
 
   _buildBlocked(){
-    for(const o of this.map.staticObstacles||[]){
-      const min=this._cellOf(o.x-o.width/2,o.z-o.depth/2),max=this._cellOf(o.x+o.width/2,o.z+o.depth/2);
-      for(let z=min.z;z<=max.z;z++)for(let x=min.x;x<=max.x;x++)this.baseBlocked.add(key(x,z));
-    }
-    for(const o of this.map.passability?.blockedRects||[]){
-      const min=this._cellOf(o.x-o.width/2,o.z-o.depth/2),max=this._cellOf(o.x+o.width/2,o.z+o.depth/2);
-      for(let z=min.z;z<=max.z;z++)for(let x=min.x;x<=max.x;x++)this.baseBlocked.add(key(x,z));
-    }
+    for(const o of this.map.staticObstacles||[])this._rasterAxisAligned(o,this.baseBlocked);
+    for(const o of this.map.passability?.blockedRects||[])this._rasterAxisAligned(o,this.baseBlocked);
   }
+
+  _rasterAxisAligned(o,target){
+    const min=this._cellOf(o.x-o.width/2,o.z-o.depth/2),max=this._cellOf(o.x+o.width/2,o.z+o.depth/2);
+    for(let z=min.z;z<=max.z;z++)for(let x=min.x;x<=max.x;x++)target.add(key(x,z));
+  }
+
+  _rotatedBounds(o){
+    const c=Math.cos(o.yaw||0),s=Math.sin(o.yaw||0),hw=o.width/2,hd=o.depth/2;
+    const ex=Math.abs(c)*hw+Math.abs(s)*hd,ez=Math.abs(s)*hw+Math.abs(c)*hd;
+    return {minX:o.x-ex,minZ:o.z-ez,maxX:o.x+ex,maxZ:o.z+ez};
+  }
+
+  _cellOverlapsRotatedRect(cx,cz,o){
+    const p=this._worldOf(cx,cz),c=Math.cos(o.yaw||0),s=Math.sin(o.yaw||0),dx=p.x-o.x,dz=p.z-o.z;
+    const lx=dx*c+dz*s,lz=-dx*s+dz*c,pad=this.cellSize*.72;
+    return Math.abs(lx)<=o.width/2+pad && Math.abs(lz)<=o.depth/2+pad;
+  }
+
+  addDynamicObstacle(id,o){
+    if(!id||!o||!(o.width>0)||!(o.depth>0))return;
+    this.removeDynamicObstacle(id);
+    const b=this._rotatedBounds(o),min=this._cellOf(b.minX,b.minZ),max=this._cellOf(b.maxX,b.maxZ),cells=new Set();
+    for(let z=min.z;z<=max.z;z++)for(let x=min.x;x<=max.x;x++)if(this._cellOverlapsRotatedRect(x,z,o)){
+      const k=key(x,z);cells.add(k);this.dynamicBlockedCounts.set(k,(this.dynamicBlockedCounts.get(k)||0)+1);
+    }
+    this.dynamicObstacleCells.set(id,cells);this.inflateCache.clear();
+  }
+
+  removeDynamicObstacle(id){
+    const cells=this.dynamicObstacleCells.get(id);if(!cells)return;
+    for(const k of cells){const n=(this.dynamicBlockedCounts.get(k)||0)-1;if(n<=0)this.dynamicBlockedCounts.delete(k);else this.dynamicBlockedCounts.set(k,n);}
+    this.dynamicObstacleCells.delete(id);this.inflateCache.clear();
+  }
+
+  clearDynamicObstacles(){this.dynamicBlockedCounts.clear();this.dynamicObstacleCells.clear();this.inflateCache.clear();}
+  _combinedBlocked(){const out=new Set(this.baseBlocked);for(const k of this.dynamicBlockedCounts.keys())out.add(k);return out;}
 
   _inflatedBlocked(clearance=0){
     const cells=Math.max(0,Math.ceil(clearance/this.cellSize));
-    if(cells===0)return this.baseBlocked;
-    if(this.inflateCache.has(cells))return this.inflateCache.get(cells);
-    const out=new Set(this.baseBlocked);
-    for(const v of this.baseBlocked){
+    const cacheKey=`${cells}:${this.dynamicObstacleCells.size}:${this.dynamicBlockedCounts.size}`;
+    if(this.inflateCache.has(cacheKey))return this.inflateCache.get(cacheKey);
+    const seed=this._combinedBlocked();if(cells===0){this.inflateCache.set(cacheKey,seed);return seed;}
+    const out=new Set(seed);
+    for(const v of seed){
       const [sx,sz]=v.split(',').map(Number);
       for(let dz=-cells;dz<=cells;dz++)for(let dx=-cells;dx<=cells;dx++){
         if(dx*dx+dz*dz>cells*cells+0.25)continue;
         const x=sx+dx,z=sz+dz;if(this._inBounds(x,z))out.add(key(x,z));
       }
     }
-    this.inflateCache.set(cells,out);return out;
+    this.inflateCache.set(cacheKey,out);return out;
   }
 
   _terrainCell(x,z){

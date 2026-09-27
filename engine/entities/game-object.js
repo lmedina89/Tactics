@@ -59,7 +59,7 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
     kind:definition.kind,
     x:spawn.x,z:spawn.z,y,yaw:spawn.yaw||0,speed:0,angularSpeed:0,steeringAngle:0,movingBackward:false,
     locomotionState:{mode:'FORWARD',modeTime:0,cooldown:0,reverseStartX:spawn.x,reverseStartZ:spawn.z,turnSign:1},
-    health:body?.maxHealth??1,maxHealth:body?.maxHealth??1,alive:true,damageState:'PRISTINE',destroyedTick:null,lastDamagedBy:null,lastDamagedTick:null,
+    health:body?.maxHealth??1,maxHealth:body?.maxHealth??1,alive:true,operational:spawn.construction?false:true,construction:spawn.construction?clone(spawn.construction):null,damageState:'PRISTINE',destroyedTick:null,lastDamagedBy:null,lastDamagedTick:null,
     selectable:selectable?.enabled??false,
     locomotorId:locoBinding?.locomotor??null,
     armorId:armor?.armor??null,

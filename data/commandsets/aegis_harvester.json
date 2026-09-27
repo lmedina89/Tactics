@@ -1,0 +1,10 @@
+{
+  "id": "aegis_harvester",
+  "commands": [
+    {
+      "id": "return_cargo",
+      "type": "RETURN_CARGO",
+      "label": "RETURN CARGO"
+    }
+  ]
+}

@@ -14,7 +14,7 @@ export class FactionEconomySystem{
   recalculatePower(){
     for(const p of this.players.values()){p.powerProduced=0;p.powerUsed=0;}
     for(const e of this.entitiesProvider?.()||[]){
-      if(!e.alive||!e.playerId)continue;const p=this.player(e.playerId);if(!p)continue;
+      if(!e.alive||e.operational===false||!e.playerId)continue;const p=this.player(e.playerId);if(!p)continue;
       const def=this.registry.definition(e.definitionId);if(!def)continue;
       const producer=moduleConfig(def,'PowerProducer'),consumer=moduleConfig(def,'PowerConsumer');
       if(producer)p.powerProduced+=Math.max(0,producer.amount??0);

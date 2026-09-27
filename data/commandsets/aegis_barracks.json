@@ -1,0 +1,16 @@
+{
+  "id": "aegis_barracks",
+  "commands": [
+    {
+      "id": "produce_rifleman",
+      "type": "PRODUCE",
+      "definition": "rifleman",
+      "label": "RIFLEMAN"
+    },
+    {
+      "id": "cancel_production",
+      "type": "CANCEL_PRODUCTION",
+      "label": "CANCEL LAST"
+    }
+  ]
+}

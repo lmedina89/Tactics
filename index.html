@@ -4,18 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>ForgeRTS v0.4.0</title>
+  <title>ForgeRTS v0.5.0</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
   <canvas id="game"></canvas>
   <div class="hud">
-    <div class="chip brand">FORGERTS <span class="version">v0.4.0</span></div>
+    <div class="chip brand">FORGERTS <span class="version">v0.5.0</span></div>
     <div class="chip economy" id="economy">$0 · PWR 0/0</div><div class="chip" id="selection">NONE</div>
     <div class="chip"><span id="status">LOADING…</span> · <span id="tick">TICK 0</span></div>
   </div>
-  <div class="help">Tap friendly units/structures to select. Units: tap terrain to MOVE, hostile to ATTACK. Harvester: tap a crystal field to HARVEST; it returns to a Refinery and unloads automatically. Select Barracks/Vehicle Factory to queue units. Credits, power, queues, docking, depletion and rollout are deterministic simulation state.</div><div id="context-controls" class="context-controls"></div>
+  <div class="help">Tap friendly units/structures to select. Select the Command Post to BUILD structures: choose a structure, move/tap the translucent placement ghost, rotate if needed, then tap terrain to confirm. Barracks/Vehicle Factory train units; Harvester mines crystal fields. Construction, economy, production, combat, docking and movement are deterministic simulation state.</div><div id="context-controls" class="context-controls"></div>
   <div class="controls"><button id="stop">STOP</button><button id="center">CENTER</button><button id="clear">CLEAR</button></div>
 </div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>

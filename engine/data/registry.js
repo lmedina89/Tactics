@@ -9,6 +9,7 @@ export class DataRegistry {
     this.interactions = new Map();
     this.armors = new Map();
     this.weapons = new Map();
+    this.commandSets = new Map();
   }
 
   async load(base = '.') {
@@ -27,9 +28,13 @@ export class DataRegistry {
     for (const p of registry.interactions || []) this._insertUnique(this.interactions, await get(p), p);
     for (const p of registry.armors || []) this._insertUnique(this.armors, await get(p), p);
     for (const p of registry.weapons || []) this._insertUnique(this.weapons, await get(p), p);
+    for (const p of registry.commandSets || []) this._insertUnique(this.commandSets, await get(p), p);
+    const defs=[];
     for (const p of registry.definitions || []) {
-      const value=await get(p);moduleBindings(value);this._validateDefinitionRefs(value,p);this._insertUnique(this.definitions,value,p);
+      const value=await get(p);moduleBindings(value);this._validateDefinitionRefs(value,p);this._insertUnique(this.definitions,value,p);defs.push([value,p]);
     }
+    for(const [value,p] of defs)this._validateLateDefinitionRefs(value,p);
+    for(const [id,set] of this.commandSets)this._validateCommandSet(set,`commandSet:${id}`);
     return this;
   }
 
@@ -48,6 +53,18 @@ export class DataRegistry {
     for(const id of prod?.buildable||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown buildable definition ${id}`);
     const cost=moduleConfig(def,'ProductionCost');if(cost&&!cost.queueType)throw new Error(`${source}: ProductionCost missing queueType`);
     const dock=moduleConfig(def,'DockingProvider');if(dock?.protocol&&!this.interactions.has(dock.protocol))throw new Error(`${source}: unknown docking protocol ${dock.protocol}`);
+    const commandSet=moduleConfig(def,'CommandSet');if(commandSet&&!this.commandSets.has(commandSet.id))throw new Error(`${source}: unknown CommandSet ${commandSet.id}`);
+  }
+
+  _validateLateDefinitionRefs(def,source){
+    const builder=moduleConfig(def,'Builder');for(const id of builder?.buildable||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown Builder target ${id}`);
+    const construction=moduleConfig(def,'Construction');for(const id of construction?.prerequisites||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown prerequisite ${id}`);
+  }
+
+  _validateCommandSet(set,source){
+    for(const c of set.commands||[]){
+      if((c.type==='BUILD_STRUCTURE'||c.type==='PRODUCE')&&!this.definitions.has(c.definition))throw new Error(`${source}: unknown command definition ${c.definition}`);
+    }
   }
 
   asset(id) { return this.assets.get(id); }
@@ -57,6 +74,7 @@ export class DataRegistry {
   interaction(id) { return this.interactions.get(id); }
   armor(id) { return this.armors.get(id); }
   weapon(id) { return this.weapons.get(id); }
+  commandSet(id){return this.commandSets.get(id);}
   module(definitionOrId,type){
     const def=typeof definitionOrId==='string'?this.definition(definitionOrId):definitionOrId;
     return def?moduleConfig(def,type):null;
