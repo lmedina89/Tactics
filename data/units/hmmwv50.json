@@ -57,6 +57,12 @@
       "turretNode": "TurretRoot",
       "gunPitchNode": "GunPitchRoot",
       "muzzleNode": "MuzzleSocket"
+    },
+    {
+      "type": "ProductionCost",
+      "queueType": "vehicle",
+      "credits": 450,
+      "buildTimeSeconds": 5.0
     }
   ]
 }

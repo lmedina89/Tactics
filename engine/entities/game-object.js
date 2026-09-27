@@ -43,6 +43,8 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
   const armor=modules.get('ArmorSet');
   const weaponSet=modules.get('WeaponSet');
   const turretAI=modules.get('TurretAI');
+  const collector=modules.get('ResourceCollector');
+  const production=modules.get('Production');
   const loco=locoBinding?registry.locomotor(locoBinding.locomotor):null;
   if(locoBinding&&!loco)throw new Error(`Unknown locomotor ${locoBinding.locomotor} on ${definition.id}`);
   const ground=terrain.heightAt(spawn.x,spawn.z);
@@ -66,7 +68,9 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
     weaponSlots:weaponSet?{slots:(weaponSet.slots||[]).map(s=>({slot:s.slot||'PRIMARY',weaponId:s.weapon,ammoInClip:null,nextFireTick:0,reloadUntilTick:0,prefireUntilTick:0,targetId:null}))}:null,
     turretYaw:turretAI?(spawn.yaw||0):null,turretAngularSpeed:0,
     combat:{manualTargetId:null,autoTargetId:null,activeTargetId:null,nextScanTick:0},
-    resourceRemaining:spawn.resourceRemaining??resource?.capacity??null,
+    resourceRemaining:spawn.resourceRemaining??resource?.capacity??null,initialResourceCapacity:spawn.resourceRemaining??resource?.capacity??null,
+    collector:collector?{state:'IDLE',cargo:0,cargoCapacity:collector.cargoCapacity??0,targetResourceId:null,resumeResourceId:null,targetRefineryId:null,sessionId:null,exitPoint:null}:null,
+    production:production?{queue:[],rallyPoint:null}:null,productionExit:null,
     modules:runtimeModules
   };
 }

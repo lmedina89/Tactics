@@ -30,7 +30,24 @@
     },
     {
       "type": "Production",
-      "queueType": "infantry"
+      "queueType": "infantry",
+      "queueLimit": 5,
+      "buildable": [
+        "rifleman"
+      ],
+      "rolloutProtocol": "infantry_rollout",
+      "exitDistance": 15,
+      "rallyDistance": 25,
+      "exitSideOffset": 0,
+      "rallySideOffset": 0
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "PowerConsumer",
+      "amount": 10
     }
   ]
 }

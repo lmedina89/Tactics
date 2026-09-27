@@ -23,3 +23,10 @@
 21. **Reverse is a maneuver, not a travel mode.** Locomotors may reverse for local tactical corrections, docking, or turn-around setup, but long-distance path intent must evaluate the persistent terminal destination and prefer forward travel unless data explicitly says otherwise.
 22. **Wheeled turn-around is stateful.** Three-point/turn-around phases are deterministic locomotor state and may temporarily move away from the terminal destination; UnitAI must not misclassify that intentional maneuver as pathfinding failure.
 23. **Attack range uses hysteresis.** UnitAI enters firing range slightly inside maximum range and holds engagement through small range-edge changes to prevent MOVE/FIRE oscillation.
+24. **Faction economy is simulation state.** Credits, power produced/used, low-power state, and later tech/build permissions belong to faction/player state rather than UI or structures individually.
+25. **Harvesting is an interaction workflow.** Resource collection, docking, unloading, and exit are explicit ResourceSystem + InteractionManager state, not proximity-triggered credit mutations.
+26. **Production is generic and data-driven.** Production queues consume `Production`, `ProductionCost`, power, and rollout protocol data; the engine must not branch on Barracks, Factory, Rifleman, HMMWV, Harvester, or Aegis-X names.
+27. **Spawn is not rollout.** A produced entity may be created before it is operationally clear of the producer; controlled rollout/clear/rally state must complete before ordinary movement owns the unit.
+28. **Resource depletion is persistent world state.** Resource capacity changes belong to the simulation/snapshot and must not be inferred from visual scale or renderer state.
+29. **Low power affects systems through policy.** Power shortage is faction state; individual systems query a policy such as production-rate factor rather than hard-coding power logic into each producer.
+

@@ -2,7 +2,7 @@
   "manifestVersion": 2,
   "id": "training_ground",
   "name": "Training Ground 02",
-  "version": 3,
+  "version": 4,
   "seed": 731904,
   "region": {
     "id": "training_ground_region",
@@ -276,13 +276,15 @@
       "id": "player",
       "faction": "aegis",
       "isHuman": true,
-      "startWaypoint": "Player_1_Start"
+      "startWaypoint": "Player_1_Start",
+      "startingCredits": 3000
     },
     {
       "id": "enemy",
       "faction": "crimson",
       "isHuman": false,
-      "startWaypoint": "Player_2_Start"
+      "startWaypoint": "Player_2_Start",
+      "startingCredits": 3000
     }
   ],
   "waypoints": [
@@ -349,15 +351,29 @@
     {
       "id": "rich_w",
       "definition": "mineral_rich",
-      "x": -90,
-      "z": 90,
+      "x": -92,
+      "z": 88,
+      "capacity": 1250
+    },
+    {
+      "id": "dense_w",
+      "definition": "mineral_dense",
+      "x": -58,
+      "z": 102,
+      "capacity": 3000
+    },
+    {
+      "id": "rich_e",
+      "definition": "mineral_rich",
+      "x": 92,
+      "z": 88,
       "capacity": 1250
     },
     {
       "id": "dense_e",
       "definition": "mineral_dense",
-      "x": 92,
-      "z": 86,
+      "x": 58,
+      "z": 102,
       "capacity": 3000
     }
   ],
@@ -486,6 +502,70 @@
       "owner": "enemy",
       "x": 139,
       "z": 31,
+      "yaw": -1.5708
+    },
+    {
+      "id": "p_power",
+      "definition": "power_node",
+      "owner": "player",
+      "x": -270,
+      "z": 30,
+      "yaw": 1.5708
+    },
+    {
+      "id": "p_refinery",
+      "definition": "refinery",
+      "owner": "player",
+      "x": -248,
+      "z": 68,
+      "yaw": 1.5708
+    },
+    {
+      "id": "p_barracks",
+      "definition": "barracks",
+      "owner": "player",
+      "x": -198,
+      "z": 72,
+      "yaw": 1.5708
+    },
+    {
+      "id": "p_harvester",
+      "definition": "harvester",
+      "owner": "player",
+      "x": -166,
+      "z": 88,
+      "yaw": 1.5708
+    },
+    {
+      "id": "e_power",
+      "definition": "power_node",
+      "owner": "enemy",
+      "x": 270,
+      "z": 30,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_refinery",
+      "definition": "refinery",
+      "owner": "enemy",
+      "x": 248,
+      "z": 68,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_barracks",
+      "definition": "barracks",
+      "owner": "enemy",
+      "x": 198,
+      "z": 72,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_harvester",
+      "definition": "harvester",
+      "owner": "enemy",
+      "x": 166,
+      "z": 88,
       "yaw": -1.5708
     }
   ],

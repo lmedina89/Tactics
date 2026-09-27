@@ -31,7 +31,25 @@
     {
       "type": "Production",
       "queueType": "vehicle",
-      "rolloutProtocol": "factory_rollout"
+      "rolloutProtocol": "factory_rollout",
+      "queueLimit": 5,
+      "buildable": [
+        "hmmwv50",
+        "harvester",
+        "aegis_x"
+      ],
+      "exitDistance": 20,
+      "rallyDistance": 34,
+      "exitSideOffset": 0,
+      "rallySideOffset": 0
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "PowerConsumer",
+      "amount": 25
     }
   ]
 }

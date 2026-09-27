@@ -1,4 +1,4 @@
-export const CommandType=Object.freeze({MOVE:'MOVE',STOP:'STOP',ATTACK:'ATTACK'});
+export const CommandType=Object.freeze({MOVE:'MOVE',STOP:'STOP',ATTACK:'ATTACK',HARVEST:'HARVEST',RETURN_CARGO:'RETURN_CARGO',PRODUCE:'PRODUCE',CANCEL_PRODUCTION:'CANCEL_PRODUCTION'});
 
 export class CommandBus{
   constructor(){this.queue=[];this.serial=0;}

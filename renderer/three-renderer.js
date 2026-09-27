@@ -36,7 +36,7 @@ export class ThreeRenderer{
       const base=await this._loadAsset(render.asset),obj=skeletonClone(base);obj.name=e.id;obj.userData.entityId=e.id;
       const faction=e.factionId?this.registry.faction(e.factionId):null;
       obj.traverse(n=>{if(!n.isMesh)return;n.userData.entityId=e.id;n.material=n.material.clone();if(n.material.color)n.material.userData.baseColor=n.material.color.clone();if(n.material.emissive)n.material.userData.baseEmissive=n.material.emissive.clone();if(faction?.id==='crimson'){const c=n.material.color?.clone?.();if(c){c.lerp(new THREE.Color(faction.color),.34);n.material.color.copy(c);n.material.userData.baseColor=n.material.color.clone();}if(n.material.emissive){n.material.emissive.lerp(new THREE.Color(faction.accent),.08);n.material.userData.baseEmissive=n.material.emissive.clone();}}});
-      obj.scale.setScalar(render.scale??1);
+      obj.userData.baseScale=render.scale??1;obj.scale.setScalar(obj.userData.baseScale);
       const turret=render.turretNode?obj.getObjectByName(render.turretNode):null;
       if(turret){turret.userData.baseRotationY=turret.rotation.y;obj.userData.turretNodeRef=turret;}
       const muzzle=render.muzzleNode?obj.getObjectByName(render.muzzleNode):null;if(muzzle)obj.userData.muzzleNodeRef=muzzle;
@@ -72,9 +72,13 @@ export class ThreeRenderer{
   _spawnImpact(p,color){const g=new THREE.SphereGeometry(.35,6,4),m=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.9}),o=new THREE.Mesh(g,m);o.position.set(p.x,p.y,p.z);this.scene.add(o);this.effectViews.push({obj:o,expires:performance.now()+120});}
   _cleanupEffects(){const now=performance.now();for(let i=this.effectViews.length-1;i>=0;i--){const e=this.effectViews[i];if(now<e.expires)continue;this.scene.remove(e.obj);e.obj.geometry?.dispose?.();e.obj.material?.dispose?.();this.effectViews.splice(i,1);}}
 
+  ensureViews(sim){if(this._viewBuildPending)return;for(const e of sim.entities.values())if(!this.entityViews.has(e.id)){this._viewBuildPending=this.buildViews(sim).finally(()=>{this._viewBuildPending=null;});break;}}
+
   sync(sim){
+    this.ensureViews(sim);
     for(const e of sim.entities.values()){
       const v=this.entityViews.get(e.id);if(!v)continue;const render=renderConfigOf(this.registry.definition(e.definitionId));v.position.set(e.x,e.y??0,e.z);v.rotation.y=e.yaw+(render?.headingOffset||0);
+      if(e.initialResourceCapacity!=null){const ratio=Math.max(0,Math.min(1,(e.resourceRemaining??0)/Math.max(1,e.initialResourceCapacity)));v.visible=ratio>0.001;const scale=(v.userData.baseScale??1)*(0.35+0.65*Math.sqrt(ratio));v.scale.setScalar(scale);}else v.visible=true;
       const turret=v.userData.turretNodeRef;if(turret&&e.turretYaw!=null){const relative=wrapPi(e.turretYaw-e.yaw)+(render?.turretHeadingOffset||0);turret.rotation.y=(turret.userData.baseRotationY||0)+relative;}
       this._applyDestroyedLook(v,!e.alive);
     }

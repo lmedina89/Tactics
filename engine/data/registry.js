@@ -45,6 +45,8 @@ export class DataRegistry {
     const weapons=moduleConfig(def,'WeaponSet');for(const s of weapons?.slots||[])if(!this.weapons.has(s.weapon))throw new Error(`${source}: unknown weapon ${s.weapon}`);
     const render=moduleConfig(def,'Render');if(render&&!this.assets.has(render.asset))throw new Error(`${source}: unknown asset ${render.asset}`);
     const prod=moduleConfig(def,'Production');if(prod?.rolloutProtocol&&!this.interactions.has(prod.rolloutProtocol))throw new Error(`${source}: unknown rollout protocol ${prod.rolloutProtocol}`);
+    for(const id of prod?.buildable||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown buildable definition ${id}`);
+    const cost=moduleConfig(def,'ProductionCost');if(cost&&!cost.queueType)throw new Error(`${source}: ProductionCost missing queueType`);
     const dock=moduleConfig(def,'DockingProvider');if(dock?.protocol&&!this.interactions.has(dock.protocol))throw new Error(`${source}: unknown docking protocol ${dock.protocol}`);
   }
 

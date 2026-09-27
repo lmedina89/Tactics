@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.4.0 — Faction Economy + Production + Docking
+
+- Added deterministic `FactionEconomySystem` with credits, data-driven power production/consumption, low-power state, deposits, withdrawals, and production-rate effects.
+- Added serializable `HARVEST`, `RETURN_CARGO`, `PRODUCE`, and `CANCEL_PRODUCTION` commands to the shared CommandBus.
+- Added `ResourceSystem` with finite resource depletion, Harvester cargo, explicit resource-target orders, automatic return-to-refinery behavior, and resume-after-unload behavior.
+- Wired the existing `resource_docking` interaction protocol into real runtime docking: request, grant, approach, dock, unload, release, exit, complete.
+- Added generic `ProductionSystem` for Barracks and Vehicle Factory queues, queue-time credit costs, cancellation refunds, build progress, low-power slowdown, deterministic dynamic entity creation, and rollout/rally behavior.
+- Wired vehicle and infantry rollout protocols into production runtime rather than spawning units directly into normal movement.
+- Added data-driven `ProductionCost`, `Production`, `PowerProducer`, `PowerConsumer`, `ResourceCollector`, `DockingProvider`, and `Resource` module usage.
+- Added player Power Node, Refinery, Barracks, Harvester, and Rich/Dense mineral fields to the training map; mirrored economy structures for the enemy faction as passive test content.
+- Added context-sensitive mobile/desktop production controls and Harvester `RETURN CARGO` control.
+- Resource GLBs now scale down visually as their simulation capacity depletes.
+- Snapshot format advanced to **v7**, preserving faction economy, collector state, resource depletion, production queues, active rollouts, dynamically produced entities, interactions, combat, and locomotion state.
+- Added economy/production regression tests for harvesting/docking/unloading, finite depletion, vehicle production, infantry production, cancellation refunds, rollout protocols, power state, and v7 snapshot restore.
+- Preserved v0.3.1 locomotion/turn-around behavior and v0.3.0 combat architecture.
+- All production GLBs remain byte-for-byte unchanged.
+
 ## v0.3.1 — Reverse / Turnaround + Combat Approach Stability
 
 - Reworked reverse selection to consider the persistent terminal destination, not only the next short path waypoint.

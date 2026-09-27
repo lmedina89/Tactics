@@ -42,6 +42,14 @@
       "gunPitchNode": "GunPitchRoot",
       "muzzleNode": "MuzzleSocket",
       "turretHeadingOffset": -1.5707963267948966
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "PowerConsumer",
+      "amount": 8
     }
   ]
 }

@@ -38,6 +38,10 @@ export class InputController{
     for(const e of this.sim.entities.values()){if(!e.alive||!e.selectable||e.playerId!=='player')continue;const d=this._screenDistance(e,x,y),limit=wide?(e.kind==='infantry'?46:38):(e.kind==='infantry'?18:20);if(d<=limit&&d<bestD){best=e;bestD=d;}}
     return best;
   }
+  _pickResource(x,y){
+    const direct=this._rayEntity(x,y,e=>e.alive&&e.kind==='resource'&&(e.resourceRemaining??0)>0);if(direct)return direct;
+    let best=null,bestD=Infinity;for(const e of this.sim.entities.values()){if(!e.alive||e.kind!=='resource'||(e.resourceRemaining??0)<=0)continue;const d=this._screenDistance(e,x,y);if(d<=34&&d<bestD){best=e;bestD=d;}}return best;
+  }
   _pickHostile(x,y){
     const direct=this._rayEntity(x,y,e=>e.alive&&e.playerId&&e.playerId!=='player');if(direct)return direct;
     let best=null,bestD=Infinity;
@@ -51,8 +55,10 @@ export class InputController{
       this.selectedId=candidate.id;this.onSelection(candidate);this.onStatus(`SELECTED ${this.renderer.registry.definition(candidate.definitionId).name.toUpperCase()}`);return;
     }
     if(!selected)return;
+    if(selected.collector){const resource=this._pickResource(x,y);if(resource){this.sim.issueHarvest([selected.id],resource.id);this.renderer.showDestination({x:resource.x,z:resource.z});this.onStatus(`HARVEST · ${this.renderer.registry.definition(resource.definitionId).name.toUpperCase()}`);return;}}
     const hostile=this._pickHostile(x,y);
     if(hostile&&selected.weaponSlots?.slots?.length){this.sim.issueAttack([selected.id],hostile.id);this.renderer.showAttackTarget(hostile);this.onStatus(`ATTACK · ${this.renderer.registry.definition(hostile.definitionId).name.toUpperCase()}`);return;}
+    if(!selected.locomotorId){this.onStatus('STRUCTURE SELECTED · USE PRODUCTION CONTROLS');return;}
     this._mouseNdc(x,y);this.raycaster.setFromCamera(this.ndc,this.renderer.camera);
     const hit=this.renderer.ground?this.raycaster.intersectObject(this.renderer.ground,false)[0]:null;
     if(!hit){this.onStatus('NO TERRAIN TARGET');return;}

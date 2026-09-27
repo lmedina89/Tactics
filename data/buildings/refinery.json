@@ -31,7 +31,23 @@
     {
       "type": "DockingProvider",
       "protocol": "resource_docking",
-      "capacity": 1
+      "capacity": 1,
+      "approachDistance": 18,
+      "approachSideOffset": 0,
+      "exitDistance": 25,
+      "exitSideOffset": -7,
+      "unloadRatePerSecond": 300,
+      "creditPerUnit": 1,
+      "approachTolerance": 7,
+      "exitTolerance": 7
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "PowerConsumer",
+      "amount": 20
     }
   ]
 }

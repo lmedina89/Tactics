@@ -21,6 +21,14 @@
       "asset": "aegis_field_power_node",
       "scale": 1.0,
       "headingOffset": 0.0
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "PowerProducer",
+      "amount": 80
     }
   ]
 }

@@ -52,6 +52,12 @@
       "scale": 1.0,
       "headingOffset": 0.0,
       "muzzleNode": "MuzzleFlash"
+    },
+    {
+      "type": "ProductionCost",
+      "queueType": "infantry",
+      "credits": 150,
+      "buildTimeSeconds": 3.0
     }
   ]
 }

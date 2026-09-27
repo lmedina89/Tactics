@@ -8,6 +8,9 @@ import {createGameObjectRuntime,footprintOf} from '../entities/game-object.js';
 import {InteractionManager} from '../interactions/interaction-protocol.js';
 import {ProjectileSystem} from '../combat/projectile-system.js';
 import {CombatSystem} from '../combat/weapon-system.js';
+import {FactionEconomySystem} from '../economy/faction-economy.js';
+import {ResourceSystem} from '../economy/resource-system.js';
+import {ProductionSystem} from '../production/production-system.js';
 
 export const FIXED_DT=1/30;
 
@@ -15,7 +18,7 @@ export class Simulation{
   constructor({registry,map,commandBus}){
     this.registry=registry;this.map=map;this.commandBus=commandBus;
     this.tick=0;this.entities=new Map();this.players=new Map();this.rng=new SeededRng(map.seed??1);
-    for(const p of map.players||[])this.players.set(p.id,{id:p.id,factionId:p.faction,isHuman:!!p.isHuman,credits:0,powerProduced:0,powerUsed:0});
+    for(const p of map.players||[])this.players.set(p.id,{id:p.id,factionId:p.faction,isHuman:!!p.isHuman,credits:p.startingCredits??0,powerProduced:0,powerUsed:0,lowPower:false});
     this.regionStates=new Map();
     const region=map.region||{id:map.id};
     this.regionStates.set(region.id,{id:region.id,owner:region.strategic?.owner??null,threat:region.strategic?.threat??0,resourceValue:region.strategic?.resourceValue??0,aiActivity:region.strategic?.aiActivity??0,discoveredBy:[...(region.strategic?.discoveredBy||[])]});
@@ -26,6 +29,9 @@ export class Simulation{
     this.interactions=new InteractionManager({registry:this.registry,entityLookup:id=>this.entities.get(id)});
     this.projectiles=new ProjectileSystem();
     this.combat=new CombatSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),projectiles:this.projectiles}).bindEntitiesProvider(()=>this.entities.values());
+    this.economy=new FactionEconomySystem({registry:this.registry,players:this.players,entitiesProvider:()=>this.entities.values()});
+    this.resources=new ResourceSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),interactions:this.interactions,economy:this.economy,pathfinder:this.pathfinder});
+    this.production=new ProductionSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),economy:this.economy,interactions:this.interactions,pathfinder:this.pathfinder,spawnEntity:o=>this._spawnEntity(o)});
   }
 
   _buildNavigationMap(map){
@@ -45,15 +51,22 @@ export class Simulation{
   _spawnEntity(o){
     const def=this.registry.definition(o.definition);if(!def)throw new Error(`Unknown definition ${o.definition}`);
     const player=o.owner?this.players.get(o.owner):null;
-    this.entities.set(o.id,createGameObjectRuntime({definition:def,spawn:o,player,registry:this.registry,terrain:this.terrain}));
+    const entity=createGameObjectRuntime({definition:def,spawn:o,player,registry:this.registry,terrain:this.terrain});this.entities.set(o.id,entity);return entity;
   }
 
   issueMove(entityIds,destination){return this.commandBus.issue({type:CommandType.MOVE,entityIds,destination});}
   issueStop(entityIds){return this.commandBus.issue({type:CommandType.STOP,entityIds});}
   issueAttack(entityIds,targetId){return this.commandBus.issue({type:CommandType.ATTACK,entityIds,targetId});}
+  issueHarvest(entityIds,resourceId){return this.commandBus.issue({type:CommandType.HARVEST,entityIds,resourceId});}
+  issueReturnCargo(entityIds){return this.commandBus.issue({type:CommandType.RETURN_CARGO,entityIds});}
+  issueProduce(producerId,definitionId){return this.commandBus.issue({type:CommandType.PRODUCE,producerId,definitionId});}
+  issueCancelProduction(producerId){return this.commandBus.issue({type:CommandType.CANCEL_PRODUCTION,producerId});}
 
   step(dt=FIXED_DT){
     for(const c of this.commandBus.drain())this._apply(c);
+    this.economy.recalculatePower();
+    this.resources.step(dt,this.tick);
+    this.production.step(this.tick);
     for(const e of this.entities.values()){
       if(!e.alive||!e.locomotorId)continue;
       const cfg=this.registry.locomotor(e.locomotorId);
@@ -66,12 +79,16 @@ export class Simulation{
   }
 
   _apply(c){
-    if(c.type===CommandType.STOP){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId)clearOrders(e);}return;}
-    if(c.type===CommandType.MOVE){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId)assignMoveOrder(e,c);}return;}
+    if(c.type===CommandType.STOP){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId){this.resources.cancel(e,'STOP');clearOrders(e);}}return;}
+    if(c.type===CommandType.MOVE){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId){this.resources.cancel(e,'MOVE');assignMoveOrder(e,c);}}return;}
     if(c.type===CommandType.ATTACK){
       const target=this.entities.get(c.targetId);if(!target?.alive)return;
-      for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId&&e.weaponSlots?.slots?.length&&e.playerId&&target.playerId&&e.playerId!==target.playerId)assignAttackOrder(e,c);}
+      for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.locomotorId&&e.weaponSlots?.slots?.length&&e.playerId&&target.playerId&&e.playerId!==target.playerId){this.resources.cancel(e,'ATTACK');assignAttackOrder(e,c);}}return;
     }
+    if(c.type===CommandType.HARVEST){const resource=this.entities.get(c.resourceId);for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.collector)this.resources.issueHarvest(e,resource);}return;}
+    if(c.type===CommandType.RETURN_CARGO){for(const id of c.entityIds||[]){const e=this.entities.get(id);if(e?.alive&&e.collector)this.resources.issueReturn(e);}return;}
+    if(c.type===CommandType.PRODUCE){this.production.queue(c.producerId,c.definitionId,this.tick);return;}
+    if(c.type===CommandType.CANCEL_PRODUCTION){this.production.cancelLast(c.producerId);return;}
   }
 
   _separateFriendlies(){
@@ -90,24 +107,25 @@ export class Simulation{
 
   snapshot(){
     return {
-      version:6,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),
+      version:7,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),
       players:[...this.players.values()].map(p=>structuredClone(p)),regionStates:[...this.regionStates.values()].map(r=>structuredClone(r)),
       entities:[...this.entities.values()].map(e=>({
         id:e.id,definitionId:e.definitionId,playerId:e.playerId,factionId:e.factionId,kind:e.kind,
         x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,angularSpeed:e.angularSpeed??0,steeringAngle:e.steeringAngle??0,movingBackward:!!e.movingBackward,locomotionState:structuredClone(e.locomotionState||null),
         health:e.health,maxHealth:e.maxHealth,alive:e.alive,damageState:e.damageState,destroyedTick:e.destroyedTick,lastDamagedBy:e.lastDamagedBy,lastDamagedTick:e.lastDamagedTick,
         armorId:e.armorId,weaponSlots:structuredClone(e.weaponSlots),turretYaw:e.turretYaw,turretAngularSpeed:e.turretAngularSpeed??0,combat:structuredClone(e.combat),
-        selectable:e.selectable,resourceRemaining:e.resourceRemaining,ai:e.ai?structuredClone(e.ai):null,modules:structuredClone(e.modules||{})
+        selectable:e.selectable,resourceRemaining:e.resourceRemaining,initialResourceCapacity:e.initialResourceCapacity,collector:structuredClone(e.collector),production:structuredClone(e.production),productionExit:structuredClone(e.productionExit),ai:e.ai?structuredClone(e.ai):null,modules:structuredClone(e.modules||{})
       }))
     };
   }
 
   restore(snapshot){
-    if((snapshot?.version??0)!==6)throw new Error('Unsupported ForgeRTS snapshot version');
+    if((snapshot?.version??0)!==7)throw new Error('Unsupported ForgeRTS snapshot version');
     this.tick=snapshot.tick??0;this.rng.restore(snapshot.rngState??1);this.commandBus.restore(snapshot.commandBus??{});
-    this.players=new Map((snapshot.players||[]).map(p=>[p.id,structuredClone(p)]));
+    this.players=new Map((snapshot.players||[]).map(p=>[p.id,structuredClone(p)]));this.economy.players=this.players;
     this.regionStates=new Map((snapshot.regionStates||[]).map(r=>[r.id,structuredClone(r)]));
-    for(const s of snapshot.entities||[]){const e=this.entities.get(s.id);if(!e)continue;Object.assign(e,structuredClone(s));}
-    this.interactions.restore(snapshot.interactions??{});this.projectiles.restore(snapshot.projectiles??{});this.combat.restore(snapshot.combat??{});
+    const snapshotIds=new Set((snapshot.entities||[]).map(e=>e.id));for(const id of [...this.entities.keys()])if(!snapshotIds.has(id))this.entities.delete(id);
+    for(const s of snapshot.entities||[]){let e=this.entities.get(s.id);if(!e){const def=this.registry.definition(s.definitionId);const player=s.playerId?this.players.get(s.playerId):null;e=createGameObjectRuntime({definition:def,spawn:{id:s.id,definition:s.definitionId,owner:s.playerId,x:s.x,z:s.z,yaw:s.yaw},player,registry:this.registry,terrain:this.terrain});this.entities.set(s.id,e);}Object.assign(e,structuredClone(s));}
+    this.interactions.restore(snapshot.interactions??{});this.projectiles.restore(snapshot.projectiles??{});this.combat.restore(snapshot.combat??{});this.resources.restore(snapshot.resources??{});this.production.restore(snapshot.productionSystem??{});this.economy.recalculatePower();
   }
 }

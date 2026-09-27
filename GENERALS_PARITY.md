@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.3.1 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.4.0 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI commands | behavior receives data, not UI events | `engine/commands/CommandBus` | MOVE / STOP / **ATTACK** implemented |
@@ -19,7 +19,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Armor/damage | armor/warhead relationships | `ArmorTemplate` / DamageType / Body | `ArmorSet` | `engine/combat/damage-system.js` + `data/armors` | **Implemented coefficients, health states, destruction** |
 | Turret/body aim | turreted vehicle fire logic | `TurretAI` under AIUpdate | turret behavior module | CombatSystem + Render turret bindings | **Independent turret yaw; body-aim infantry; Guardian auto-acquire** |
 | Projectile objects | projectile classes | projectile Thing/Object weapon delivery | projectile behavior data | `engine/combat/projectile-system.js` | **Deterministic projectile runtime + snapshot** |
-| Interaction protocols | refinery/harvester radio/docking handshakes | production/contain/dock behavior families | behavior modules/endpoints | `engine/interactions/interaction-protocol.js` | Dock + rollout protocol foundation |
+| Interaction protocols | refinery/harvester radio/docking handshakes | production/contain/dock behavior families | behavior modules/endpoints | `engine/interactions/interaction-protocol.js` | **Resource docking + infantry/vehicle rollout used by live systems** |
 | Gesture/context input | classic click orders | selection/context translation | client behavior separate from simulation | `ui/gesture-resolver.js` + InputController | TAP/LONG_PRESS/PAN/PINCH + hostile ATTACK context |
 | Terrain/passability separation | map cells/regions | `MapReaderWriterInfo.h` | terrain appearance vs gameplay data | `MapManifest` + TerrainSampler + Pathfinder | Implemented foundation |
 | Height/blend terrain | tile/cell terrain | WorldBuilder blend terrain | layered terrain data | `renderer/terrain-renderer.js` | 3-layer splat terrain |
@@ -27,9 +27,9 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Rivers/water | map cells/water logic | terrain/water systems | water as independent feature data | map `water` + renderer | Foundation implemented |
 | Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | Owner/threat/resources/activity/discovery implemented |
 | Stable starts/waypoints | cell/waypoint mission logic | player start/rally waypoints | named anchors | map `waypoints[]` | Data implemented |
-| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v5 includes combat/weapon/turret/projectile state** |
-| Player economy/power | house/resources | `Player` | player/faction data | `FactionState` | NEXT after combat validation |
-| Production | factory queues/service | production update modules | Production behavior | `ProductionSystem` | Data hooks added; runtime planned |
+| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v7 includes dynamic production, economy, resources, interactions, combat and locomotion** |
+| Player economy/power | house/resources | `Player` | player/faction data | `FactionEconomySystem` / player state | **Credits + power + low-power policy implemented** |
+| Production | factory queues/service | production update modules | Production behavior | `engine/production/production-system.js` | **Generic queues, costs, build time, cancellation, dynamic spawn, rollout/rally implemented** |
 | Teams/attack groups | teams/groups | `Team` / `AIGroup` | team data | `TeamManager` | Planned |
 | Strategic AI | house AI | `AIPlayer` | AI modules/data | `AIController` | Planned |
 | Mission conditions/actions | triggers/actions | Scripts / Conditions / Actions | script data | `MissionSystem` | Planned; never owns world lifetime |
@@ -44,6 +44,11 @@ Before implementing a major system, update this matrix with the source/reference
 ## v0.3.1 locomotor/combat reference boundary
 
 ForgeRTS v0.3.1 preserves the v0.3.0 combat separation and tightens locomotor behavior around a C&C-style principle: reverse/turn-around is explicit locomotor state rather than a permanent alternate travel mode. The implementation uses the persistent terminal order to distinguish short tactical reverse from long-distance movement, adds deterministic wheeled turn-around phases, and keeps tracked long-route movement biased toward pivot + forward travel. ATTACK approach also uses range hysteresis to avoid edge-of-range MOVE/FIRE oscillation. The code remains an original browser-native implementation rather than a direct translation.
+
+
+## v0.4.0 economy / production reference boundary
+
+ForgeRTS v0.4.0 activates the interaction and module foundations that were intentionally laid down earlier. Harvester/Refinery behavior uses an explicit docking workflow instead of collision inference; production is a generic queue driven by GameObject modules and ProductionCost data; faction credits and power are simulation state; produced units use explicit rollout state before ordinary movement resumes. Enemy strategic decision-making remains deferred, so enemy economy structures currently exist as passive test-world content rather than a full AI economy. The implementation remains original browser-native JavaScript rather than a direct C&C source translation.
 
 ## Licensing / content boundary
 

@@ -29,7 +29,8 @@
   ],
   "interactions": [
     "data/interactions/resource_docking.json",
-    "data/interactions/factory_rollout.json"
+    "data/interactions/factory_rollout.json",
+    "data/interactions/infantry_rollout.json"
   ],
   "armors": [
     "data/armors/infantry.json",

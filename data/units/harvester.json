@@ -31,7 +31,9 @@
       "cargoCapacity": 1200,
       "resourceTypes": [
         "mineral"
-      ]
+      ],
+      "harvestRatePerSecond": 120,
+      "harvestRadius": 6.0
     },
     {
       "type": "InteractionEndpoint",
@@ -45,6 +47,12 @@
       "asset": "aegis_field_harvester",
       "scale": 1.0,
       "headingOffset": 0.0
+    },
+    {
+      "type": "ProductionCost",
+      "queueType": "vehicle",
+      "credits": 800,
+      "buildTimeSeconds": 7.0
     }
   ]
 }
