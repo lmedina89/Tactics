@@ -1,0 +1,33 @@
+{
+  "id": "training_ground",
+  "name": "Training Ground 01",
+  "version": 1,
+  "seed": 731904,
+  "size": {"width": 520, "depth": 360},
+  "terrain": {"baseHeight": 0, "color": "#657154"},
+  "players": [
+    {"id":"player","faction":"aegis","start":{"x":-175,"z":0}},
+    {"id":"enemy","faction":"crimson","start":{"x":175,"z":0}}
+  ],
+  "staticObstacles": [
+    {"id":"ridge_a","x":0,"z":-82,"width":92,"depth":28},
+    {"id":"ridge_b","x":0,"z":82,"width":92,"depth":28},
+    {"id":"rock_a","x":-48,"z":22,"width":22,"depth":22},
+    {"id":"rock_b","x":52,"z":-28,"width":26,"depth":24}
+  ],
+  "objects": [
+    {"id":"p_hq","definition":"command_post","faction":"player","x":-205,"z":0,"yaw":1.5708},
+    {"id":"p_factory","definition":"vehicle_factory","faction":"player","x":-190,"z":-52,"yaw":1.5708},
+    {"id":"p_turret","definition":"guardian_turret","faction":"player","x":-154,"z":48,"yaw":0},
+    {"id":"p_tank","definition":"aegis_x","faction":"player","x":-142,"z":-18,"yaw":1.5708},
+    {"id":"p_hmmwv","definition":"hmmwv50","faction":"player","x":-145,"z":18,"yaw":1.5708},
+    {"id":"p_rifle","definition":"rifleman","faction":"player","x":-128,"z":32,"yaw":1.5708},
+
+    {"id":"e_hq","definition":"command_post","faction":"enemy","x":205,"z":0,"yaw":-1.5708},
+    {"id":"e_factory","definition":"vehicle_factory","faction":"enemy","x":190,"z":52,"yaw":-1.5708},
+    {"id":"e_turret","definition":"guardian_turret","faction":"enemy","x":154,"z":-48,"yaw":3.1416},
+    {"id":"e_tank","definition":"aegis_x","faction":"enemy","x":142,"z":18,"yaw":-1.5708},
+    {"id":"e_hmmwv","definition":"hmmwv50","faction":"enemy","x":145,"z":-18,"yaw":-1.5708},
+    {"id":"e_rifle","definition":"rifleman","faction":"enemy","x":128,"z":-32,"yaw":-1.5708}
+  ]
+}

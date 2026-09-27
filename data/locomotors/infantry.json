@@ -1,0 +1,10 @@
+{
+  "id": "infantry_basic",
+  "kind": "legs",
+  "maxSpeed": 7.5,
+  "acceleration": 18.0,
+  "braking": 24.0,
+  "turnRate": 6.5,
+  "radius": 0.42,
+  "arrivalRadius": 0.45
+}

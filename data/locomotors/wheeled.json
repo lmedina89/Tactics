@@ -1,0 +1,10 @@
+{
+  "id": "wheeled_light",
+  "kind": "wheels",
+  "maxSpeed": 14.0,
+  "acceleration": 8.0,
+  "braking": 12.0,
+  "turnRate": 2.8,
+  "radius": 1.35,
+  "arrivalRadius": 0.9
+}

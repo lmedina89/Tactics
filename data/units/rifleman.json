@@ -1,0 +1,10 @@
+{
+  "id": "rifleman",
+  "name": "Rifleman",
+  "kind": "infantry",
+  "asset": "aegis_rifleman",
+  "locomotor": "infantry_basic",
+  "selectable": true,
+  "maxHealth": 100,
+  "model": {"scale": 1.0, "headingOffset": 0.0}
+}

@@ -1,0 +1,10 @@
+{
+  "id": "tracked_heavy",
+  "kind": "tracks",
+  "maxSpeed": 10.0,
+  "acceleration": 5.8,
+  "braking": 9.0,
+  "turnRate": 2.25,
+  "radius": 1.8,
+  "arrivalRadius": 1.1
+}

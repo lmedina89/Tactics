@@ -1,0 +1,9 @@
+{
+  "id": "command_post",
+  "name": "Tactical Command Post",
+  "kind": "building",
+  "asset": "aegis_tactical_command_post",
+  "selectable": false,
+  "maxHealth": 3500,
+  "footprint": {"width": 22, "depth": 18}
+}

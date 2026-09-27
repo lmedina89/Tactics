@@ -1,0 +1,10 @@
+{
+  "id": "aegis_x",
+  "name": "Aegis-X MBT",
+  "kind": "vehicle",
+  "asset": "aegis_x_mbt",
+  "locomotor": "tracked_heavy",
+  "selectable": true,
+  "maxHealth": 1800,
+  "model": {"scale": 1.0, "headingOffset": 0.0}
+}

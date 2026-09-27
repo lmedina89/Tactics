@@ -1,0 +1,9 @@
+{
+  "id": "vehicle_factory",
+  "name": "Vehicle Factory",
+  "kind": "building",
+  "asset": "aegis_vehicle_factory",
+  "selectable": false,
+  "maxHealth": 2200,
+  "footprint": {"width": 28, "depth": 24}
+}

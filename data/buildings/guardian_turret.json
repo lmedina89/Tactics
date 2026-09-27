@@ -1,0 +1,9 @@
+{
+  "id": "guardian_turret",
+  "name": "Guardian Turret",
+  "kind": "building",
+  "asset": "aegis_guardian_turret",
+  "selectable": false,
+  "maxHealth": 1150,
+  "footprint": {"width": 8, "depth": 8}
+}
