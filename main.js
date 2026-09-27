@@ -31,7 +31,7 @@ function frame(now){
   const dt=Math.min(.1,(now-last)/1000);last=now;accumulator+=dt;
   while(accumulator>=FIXED_DT){sim.step(FIXED_DT);accumulator-=FIXED_DT;}
   view.sync(sim);const selected=input.selected();view.setSelection(selected);selectionLabel.textContent=selectionText(selected);view.render();
-  const aiState=selected?.ai?.state?` · ${selected.ai.state}`:'';const target=selected?.combat?.activeTargetId?` · TARGET ${selected.combat.activeTargetId}`:'';tickLabel.textContent=`TICK ${sim.tick}${aiState}${target}`;
+  const aiState=selected?.ai?.state?` · ${selected.ai.state}`:'';const target=selected?.combat?.activeTargetId?` · TARGET ${selected.combat.activeTargetId}`:'';const maneuver=selected?.locomotionState?.mode&&selected.locomotionState.mode!=='FORWARD'?` · ${selected.locomotionState.mode.replaceAll('_',' ')}`:'';tickLabel.textContent=`TICK ${sim.tick}${aiState}${maneuver}${target}`;
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

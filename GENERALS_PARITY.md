@@ -6,13 +6,13 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.3.0 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.3.1 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI commands | behavior receives data, not UI events | `engine/commands/CommandBus` | MOVE / STOP / **ATTACK** implemented |
 | GameObject composition | object classes + explicit state | object/update-module architecture | `GameObject` composed from Body/AI/Draw/Behaviors/etc. | `engine/entities/game-object.js` + JSON modules | Implemented foundation |
 | Unit AI requested destination/state | mission/state handling | `AIUpdate` module family | AI behavior as module | `engine/ai/unit-ai-update.js` | MOVE + **persistent ATTACK approach/engage state** |
-| Locomotor templates | movement classes | `Locomotor.h` family (`FOUR_WHEELS`, `TREADS`, turn rate, wheel angle, reverse state) | locomotor set data | `engine/locomotion/locomotor.js` + JSON | Tracks pivot/turn; wheels steer on curvature; legs/air separate; facing simulation-owned |
+| Locomotor templates | movement classes | `Locomotor.h` family (`FOUR_WHEELS`, `TREADS`, turn rate, wheel angle, reverse state) | locomotor set data | `engine/locomotion/locomotor.js` + JSON | Tracks pivot/turn; wheels steer on curvature with bounded reverse + three-point turn-around; legs/air separate; facing simulation-owned |
 | Pathfinder destination correction | cell movement | AI/pathfinder family | geometry/pathing data separate | `engine/pathfinding/grid-pathfinder.js` | nearest-valid destination + clearance + attack approach point |
 | Weapons / Weapon templates/runtime | projectile/warhead behavior | `WeaponTemplate` / `Weapon` | `WeaponSet` modules | `engine/combat/weapon-system.js` + `data/weapons` | **Implemented initial hitscan/projectile, prefire, cadence, clip/reload, target masks** |
 | Weapon slots / selection | weapon/warhead choices | primary/secondary/tertiary weapon slots + damage estimation | WeaponSet data | `engine/combat/targeting.js` | **Generic slots + armor-adjusted best-weapon scoring implemented** |
@@ -41,9 +41,9 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 
 Before implementing a major system, update this matrix with the source/reference family and intended ForgeRTS owner. Do not add a bespoke unit-specific system if a general C&C-style subsystem can own the behavior.
 
-## v0.3.0 combat reference boundary
+## v0.3.1 locomotor/combat reference boundary
 
-ForgeRTS v0.3.0 follows the *system separation* observed in the released Generals/Zero Hour `Weapon`, `Armor/Damage`, `AIUpdate/TurretAI`, and weapon-slot/object interfaces: ATTACK intent is separate from pathing, turret aim is separate from hull locomotion, WeaponRuntime is separate from damage application, and projectile travel is separate from rendering. The code in ForgeRTS is an original browser-native implementation rather than a direct translation.
+ForgeRTS v0.3.1 preserves the v0.3.0 combat separation and tightens locomotor behavior around a C&C-style principle: reverse/turn-around is explicit locomotor state rather than a permanent alternate travel mode. The implementation uses the persistent terminal order to distinguish short tactical reverse from long-distance movement, adds deterministic wheeled turn-around phases, and keeps tracked long-route movement biased toward pivot + forward travel. ATTACK approach also uses range hysteresis to avoid edge-of-range MOVE/FIRE oscillation. The code remains an original browser-native implementation rather than a direct translation.
 
 ## Licensing / content boundary
 

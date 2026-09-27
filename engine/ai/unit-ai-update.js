@@ -23,6 +23,7 @@ export function assignAttackOrder(entity,command){
 export function clearOrders(entity){
   entity.ai ??= createUnitAIState();entity.ai.state=UnitAIState.IDLE;entity.ai.order=null;entity.ai.attackTargetLast=null;resetRoute(entity.ai);
   entity.speed=0;entity.angularSpeed=0;entity.steeringAngle=0;entity.movingBackward=false;
+  if(entity.locomotionState){entity.locomotionState.mode='FORWARD';entity.locomotionState.modeTime=0;entity.locomotionState.cooldown=0;entity.locomotionState.reverseStartX=entity.x;entity.locomotionState.reverseStartZ=entity.z;}
   if(entity.combat)entity.combat.manualTargetId=null;
 }
 
@@ -52,6 +53,12 @@ function followRoute(entity,locomotor,tick,terminalPoint,onArrive){
   const remaining=dist(entity,terminalPoint);
   if(remaining<=reach*1.15){onArrive();return;}
   if(tick-ai.lastProgressTick>=15){
+    const maneuver=entity.locomotionState?.mode;
+    if(maneuver==='THREE_POINT_REVERSE'||maneuver==='THREE_POINT_FORWARD'){
+      // A deliberate wheeled turn-around may temporarily increase terminal distance.
+      // Do not misclassify that as a pathfinding failure and throw away the route.
+      ai.lastProgressDistance=remaining;ai.lastProgressTick=tick;return;
+    }
     const progress=ai.lastProgressDistance-remaining;
     if(ai.lastProgressDistance<Infinity&&progress<0.12&&tick>=ai.nextRepathTick){ai.route=null;ai.goal=null;ai.nextRepathTick=tick+24;ai.state=UnitAIState.MOVING;}
     ai.lastProgressDistance=remaining;ai.lastProgressTick=tick;
@@ -79,7 +86,11 @@ function stepAttack(entity,locomotor,pathfinder,tick,context){
   if(!engagement){ai.state=UnitAIState.BLOCKED;ai.goal=null;return;}
   if(entity.combat)entity.combat.manualTargetId=target.id;
   const distance=dist(entity,target),maxRange=engagement.range,minRange=engagement.minimumRange;
-  if(distance<=maxRange*0.98&&distance>=minRange){ai.state=UnitAIState.ATTACKING;ai.route=null;ai.routeIndex=0;ai.goal=null;ai.adjustedDestination=null;entity.speed=0;return;}
+  // Generals-style attack approach should not oscillate between MOVE and FIRE at the range edge.
+  // Enter a little inside weapon range, then hold the engagement until the target moves clearly out.
+  const enterRange=maxRange*0.96,holdRange=maxRange*1.06,minHold=Math.max(0,minRange*0.94);
+  const inStableRange=(ai.state===UnitAIState.ATTACKING?distance<=holdRange:distance<=enterRange)&&distance>=minHold;
+  if(inStableRange){ai.state=UnitAIState.ATTACKING;ai.route=null;ai.routeIndex=0;ai.goal=null;ai.adjustedDestination=null;entity.speed=0;return;}
 
   const moved=ai.attackTargetLast?Math.hypot(target.x-ai.attackTargetLast.x,target.z-ai.attackTargetLast.z):Infinity;
   if((!ai.route||moved>4)&&tick>=ai.nextRepathTick){

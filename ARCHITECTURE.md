@@ -20,3 +20,6 @@
 18. **Turrets are independent simulation state.** Hull yaw remains locomotor-owned. Turret yaw/aim tolerance/turn rate are deterministic combat state and renderer nodes merely display it.
 19. **Weapon slots are generic.** GameObjects may expose PRIMARY/SECONDARY/TERTIARY-style slots without concrete unit-name checks; target suitability and expected armor-adjusted damage drive later weapon selection.
 20. **Destroyed objects remain world state.** Death disables gameplay participation but does not require immediate deletion; wreck rendering, salvage, rebuilding, and persistence can be layered later.
+21. **Reverse is a maneuver, not a travel mode.** Locomotors may reverse for local tactical corrections, docking, or turn-around setup, but long-distance path intent must evaluate the persistent terminal destination and prefer forward travel unless data explicitly says otherwise.
+22. **Wheeled turn-around is stateful.** Three-point/turn-around phases are deterministic locomotor state and may temporarily move away from the terminal destination; UnitAI must not misclassify that intentional maneuver as pathfinding failure.
+23. **Attack range uses hysteresis.** UnitAI enters firing range slightly inside maximum range and holds engagement through small range-edge changes to prevent MOVE/FIRE oscillation.

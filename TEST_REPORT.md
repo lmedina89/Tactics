@@ -1,33 +1,29 @@
-# ForgeRTS v0.3.0 Validation Report
+# ForgeRTS v0.3.1 Validation Report
 
 ## Automated tests
 
-`npm test` passes **32/32** tests.
+`npm test` passes **35/35** tests.
 
-Combat coverage includes:
+New locomotor coverage includes:
 
-- armor data and weapon data registry families
-- meaningful armor coefficients: rifle fire is nearly ineffective against heavy tank armor while cannon damage remains significant
-- persistent ATTACK order with attack-range approach behavior
+- tracked vehicles reverse only for short tactical behind-destinations
+- tracked long behind-orders pivot toward forward travel
+- wheeled short reverse preserves stable hull facing
+- wheeled long behind-orders invoke a deterministic turn-around maneuver
+- long wheeled orders transition back to forward movement instead of reversing the entire route
+- reverse travel during turn-around is explicitly bounded
+- authored GLB forward-axis heading calibration remains intact
+
+Combat regression coverage remains intact for:
+
+- armor/weapon data families and meaningful damage relationships
+- persistent ATTACK approach behavior
 - independent Aegis-X turret aiming and deterministic projectile fire
-- HMMWV hitscan weapon defeating infantry and destruction-state cleanup
-- autonomous Guardian Turret target acquisition and firing
-- projectile/weapon/combat snapshot and restore determinism
+- HMMWV hitscan vs infantry
+- autonomous Guardian Turret acquisition
+- projectile/combat snapshot determinism
 
-Existing regression coverage remains intact for:
-
-- deterministic persistent MOVE / STOP behavior
-- static building clearance and destination correction
-- MapManifest v2 persistent-world fields
-- splat terrain normalization and water passability
-- gesture classification before gameplay command emission
-- GameObject module composition
-- explicit resource-docking and factory-rollout interaction protocols
-- real-map repeated movement for player tank, HMMWV, and Rifleman
-- tracked hull pivot/facing behavior
-- wheeled arc steering without center-pivot snapping
-- wheeled reverse behavior with stable hull facing
-- authored GLB forward-axis heading calibration
+Existing regression coverage remains intact for deterministic MOVE/STOP, static building clearance, MapManifest v2, splat terrain, water passability, gesture classification, GameObject modules, resource docking/factory rollout protocols, and repeated real-map movement.
 
 ## Syntax / data validation
 
@@ -35,19 +31,18 @@ All project JavaScript and MJS sources pass `node --check`. All JSON data files 
 
 ## Asset integrity
 
-`sha256sum -c ASSET_HASHES.sha256` passes. All **16 production GLBs** are byte-for-byte unchanged from v0.2.2. Existing terrain textures are unchanged.
+`sha256sum -c ASSET_HASHES.sha256` passes. All **16 production GLBs** remain byte-for-byte unchanged from v0.3.0. Existing terrain textures are unchanged.
 
-## Combat implementation notes
+## Locomotor implementation notes
 
-- `ATTACK` is a serialized command and persists as UnitAI target intent.
-- UnitAI computes a firing-position approach point rather than simply moving onto the victim.
-- Aegis-X, HMMWV, and Guardian use independent world-space `turretYaw`; Rifleman uses a high-rate body aim module.
-- hitscan and projectile delivery are distinct simulation paths.
-- ArmorSet coefficients transform weapon damage before Body health changes.
-- Guardian Turrets are the first auto-acquiring defensive objects.
-- destroyed objects remain present as darkened wrecks but are no longer selectable or active combatants.
-- snapshot format is v5 and includes attack intent, weapon runtime, turret state, damage state, and in-flight projectiles.
+- locomotors inspect both the current route waypoint and persistent terminal destination
+- short reverse remains available for nearby tactical movement
+- long wheeled behind-orders use `THREE_POINT_REVERSE → THREE_POINT_FORWARD → FORWARD`
+- long tracked behind-orders prefer pivot + forward travel
+- UnitAI does not trigger stuck/repath recovery during deliberate three-point phases
+- snapshot format is **v6** and includes `locomotionState`
+- ATTACK approach uses entry/hold range hysteresis to reduce range-edge oscillation
 
 ## Intentionally deferred
 
-Full projectile collision masks, line-of-fire occlusion, splash/radius damage, anti-air weapons, reactive guard behavior, and production/economy are deferred so the initial combat layer can be validated independently.
+Full obstacle-aware multi-stage three-point planning, parking/docking-specific reverse corridors, wheel animation, steering-wheel visual animation, and formation-level vehicle maneuver coordination remain deferred. The current goal is deterministic, bounded and believable route-level vehicle behavior.

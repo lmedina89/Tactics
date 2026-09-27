@@ -20,5 +20,17 @@
   "reverseThreshold": 2.42,
   "reverseMaxSpeedFactor": 0.38,
   "turnInPlace": false,
-  "speedTurnPenalty": 0.88
+  "speedTurnPenalty": 0.88,
+  "reverseEntryAngle": 2.42,
+  "reverseExitAngle": 1.3,
+  "maxReverseDistance": 4.8,
+  "preferForwardDistance": 9.0,
+  "allowThreePointTurn": true,
+  "threePointReverseDistance": 2.3,
+  "threePointReverseSpeedFactor": 0.28,
+  "threePointReverseSteerFactor": 0.9,
+  "threePointSwitchAngle": 2.15,
+  "threePointExitAngle": 1.38,
+  "threePointReverseMaxTime": 1.65,
+  "reverseReentryCooldown": 2.0
 }

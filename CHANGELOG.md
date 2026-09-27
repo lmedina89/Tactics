@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.3.1 — Reverse / Turnaround + Combat Approach Stability
+
+- Reworked reverse selection to consider the persistent terminal destination, not only the next short path waypoint.
+- Added bounded short-reverse behavior for nearby behind-the-hull destinations.
+- Added deterministic wheeled turn-around states: `THREE_POINT_REVERSE` and `THREE_POINT_FORWARD`.
+- Added data-driven maximum reverse distance, forward-preference distance, reverse entry/exit angles, three-point reverse distance/speed/steer limits, timeout, and reverse re-entry cooldown.
+- Tracked vehicles now reserve reverse for short tactical destinations and pivot toward long behind-orders.
+- UnitAI stuck/repath detection now recognizes deliberate three-point maneuvers and does not discard their route while they temporarily move away from the terminal destination.
+- Added ATTACK range hysteresis so already-engaged units hold firing position across small target-distance changes instead of oscillating between approach and firing.
+- Added locomotor maneuver state to deterministic entity state and snapshot format v6.
+- Added debug HUD visibility for non-forward maneuver modes.
+- Expanded locomotor tests for short reverse, long-route turn-around, tracked long-route forward preference, and bounded reverse travel.
+- Preserved all v0.3.0 combat architecture and all production GLBs unchanged.
+
 ## v0.3.0 — Combat Core
 
 - Added serializable `ATTACK` CommandBus command and persistent UnitAI attack intent.

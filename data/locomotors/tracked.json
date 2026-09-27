@@ -19,5 +19,8 @@
   "reverseThreshold": 2.62,
   "reverseMaxSpeedFactor": 0.42,
   "turnInPlace": true,
-  "speedTurnPenalty": 0.72
+  "speedTurnPenalty": 0.72,
+  "reverseEntryAngle": 2.62,
+  "maxReverseDistance": 4.5,
+  "preferForwardDistance": 7.5
 }

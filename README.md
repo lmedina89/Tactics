@@ -1,65 +1,69 @@
-# ForgeRTS v0.3.0 — Combat Core
+# ForgeRTS v0.3.1 — Reverse / Turnaround + Combat Approach Stability
 
 ForgeRTS is a clean, separate browser-native RTS engine. It does **not** modify the existing WorldForge / Skirmish project.
 
-v0.3.0 is the first combat milestone. The implementation follows the same broad separation we have been studying in Command & Conquer: Generals / Zero Hour: ATTACK is persistent UnitAI intent, weapons are data-driven templates with runtime reload state, armor adjusts incoming damage, projectiles are simulation objects, and turret facing is independent from hull locomotion. The implementation is original ForgeRTS JavaScript; no EA game assets or copied EA source are included.
+v0.3.1 corrects the first major vehicle-maneuver edge case found during v0.3.0 combat testing: a MOVE order directly behind a wheeled vehicle could cause it to reverse for the entire route because the locomotor only saw the next nearby path waypoint. The new implementation evaluates both the immediate path waypoint and the persistent terminal destination, so reverse is a local maneuver rather than a second long-distance travel mode.
+
+The implementation remains original ForgeRTS JavaScript. The behavior is informed by the separation seen in released C&C locomotor/drive systems: tracked and wheeled movement are distinct, reverse is stateful, and wheeled turn-around behavior is allowed to use a short reversing maneuver before recommitting to forward travel.
 
 ## Player-facing changes
 
-- select a green friendly combat unit, then tap a red hostile to issue **ATTACK**
-- Aegis-X and HMMWV turrets rotate independently from their moving hulls
-- Riflemen stop and turn their bodies to aim
-- Guardian Turrets automatically acquire hostile ground targets in range
-- rifle/HMMWV fire uses hitscan/tracer delivery
-- Aegis-X and Guardian Turret cannon fire uses deterministic projectile objects
-- targets take armor-adjusted damage, transition through damage states, and become non-selectable wrecks at zero HP
-- selected-unit HUD health updates continuously
+- **Short destination behind a vehicle:** the vehicle may simply back into it.
+- **Long destination behind a wheeled vehicle:** HMMWV / Harvester perform a bounded reverse-and-turn maneuver, then commit to forward travel instead of reversing across the map.
+- **Long destination behind a tracked vehicle:** Aegis-X prefers its pivot-turn behavior and forward travel; reverse is reserved for short tactical movement.
+- Wheeled turn-around state is visible in the debug HUD as `THREE POINT REVERSE` / `THREE POINT FORWARD` while testing.
+- ATTACK approach now uses range hysteresis so a unit already engaging near maximum range does not repeatedly bounce between moving and firing when the target shifts slightly.
 
-## Data-driven combat foundation
+## Data-driven locomotor additions
 
-New content families:
+Wheeled locomotor data now supports:
 
-- `data/weapons/` — damage type, range, minimum range, cadence, prefire, clip/reload, delivery type, aim tolerance, targeting masks, projectile parameters
-- `data/armors/` — damage-type multipliers for infantry, light vehicles, heavy tanks, industrial vehicles, aircraft, structures, heavy structures, and fortified targets
-- `WeaponSet`, `ArmorSet`, `TurretAI`, and `BodyAim` GameObject modules
+- `reverseEntryAngle`
+- `reverseExitAngle`
+- `maxReverseDistance`
+- `preferForwardDistance`
+- `allowThreePointTurn`
+- `threePointReverseDistance`
+- `threePointReverseSpeedFactor`
+- `threePointReverseSteerFactor`
+- `threePointSwitchAngle`
+- `threePointExitAngle`
+- `threePointReverseMaxTime`
+- `reverseReentryCooldown`
 
-Initial weapon set:
+Tracked locomotors also use a bounded `maxReverseDistance`, keeping reverse available for nearby tactical corrections without allowing a tank to back down an entire long route just because the path starts behind its hull.
 
-- Rifleman Service Rifle — SMALL_ARMS / hitscan
-- HMMWV-50 .50 Cal — HEAVY_MACHINE_GUN / hitscan
-- Aegis-X 120mm — CANNON / projectile
-- Guardian Twin Cannon — CANNON / projectile
+## Simulation behavior
 
-The initial balance intentionally relies on armor coefficients rather than inflated HP. Rifle fire is dangerous to infantry, reduced against light vehicles, and nearly irrelevant against heavy tank armor. The 120mm cannon is a heavy anti-vehicle weapon.
+The movement chain remains:
 
-## Simulation architecture
+`MOVE / ATTACK intent → UnitAI route → locomotor maneuver state → steering/pivot → simulation position/facing → renderer`
 
-The combat chain is now:
+For wheels, a long behind-order can now transition through:
 
-`ATTACK command → UnitAI persistent target → attack approach position → independent turret/body aim → weapon runtime → hitscan/projectile delivery → armor adjustment → Body health/damage state → destruction`
+`FORWARD → THREE_POINT_REVERSE → THREE_POINT_FORWARD → FORWARD`
 
-Weapons support primary/secondary/tertiary-style slot data even though the current units use only a primary slot. Weapon selection already estimates armor-adjusted damage so later multi-weapon units can choose sensibly without unit-name branching.
+The turn-around is deterministic simulation state. UnitAI temporarily suppresses false stuck/repath detection while a deliberate three-point maneuver is in progress, so the route is not discarded merely because the vehicle briefly moves away from its final destination to create turning room.
 
-Snapshot format is now **v5** and preserves weapon runtime, turret state, damage state, explicit attack intent, and in-flight projectile state.
+Snapshot format is now **v6** and includes locomotor maneuver state in addition to the v0.3.0 combat state.
 
-## What remains intentionally deferred
+## Combat preserved from v0.3.0
 
-- full line-of-fire collision masks and terrain/building occlusion
-- splash/radius damage
-- secondary/tertiary weapon switching in production content
-- anti-air targeting and Talon weapons
-- reactive unit auto-acquisition/guard behavior beyond Guardian Turrets
-- economy, harvesting, production queues, strategic enemy AI, fog/radar, veterancy, upgrades
-
-Those systems now have a combat substrate to build on instead of requiring bespoke unit logic.
+- persistent ATTACK orders
+- data-defined WeaponSet / ArmorSet
+- independent turret yaw for Aegis-X, HMMWV, and Guardian Turret
+- Rifleman body aim
+- hitscan and deterministic projectile delivery
+- armor-adjusted damage, health/damage states, destruction, wreck persistence
+- autonomous Guardian Turret acquisition
 
 ## Validation focus
 
-1. Select Aegis-X, HMMWV, or Rifleman and tap a red hostile.
-2. Confirm the unit approaches only until it reaches weapon range rather than moving onto the target.
-3. Watch Aegis-X/HMMWV turret orientation independently from the hull.
-4. Approach an enemy Guardian Turret and confirm it automatically defends its base.
-5. Destroy a target and confirm it stops acting/selecting while remaining visually as a darkened wreck.
+1. Send the HMMWV to a point only a few meters directly behind it: short reverse is expected.
+2. Send it to a point far behind it: it should back only briefly, turn, then travel forward.
+3. Repeat with the Harvester; its heavier wheel profile should maneuver more slowly.
+4. Send Aegis-X far behind itself: it should pivot and drive forward rather than reverse the whole route.
+5. Attack around weapon-range boundaries and confirm units do not visibly oscillate between MOVE and FIRE.
 
 ## Run
 

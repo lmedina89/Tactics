@@ -40,6 +40,17 @@ test('snapshot/restore preserves deterministic world state and pending AI intent
   const sim2=new Simulation({registry:new TestRegistry(defs,locos),map:baseMap(),commandBus:new CommandBus()});decodeWorldState(sim2,encoded);assert.deepEqual(sim2.snapshot(),sim.snapshot());
 });
 
+
+test('snapshot v6 preserves active wheeled turn-around maneuver state',()=>{
+  const bus=new CommandBus(),sim=new Simulation({registry:new TestRegistry(defs,locos),map:baseMap(),commandBus:bus});
+  const e=sim.entities.get('u1');e.yaw=0;e.x=0;e.z=0;
+  sim.issueMove(['u1'],{x:0,z:-55});for(let i=0;i<18;i++)sim.step(FIXED_DT);
+  assert.ok(e.locomotionState?.mode==='THREE_POINT_REVERSE'||e.locomotionState?.mode==='THREE_POINT_FORWARD',`mode ${e.locomotionState?.mode}`);
+  const encoded=encodeWorldState(sim),sim2=new Simulation({registry:new TestRegistry(defs,locos),map:baseMap(),commandBus:new CommandBus()});decodeWorldState(sim2,encoded);
+  assert.deepEqual(sim2.snapshot(),sim.snapshot());
+  assert.deepEqual(sim2.entities.get('u1').locomotionState,e.locomotionState);
+});
+
 test('MapManifest v2 carries persistent-world authoring fields',async()=>{
   const m=validateMapManifest(await read('maps/training_ground.json'));assert.equal(m.manifestVersion,2);assert.equal(m.region.streamable,true);assert.ok(m.roads.length>=3);assert.ok(m.water.rivers.length>=1);assert.ok(m.waypoints.length>=5);assert.ok(m.triggerAreas.length>=1);assert.ok(m.resourceFields.length===2);assert.ok(m.aiAnchors.length>=2);assert.equal(m.region.strategic.resourceValue,4250);assert.ok(m.region.strategic.discoveredBy.includes('player'));
 });

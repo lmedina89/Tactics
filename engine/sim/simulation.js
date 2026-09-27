@@ -90,11 +90,11 @@ export class Simulation{
 
   snapshot(){
     return {
-      version:5,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),
+      version:6,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),
       players:[...this.players.values()].map(p=>structuredClone(p)),regionStates:[...this.regionStates.values()].map(r=>structuredClone(r)),
       entities:[...this.entities.values()].map(e=>({
         id:e.id,definitionId:e.definitionId,playerId:e.playerId,factionId:e.factionId,kind:e.kind,
-        x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,angularSpeed:e.angularSpeed??0,steeringAngle:e.steeringAngle??0,movingBackward:!!e.movingBackward,
+        x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,angularSpeed:e.angularSpeed??0,steeringAngle:e.steeringAngle??0,movingBackward:!!e.movingBackward,locomotionState:structuredClone(e.locomotionState||null),
         health:e.health,maxHealth:e.maxHealth,alive:e.alive,damageState:e.damageState,destroyedTick:e.destroyedTick,lastDamagedBy:e.lastDamagedBy,lastDamagedTick:e.lastDamagedTick,
         armorId:e.armorId,weaponSlots:structuredClone(e.weaponSlots),turretYaw:e.turretYaw,turretAngularSpeed:e.turretAngularSpeed??0,combat:structuredClone(e.combat),
         selectable:e.selectable,resourceRemaining:e.resourceRemaining,ai:e.ai?structuredClone(e.ai):null,modules:structuredClone(e.modules||{})
@@ -103,7 +103,7 @@ export class Simulation{
   }
 
   restore(snapshot){
-    if((snapshot?.version??0)!==5)throw new Error('Unsupported ForgeRTS snapshot version');
+    if((snapshot?.version??0)!==6)throw new Error('Unsupported ForgeRTS snapshot version');
     this.tick=snapshot.tick??0;this.rng.restore(snapshot.rngState??1);this.commandBus.restore(snapshot.commandBus??{});
     this.players=new Map((snapshot.players||[]).map(p=>[p.id,structuredClone(p)]));
     this.regionStates=new Map((snapshot.regionStates||[]).map(r=>[r.id,structuredClone(r)]));
