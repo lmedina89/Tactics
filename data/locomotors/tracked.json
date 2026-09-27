@@ -6,11 +6,18 @@
   "acceleration": 5.8,
   "braking": 9.0,
   "turnRate": 2.25,
+  "movingTurnRate": 1.55,
+  "pivotTurnRate": 2.55,
+  "pivotAngleThreshold": 0.48,
+  "hardPivotAngleThreshold": 0.92,
+  "pivotCrawlSpeedFactor": 0.08,
   "radius": 1.8,
   "pathfindRadius": 2.2,
   "arrivalRadius": 1.1,
   "maxSlopeDeg": 31,
   "canMoveBackward": true,
+  "reverseThreshold": 2.62,
+  "reverseMaxSpeedFactor": 0.42,
   "turnInPlace": true,
-  "speedTurnPenalty": 0.78
+  "speedTurnPenalty": 0.72
 }

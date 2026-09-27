@@ -6,6 +6,7 @@
   "locomotors": [
     "data/locomotors/infantry.json",
     "data/locomotors/wheeled.json",
+    "data/locomotors/wheeled_heavy.json",
     "data/locomotors/tracked.json",
     "data/locomotors/rotary_air.json"
   ],

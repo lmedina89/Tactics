@@ -80,18 +80,18 @@ export class Simulation{
 
   snapshot(){
     return {
-      version:3,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),
+      version:4,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),
       players:[...this.players.values()].map(p=>structuredClone(p)),regionStates:[...this.regionStates.values()].map(r=>structuredClone(r)),
       entities:[...this.entities.values()].map(e=>({
         id:e.id,definitionId:e.definitionId,playerId:e.playerId,factionId:e.factionId,kind:e.kind,
-        x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,health:e.health,maxHealth:e.maxHealth,
+        x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,angularSpeed:e.angularSpeed??0,steeringAngle:e.steeringAngle??0,movingBackward:!!e.movingBackward,health:e.health,maxHealth:e.maxHealth,
         resourceRemaining:e.resourceRemaining,ai:e.ai?structuredClone(e.ai):null,modules:structuredClone(e.modules||{})
       }))
     };
   }
 
   restore(snapshot){
-    if((snapshot?.version??0)!==3)throw new Error('Unsupported ForgeRTS snapshot version');
+    if((snapshot?.version??0)!==4)throw new Error('Unsupported ForgeRTS snapshot version');
     this.tick=snapshot.tick??0;this.rng.restore(snapshot.rngState??1);this.commandBus.restore(snapshot.commandBus??{});
     this.players=new Map((snapshot.players||[]).map(p=>[p.id,structuredClone(p)]));
     this.regionStates=new Map((snapshot.regionStates||[]).map(r=>[r.id,structuredClone(r)]));

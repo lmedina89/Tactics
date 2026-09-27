@@ -6,13 +6,13 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.2.1 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.2.2 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI commands | behavior receives data, not UI events | `engine/commands/CommandBus` | MOVE / STOP implemented |
 | GameObject composition | object classes + explicit state | object/update-module architecture | `GameObject` composed from Body/AI/Draw/Behaviors/etc. | `engine/entities/game-object.js` + JSON modules | **Implemented foundation** |
 | Unit AI requested destination/state | mission/state handling | `AIUpdate` module family | AI behavior as module | `engine/ai/unit-ai-update.js` | MOVE state + repath implemented |
-| Locomotor templates | movement classes | `Locomotor.h` family | locomotor set data | `engine/locomotion/locomotor.js` + JSON | Separate legs/wheels/treads/rotary-air |
+| Locomotor templates | movement classes | `Locomotor.h` family (`FOUR_WHEELS`, `TREADS`, turn rate, wheel angle, reverse state) | locomotor set data | `engine/locomotion/locomotor.js` + JSON | **Tracks pivot/turn; wheels steer on curvature; legs/air separate; facing is simulation state** |
 | Pathfinder destination correction | cell movement | AI/pathfinder family | geometry/pathing data separate | `engine/pathfinding/grid-pathfinder.js` | nearest-valid destination + clearance |
 | Interaction protocols | refinery/harvester radio/docking handshakes | production/contain/dock behavior families | behavior modules/endpoints | `engine/interactions/interaction-protocol.js` | **Dock + rollout protocol foundation** |
 | Gesture/context input | classic click orders | selection/context translation | client behavior separate from simulation | `ui/gesture-resolver.js` + InputController | **TAP/LONG_PRESS/PAN/PINCH classification** |
@@ -22,7 +22,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Rivers/water | map cells/water logic | terrain/water systems | water as independent feature data | map `water` + renderer | Foundation implemented |
 | Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | **Owner/threat/resources/activity/discovery implemented** |
 | Stable starts/waypoints | cell/waypoint mission logic | player start/rally waypoints | named anchors | map `waypoints[]` | Data implemented |
-| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | v3 includes modules/interactions/regions |
+| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | v4 includes modules/interactions/regions/facing-steering state |
 | Weapons | weapon/projectile behavior | `WeaponTemplate` / `Weapon` | WeaponSet modules | `engine/combat` | NEXT major system |
 | Armor/damage | armor/warhead relationships | damage/armor definitions | ArmorSet | `engine/combat` | NEXT major system |
 | Player economy/power | house/resources | `Player` | player/faction data | `FactionState` | Planned |

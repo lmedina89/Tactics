@@ -31,5 +31,5 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-status.textContent='READY · GAMEOBJECT MODULE CORE · SELECT A FRIENDLY UNIT';
+status.textContent='READY · LOCOMOTOR FACING CORE · SELECT A FRIENDLY UNIT';
 window.ForgeRTS={sim,view,input,registry,map,snapshot:()=>sim.snapshot(),restore:s=>sim.restore(s)};

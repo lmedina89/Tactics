@@ -32,7 +32,7 @@
       "type": "Render",
       "asset": "aegis_hmmwv50",
       "scale": 1.0,
-      "headingOffset": 0.0
+      "headingOffset": -1.5707963267948966
     }
   ]
 }

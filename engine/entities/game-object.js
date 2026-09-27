@@ -18,7 +18,7 @@ export function moduleBindings(definition){
     byType.set(m.type,m);
   }
 
-  // Transitional compatibility for v0.2-era definitions. Production data in v0.2.1 uses explicit modules.
+  // Transitional compatibility for v0.2-era definitions. Production data uses explicit modules.
   if(definition?.maxHealth!=null&&!byType.has('Body'))byType.set('Body',{type:'Body',maxHealth:definition.maxHealth});
   if(definition?.selectable!=null&&!byType.has('Selectable'))byType.set('Selectable',{type:'Selectable',enabled:!!definition.selectable});
   if(definition?.locomotor){const m=byType.get('Locomotor');if(m&&!m.locomotor)m.locomotor=definition.locomotor;else if(!m)byType.set('Locomotor',{type:'Locomotor',locomotor:definition.locomotor});}
@@ -52,7 +52,7 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
     playerId:spawn.owner??null,
     factionId:player?.factionId??null,
     kind:definition.kind,
-    x:spawn.x,z:spawn.z,y,yaw:spawn.yaw||0,speed:0,
+    x:spawn.x,z:spawn.z,y,yaw:spawn.yaw||0,speed:0,angularSpeed:0,steeringAngle:0,movingBackward:false,
     health:body?.maxHealth??1,maxHealth:body?.maxHealth??1,
     selectable:selectable?.enabled??false,
     locomotorId:locoBinding?.locomotor??null,

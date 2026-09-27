@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.2 — Locomotor Facing + Vehicle Steering
+
+- Corrected Aegis-X and HMMWV Render heading offsets to match their authored `+X` forward axes; corrected Harvester to its authored `+Z` forward axis.
+- Split locomotion behavior into explicit tread, wheel, leg, and air paths.
+- Added tracked pivot-turn behavior with separate moving/pivot turn rates and backward movement state.
+- Added wheel steering based on steering angle, wheelbase, curvature, speed reduction on hard turns, and correct reverse steering.
+- Added `wheeled_heavy` locomotor profile for the Field Harvester.
+- Runtime/snapshot state now persists angular speed, steering angle, and reverse state. Snapshot format advanced to v4.
+- Added locomotor-facing tests for track pivoting, wheeled arcs, reverse behavior, and asset heading calibration.
+- Preserved all v0.2.1 module, interaction, input, strategic-region, terrain, navigation, and persistent-order foundations.
+- All production GLBs remain byte-for-byte unchanged.
+
 ## v0.2.1 — GameObject Modules + Interaction Core
 
 - Migrated all production object definitions to explicit composable GameObject modules.

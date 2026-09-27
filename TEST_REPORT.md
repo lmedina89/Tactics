@@ -1,32 +1,39 @@
-# ForgeRTS v0.2.1 Validation Report
+# ForgeRTS v0.2.2 Validation Report
 
-## Automated results
+## Automated tests
 
-- `npm test`: **22/22 tests passed**.
-- All engine / renderer / UI / test JavaScript and MJS files pass `node --check` syntax validation.
-- All **27 JSON files** parse successfully.
-- Real training-map regression still verifies repeated persistent MOVE orders for the player Aegis-X, HMMWV-50, and Rifleman without ending in `BLOCKED` state.
-- GameObject migration test verifies every production unit/building/resource definition uses explicit object module records and no longer relies on top-level gameplay fields such as `maxHealth`, `asset`, or `locomotor`.
-- GameObject factory test verifies runtime Body / Selectable / Locomotor / UnitAI / Render composition.
-- Resource docking interaction test verifies the complete request → grant → approach → dock → unload → release → exit → complete handshake.
-- Factory rollout interaction test verifies role-gated, data-driven rollout state transitions.
-- Interaction state snapshot/restore test passes.
-- Gesture tests verify gameplay TAP is not emitted until pointer-up classification, deliberate drags become PAN, long press is distinct, and pinch suppresses accidental taps.
-- MapManifest regression verifies strategic region metadata for ownership/threat/resource value/AI activity/discovery.
-- Snapshot/restore format v3 preserves deterministic world state, module state, interaction state, region state, command bus, RNG and UnitAI intent.
+`npm test` passes **26/26** tests.
+
+Coverage includes:
+
+- deterministic persistent MOVE / STOP behavior
+- static building clearance and destination correction
+- snapshot / restore determinism
+- MapManifest v2 persistent-world fields
+- splat terrain normalization and water passability
+- registry and asset-catalog integrity
+- gesture classification before gameplay command emission
+- GameObject module composition
+- explicit resource-docking and factory-rollout interaction protocols
+- real-map repeated movement for player tank, HMMWV, and Rifleman
+- tracked hull pivot/facing behavior
+- wheeled arc steering without center-pivot snapping
+- wheeled reverse behavior with stable hull facing
+- authored GLB forward-axis heading calibration
+
+## Syntax / data validation
+
+All project JavaScript and MJS sources pass `node --check`. All JSON data files parse successfully.
 
 ## Asset integrity
 
-- **16/16 production GLBs are byte-for-byte identical to ForgeRTS v0.2.0.**
-- Existing terrain textures are unchanged.
-- `ASSET_HASHES.sha256` remains the packaged asset integrity manifest.
+`sha256sum -c ASSET_HASHES.sha256` passes. All **16 production GLBs** are byte-for-byte unchanged from v0.2.1. Terrain textures are unchanged as well.
 
-## Scope boundary
+## Implementation notes
 
-v0.2.1 intentionally does **not** wire production or harvesting gameplay into the new interaction protocols yet. The protocols and endpoint/module data are the deterministic foundation those systems will use later.
-
-This milestone also does not add weapons/combat. The next recommended major system is the data-driven Weapon / Armor / Damage core.
-
-## Real-device validation still required
-
-Automated validation cannot replace an iPhone Safari test. Verify that selection/MOVE still behave like v0.2.0 and that the new gesture resolver preserves reliable taps while deliberate drag/pinch camera gestures remain smooth. Because the visible world/rendering assets are intentionally unchanged, unexpected visual differences should be treated as regressions.
+- Simulation yaw uses `0 = +Z` world-forward.
+- Aegis-X and HMMWV were authored with local `+X` as forward, so their Render modules now apply `-π/2` heading offsets.
+- Field Harvester was authored with local `+Z` as forward and therefore uses zero heading offset.
+- The renderer continues to consume simulation-owned `yaw`; it does not invent vehicle orientation.
+- Tracked vehicles may pivot at low speed while wheeled vehicles use steering curvature based on wheel angle and wheelbase.
+- Hull/turret separation is intentionally reserved for the Weapon/Attack milestone.

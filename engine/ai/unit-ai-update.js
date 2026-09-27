@@ -12,7 +12,7 @@ export function assignMoveOrder(entity,command){
 }
 
 export function clearOrders(entity){
-  entity.ai ??= createUnitAIState();entity.ai.state=UnitAIState.IDLE;entity.ai.order=null;entity.ai.route=null;entity.ai.routeIndex=0;entity.ai.goal=null;entity.speed=0;
+  entity.ai ??= createUnitAIState();entity.ai.state=UnitAIState.IDLE;entity.ai.order=null;entity.ai.route=null;entity.ai.routeIndex=0;entity.ai.goal=null;entity.speed=0;entity.angularSpeed=0;entity.steeringAngle=0;entity.movingBackward=false;
 }
 
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);

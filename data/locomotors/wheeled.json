@@ -6,11 +6,19 @@
   "acceleration": 8.0,
   "braking": 12.0,
   "turnRate": 2.8,
+  "wheelTurnAngle": 0.66,
+  "wheelbase": 2.65,
+  "steeringResponse": 5.8,
+  "minTurnSpeedFactor": 0.28,
+  "hardTurnSlowAngle": 1.35,
+  "hardTurnSpeedFactor": 0.34,
   "radius": 1.35,
   "pathfindRadius": 1.65,
   "arrivalRadius": 0.9,
   "maxSlopeDeg": 27,
   "canMoveBackward": true,
+  "reverseThreshold": 2.48,
+  "reverseMaxSpeedFactor": 0.46,
   "turnInPlace": false,
-  "speedTurnPenalty": 0.92
+  "speedTurnPenalty": 0.82
 }
