@@ -14,7 +14,21 @@
     "spacing": 7
   },
   "composition": [
-    { "definition": "aegis_x", "min": 1, "max": 1 },
-    { "definition": "hmmwv50", "min": 1, "max": 1 }
-  ]
+    {
+      "definition": "aegis_x",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "definition": "hmmwv50",
+      "min": 1,
+      "max": 1
+    }
+  ],
+  "attackPrioritySet": "crimson_assault_targets",
+  "reinforcement": {
+    "enabled": true,
+    "retreatBelowStrength": 0.6,
+    "reformTimeoutTicks": 900
+  }
 }

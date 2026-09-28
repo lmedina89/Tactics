@@ -112,6 +112,14 @@
           "direction": -1
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "PRODUCTION",
+        "STRUCTURE"
+      ],
+      "significant": true
     }
   ]
 }

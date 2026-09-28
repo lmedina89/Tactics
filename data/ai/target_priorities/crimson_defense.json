@@ -1,0 +1,18 @@
+{
+  "id": "crimson_defense_targets",
+  "name": "Crimson Defense Target Priorities",
+  "defaultPriority": 1,
+  "distanceModifier": 32,
+  "recentAttackerBonus": 12,
+  "ignoreInsignificant": true,
+  "priorities": {
+    "COMBAT": 30,
+    "VEHICLE": 24,
+    "AIRCRAFT": 24,
+    "INFANTRY": 20,
+    "DEFENSE": 10,
+    "HARVESTER": 5,
+    "ECONOMY": 4,
+    "STRUCTURE": 2
+  }
+}

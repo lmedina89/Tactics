@@ -61,5 +61,9 @@
   ],
   "aiProfiles": [
     "data/ai/crimson_skirmish_basic.json"
+  ],
+  "targetPrioritySets": [
+    "data/ai/target_priorities/crimson_assault.json",
+    "data/ai/target_priorities/crimson_defense.json"
   ]
 }

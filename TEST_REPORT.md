@@ -1,70 +1,68 @@
-# ForgeRTS v0.6.1 Test Report
+# ForgeRTS v0.6.2 Test Report
 
 ## Release target
 
-**ForgeRTS v0.6.1 — Autonomous AI Economy + Construction + Production**
+**ForgeRTS v0.6.2 — Tactical Battlefield Intelligence**
 
-This release builds on the v0.6.0 Team/Skirmish-AI foundation. The computer player now uses the existing authoritative harvesting, construction, placement, economy, production, Team and CommandBus systems to operate a basic RTS economy rather than relying only on authored starting forces.
+This release builds on the v0.6.1 autonomous AI economy. It adds C&C-style distance-weighted target priority, economic-defense response, common Team targeting, casualty-driven reform/reinforcement, construction safety filtering, and generic harvest-accessibility validation.
 
 ## Automated suite
 
 Command: `npm test`
 
-Result: **85/85 tests passing**.
+Result: **91/91 tests passing**.
 
-New v0.6.1 coverage verifies:
+New v0.6.2 coverage verifies:
 
-- AI economy policy is data-defined: desired gatherers, build list, reserves, timing and production priorities
-- AI autonomously harvests finite minerals and returns cargo through the normal Refinery/docking path
-- the AI reaches its desired second Harvester through a real production queue
-- planned Power Node / Guardian Turret expansion uses ordinary legal construction sites
-- a missing build-list Refinery is reconstructed through the authoritative placement/construction path
-- empty RECRUITING Teams remain bounded work orders while factories produce missing minimum composition
-- Team work-order production can create Rifleman, Aegis-X and HMMWV requirements without direct spawning
-- v11 snapshot/restore preserves economy-planner timers and remains deterministic after continuation
-- the AI economy planner does not call direct construction/production/resource/economy mutation paths; actions are emitted through CommandBus
+- named AttackPrioritySet data loads and distance weighting can make a nearby combat threat outrank a distant higher-value structure
+- assault Teams consume `attackCommonTarget` and use ordinary authoritative `ATTACK` orders against their shared objective
+- recent damage to an AI Harvester/economy asset redirects the base-defense Team through normal `GUARD_OBJECT`
+- an understrength assault Team enters `REFORMING`, retreats, generates ordinary factory work-order demand, recruits a replacement, re-rallies and reactivates
+- all authored validation-map mineral fields expose a valid harvest approach for both player and enemy Harvesters
+- the old steep west Dense Mineral position has no legal harvesting terminal and is authoritatively rejected as `RESOURCE_UNREACHABLE`
+- AI construction safety rejects otherwise-legal locations within the configured hostile combat-threat radius
 
-All prior Team/Skirmish-AI, construction, economy, production, combat, pathfinding, dynamic collision/local avoidance, steering/reverse/three-point-turn, interaction, command authority, queued orders, Attack Move, Guard, stance/acquisition, resource visualization, client animation, map identity, snapshot determinism, and mobile vertical-slice regression tests remain passing.
+All prior construction, autonomous economy, production, Team/Skirmish-AI, combat, pathfinding, collision/local avoidance, locomotion, interaction, command authority, tactical command, resource rendering, animation and mobile vertical-slice regressions remain passing.
 
 ## Static validation
 
-- **47** JavaScript / MJS files pass `node --check`.
-- **50** JSON files parse successfully.
+- **49** JavaScript / MJS files pass `node --check`.
+- **52** JSON files parse successfully.
 - `ASSET_HASHES.sha256` passes for all **21** listed production GLBs and terrain textures.
-- Production GLBs and terrain assets were not modified.
-- Snapshot schema is **v11**; restore accepts v8, v9, v10, or v11.
+- Production GLBs and terrain textures were not modified.
+- Snapshot schema is **v12**; restore accepts v8, v9, v10, v11 and v12.
 
 ## Long-run engineering sanity pass
 
-A 300-tick warmup followed by a measured **3,000-tick** construction-map simulation completed at about **0.136 ms/tick** in this container. This is an engineering sanity measurement, **not an iPhone benchmark**.
+A 300-tick warmup followed by a measured **3,000-tick** construction-map simulation completed at about **0.153 ms/tick** in this container. This is an engineering sanity measurement, not an iPhone benchmark.
 
-At tick 3,300 the AI remained bounded and coherent:
+At tick 3,300 the strategic layer remained bounded:
 
 - **2** retained Team records
-- **2** Harvesters
-- **2** Power Nodes
-- **2** Guardian Turrets
-- **1** Refinery
-- **1** Barracks
-- **1** Vehicle Factory
-- **2** Riflemen
-- **1** Aegis-X
-- **2** HMMWV-50s
-- **2,450** minerals credited through actual harvesting
+- Team registry states: **1 ACTIVE**, **1 RECRUITING**
+- AI still owned the planned core base: Command Post, Vehicle Factory, two Guardian Turrets, two Power Nodes, Refinery and Barracks
+- AI had **2 Harvesters**, **2 Riflemen** and **1 Aegis-X** alive at the sample point
+- **2,282** minerals had been credited through real harvesting
+- west/east mineral accessibility remained functional; the east Rich field had been depleted through normal harvesting
 
-The result is useful as a leak/spam sanity check: the AI did not accumulate unbounded Teams, duplicate construction sites, or uncontrolled producer queues during the run.
+Combat losses can naturally change exact force counts in a long simulation, so this sanity pass is used for bounded-state/performance checking rather than a fixed army-composition assertion.
+
+## Resource authoring check
+
+- old west Dense position `(-58, 102)`: sampled slope about **44.1°** — intentionally confirmed unreachable for the heavy wheeled Harvester
+- new west Dense position `(-58, 82)`: sampled slope about **13.0°** — reachable
+
+The engine regression test additionally verifies accessibility, so future authoring errors are not dependent on visual inspection alone.
 
 ## Browser smoke-test limitation
 
-The page imports Three.js from jsDelivr and the execution environment cannot resolve external DNS, so a rendered headless-browser pass is not claimed here. Simulation/source/static tests are complete; normal iPhone/GitHub Pages visual/feel validation is still required.
+The page imports Three.js from jsDelivr and this execution environment cannot resolve external DNS, so a rendered headless-browser pass is not claimed. Simulation/source/static tests are complete; normal iPhone/GitHub Pages visual/feel validation remains required.
 
 ## Manual iPhone focus
 
-1. Confirm the Crimson Harvester mines a visible mineral field and returns cargo normally.
-2. Confirm a second Harvester is produced through the real Vehicle Factory queue.
-3. Confirm the AI visibly constructs its desired second Power Node and second Guardian Turret rather than spawning them instantly.
-4. Destroy a desired AI structure if practical and verify it is rebuilt when prerequisites, funds and placement allow.
-5. Kill assault-team members and verify missing Team composition becomes ordinary factory production demand.
-6. Keep issuing player commands while AI economy/build/production work occurs; player HUD command feedback must remain isolated from background AI results.
-7. Stress vehicle traffic around the expanding AI base to recheck v0.5.4 local avoidance under construction/production traffic.
-8. If using snapshots, save during harvesting/construction/production and confirm the AI continues deterministically after restore.
+1. Harvest each field, especially the relocated west Dense field near the river.
+2. Observe the assault tank + HMMWV and confirm they focus a common strategic target.
+3. Attack the enemy Harvester/economy and watch the base guard redirect to protect it.
+4. Destroy one assault-Team member and watch the survivor retreat while the real factory builds a replacement; the Team should later return to combat.
+5. Pressure the enemy base while it needs a structure and confirm it does not deliberately place a new building inside the configured hostile safety radius.
+6. Recheck vehicle traffic/collision while retreating/reinforcing Teams cross the expanding base.

@@ -143,6 +143,15 @@
           }
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "ECONOMY",
+        "HARVESTER",
+        "VEHICLE"
+      ],
+      "significant": true
     }
   ]
 }

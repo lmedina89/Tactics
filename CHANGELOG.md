@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.6.2 — Tactical Battlefield Intelligence
+
+- Added data-driven `AttackPrioritySet` content plus generic `AITargetable` categories. Target score uses priority minus distance/distance-modifier, matching the released Generals/Zero Hour attack-priority concept without hard-coded object IDs.
+- Assault Team `attackCommonTarget` is now active: Teams issue normal authoritative `ATTACK` commands against their scored shared objective and reassess targets on a data-defined cadence.
+- Added recent economic-asset threat response. Damage against configured Harvester/economy/builder categories can redirect the base-defense Team to `GUARD_OBJECT` the threatened asset for a bounded hold window.
+- Added `REFORMING` Team lifecycle. Assault Teams below a data-defined surviving-strength threshold retreat to rally; missing minimum members become ordinary v0.6.1 factory work orders; replacements rejoin, re-rally and reactivate the same Team.
+- Added AI construction location-safety filtering using a data-defined hostile combat/defense radius, on top of the existing authoritative placement validator.
+- Added generic navigation-valid harvest approach resolution. Resource orders account for pathfinder cell snapping and locomotor arrival tolerance; unreachable fields are rejected with `RESOURCE_UNREACHABLE` and AI Harvesters skip them.
+- Moved the validation map west Dense Mineral Field from `(-58, 102)` on the steep river ledge to `(-58, 82)` on reachable terrain.
+- Snapshot format advanced to **v12**; restore accepts v8/v9/v10/v11/v12.
+- Added six tactical/resource regression tests. Full automated suite now passes **91/91** tests.
+- Added `TACTICAL_AI_AUDIT.md`. No production GLBs or terrain assets were modified.
+
 ## v0.6.1 — Autonomous AI Economy + Construction + Production
 
 - Corrected stale v0.6.0 client/version labels in the HUD/title/startup status and asset-catalog metadata; gameplay code was already v0.6.1.

@@ -2,7 +2,7 @@
   "manifestVersion": 2,
   "id": "construction_validation",
   "name": "Construction Validation Range",
-  "version": 9,
+  "version": 10,
   "seed": 731904,
   "region": {
     "id": "construction_validation_region",
@@ -365,7 +365,7 @@
       "id": "dense_w",
       "definition": "mineral_dense",
       "x": -58,
-      "z": 102,
+      "z": 82,
       "capacity": 3000
     },
     {

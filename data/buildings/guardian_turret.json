@@ -81,6 +81,14 @@
     {
       "type": "PowerConsumer",
       "amount": 8
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "DEFENSE",
+        "STRUCTURE"
+      ],
+      "significant": true
     }
   ]
 }

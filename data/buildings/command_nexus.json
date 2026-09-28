@@ -35,6 +35,14 @@
           "radiansPerSecond": 0.42
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "COMMAND",
+        "STRUCTURE"
+      ],
+      "significant": true
     }
   ]
 }

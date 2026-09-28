@@ -1,4 +1,4 @@
-export const TeamState=Object.freeze({RECRUITING:'RECRUITING',RALLYING:'RALLYING',ACTIVE:'ACTIVE',DESTROYED:'DESTROYED',DISBANDED:'DISBANDED'});
+export const TeamState=Object.freeze({RECRUITING:'RECRUITING',RALLYING:'RALLYING',ACTIVE:'ACTIVE',REFORMING:'REFORMING',DESTROYED:'DESTROYED',DISBANDED:'DISBANDED'});
 
 const clone=v=>structuredClone(v);
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
@@ -22,7 +22,7 @@ export class TeamManager{
     const proto=this.prototype(prototypeId);if(!proto)throw new Error(`Unknown team prototype ${prototypeId}`);
     const live=this.instances(playerId,prototypeId);if(live.length>=(proto.maxInstances??1))return null;
     const id=`${playerId}_team_${prototypeId}_${++this.serial}`;
-    const team={id,prototypeId,playerId,planId,role:proto.role||'ASSAULT',state:TeamState.RECRUITING,active:false,created:false,createdTick:tick,activeTick:null,memberIds:[],initialMemberCount:0,home:home?clone(home):null,rally:rally?clone(rally):null,objective:null,lastOrderSignature:null,lastOrderTick:-1,destroyedTick:null};
+    const team={id,prototypeId,playerId,planId,role:proto.role||'ASSAULT',state:TeamState.RECRUITING,active:false,created:false,createdTick:tick,activeTick:null,memberIds:[],initialMemberCount:0,home:home?clone(home):null,rally:rally?clone(rally):null,objective:null,lastOrderSignature:null,lastOrderTick:-1,nextTargetEvalTick:0,reformStartedTick:null,rallyStartedTick:null,defenseHoldUntilTick:0,destroyedTick:null};
     this.teams.set(id,team);return team;
   }
 
@@ -32,7 +32,7 @@ export class TeamManager{
     return !center||distance(entity,center)<=radius;
   }
 
-  recruit(teamOrId,{center=null,radius=Infinity}={}){
+  recruit(teamOrId,{center=null,radius=Infinity,tick=0}={}){
     const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId;if(!team)return {recruited:0,minimumReady:false};
     const proto=this.prototype(team.prototypeId);if(!proto)return {recruited:0,minimumReady:false};
     let recruited=0;
@@ -47,7 +47,7 @@ export class TeamManager{
     team.memberIds=[...new Set(team.memberIds)];
     const minimumReady=this.minimumSatisfied(team);
     if(minimumReady&&team.initialMemberCount===0)team.initialMemberCount=team.memberIds.length;
-    if(minimumReady&&team.state===TeamState.RECRUITING)team.state=TeamState.RALLYING;
+    if(minimumReady&&[TeamState.RECRUITING,TeamState.REFORMING].includes(team.state)){team.state=TeamState.RALLYING;team.reformStartedTick=null;team.rallyStartedTick=tick;}
     return {recruited,minimumReady};
   }
 
@@ -56,12 +56,28 @@ export class TeamManager{
     const members=this.members(team);for(const entry of proto.composition||[]){const count=members.filter(e=>e.definitionId===entry.definition).length;if(count<(entry.min??0))return false;}return members.length>0;
   }
 
+
+  minimumCount(teamOrId){
+    const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId,proto=team?this.prototype(team.prototypeId):null;if(!team||!proto)return 0;
+    return (proto.composition||[]).reduce((sum,entry)=>sum+(entry.min??0),0);
+  }
+
+  strengthRatio(teamOrId){
+    const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId;if(!team)return 0;
+    const baseline=Math.max(1,team.initialMemberCount||this.minimumCount(team));return this.members(team).length/baseline;
+  }
+
+  beginReform(teamOrId,tick=0){
+    const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId;if(!team||[TeamState.DESTROYED,TeamState.DISBANDED].includes(team.state))return false;
+    team.active=false;team.state=TeamState.REFORMING;team.reformStartedTick=tick;team.lastOrderSignature=null;return true;
+  }
+
   rallySatisfied(teamOrId,radius=null){
     const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId;if(!team?.rally)return false;const members=this.members(team);if(!members.length)return false;
     const proto=this.prototype(team.prototypeId),r=radius??proto?.rallyRadius??12;return members.every(e=>distance(e,team.rally)<=r);
   }
 
-  activate(teamOrId,tick){const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId;if(!team||team.state===TeamState.DESTROYED)return false;team.active=true;team.created=true;team.activeTick??=tick;team.state=TeamState.ACTIVE;return true;}
+  activate(teamOrId,tick){const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId;if(!team||team.state===TeamState.DESTROYED)return false;team.active=true;team.created=true;team.activeTick??=tick;team.state=TeamState.ACTIVE;team.rallyStartedTick=null;return true;}
   setObjective(teamOrId,objective){const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId;if(team)team.objective=objective?clone(objective):null;}
 
   disband(teamOrId,tick=0){const team=typeof teamOrId==='string'?this.team(teamOrId):teamOrId;if(!team)return false;for(const e of this.members(team,{aliveOnly:false}))if(e.teamId===team.id)e.teamId=null;team.active=false;team.state=TeamState.DISBANDED;team.destroyedTick=tick;return true;}
@@ -76,14 +92,14 @@ export class TeamManager{
       team.memberIds=alive;
       // Recruiting teams are intentional work orders: they may remain empty while factories satisfy
       // their data-defined composition. Rallying teams that lose members fall back to recruiting.
-      if(team.state===TeamState.RALLYING&&!this.minimumSatisfied(team)){team.active=false;team.state=TeamState.RECRUITING;team.lastOrderSignature=null;}
+      if(team.state===TeamState.RALLYING&&!this.minimumSatisfied(team)){team.active=false;team.state=team.created?TeamState.REFORMING:TeamState.RECRUITING;team.reformStartedTick=team.created?tick:null;team.lastOrderSignature=null;}
       if(!alive.length&&team.createdTick<tick&&team.state!==TeamState.RECRUITING){team.active=false;team.state=TeamState.DESTROYED;team.destroyedTick=tick;continue;}
     }
   }
 
   snapshot(){return {serial:this.serial,teams:[...this.teams.values()].map(clone)};}
   restore(state={}){
-    this.serial=state.serial??0;this.teams=new Map((state.teams||[]).map(t=>[t.id,clone(t)]));
+    this.serial=state.serial??0;this.teams=new Map((state.teams||[]).map(raw=>{const t=clone(raw);t.nextTargetEvalTick??=0;t.reformStartedTick??=null;t.rallyStartedTick??=null;t.defenseHoldUntilTick??=0;return [t.id,t];}));
     for(const e of this.entitiesProvider())if(e.teamId&&!this.teams.has(e.teamId))e.teamId=null;
     for(const team of this.teams.values())for(const id of team.memberIds||[]){const e=this.entityLookup(id);if(e)e.teamId=team.id;}
   }

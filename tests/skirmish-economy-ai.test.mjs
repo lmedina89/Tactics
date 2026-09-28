@@ -74,8 +74,8 @@ test('empty recruiting Teams persist as work orders while factories produce thei
   assert.ok(assaultDefs.includes('hmmwv50'),'Vehicle Factory did not produce HMMWV for assault Team');
 });
 
-test('v11 snapshot preserves economy-planner timers and continues deterministically',async()=>{
-  const a=await makeSim();run(a,480);const snap=a.snapshot();assert.equal(snap.version,11);
+test('v12 snapshot preserves economy-planner timers and continues deterministically',async()=>{
+  const a=await makeSim();run(a,480);const snap=a.snapshot();assert.equal(snap.version,12);
   const state=snap.skirmishAI.controllers[0].economyPlanner;assert.ok(state);assert.ok(state.nextHarvestTick>0&&state.nextConstructionTick>0&&state.nextProductionTick>0);
   const b=await makeSim();b.restore(snap);assert.deepEqual(b.snapshot(),snap);run(a,240);run(b,240);assert.deepEqual(b.snapshot(),a.snapshot());
 });

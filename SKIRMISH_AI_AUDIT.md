@@ -52,3 +52,7 @@ Also deferred to later v0.6.x work:
 ## Copy/translation decision
 
 Directly translating the Generals C++ is not the best engineering choice for these milestones. The existing ForgeRTS CommandBus, UnitAI, Construction, Production, Resource, snapshot model, ES-module data registry, and browser constraints already provide native equivalents for the important boundaries. v0.6.x therefore copies the proven *architecture and behavior pattern*, not EA implementation text. If a later AI subsystem contains an algorithm whose direct GPL-covered translation is materially better than a native implementation, that should be an explicit provenance/licensing decision before code is introduced.
+
+## v0.6.2 extension
+
+v0.6.2 adds the tactical layer above the same Team/CommandBus foundation. Named `AttackPrioritySet` data and generic `AITargetable` categories provide distance-weighted objective selection; base-defense Teams can react to recent authoritative damage against economy assets; assault Teams may share a common target and enter `REFORMING` when casualties cross a TeamPrototype threshold. Missing reform composition is satisfied by the existing v0.6.1 factory work-order path rather than spawning replacements. Construction planning also gains a hostile-location safety filter, while ResourceSystem gains navigation-valid harvest approaches so unreachable fields are skipped/rejected rather than retried forever. See `TACTICAL_AI_AUDIT.md` for detailed C&C source mapping.

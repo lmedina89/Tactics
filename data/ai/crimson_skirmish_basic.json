@@ -90,7 +90,8 @@
         "desiredFree": 1,
         "priority": 250
       }
-    ]
+    ],
+    "constructionSafetyRadius": 34
   },
   "teamPlans": [
     {
@@ -109,5 +110,16 @@
       "retryTicks": 150,
       "productionPriority": 700
     }
-  ]
+  ],
+  "tactical": {
+    "targetReassessTicks": 90,
+    "economicThreatRecentTicks": 180,
+    "economicDefenseHoldTicks": 180,
+    "maxRetaliateDistance": 150,
+    "economicProtectedCategories": [
+      "HARVESTER",
+      "ECONOMY",
+      "BUILDER"
+    ]
+  }
 }

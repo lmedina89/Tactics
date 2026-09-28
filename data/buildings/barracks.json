@@ -119,6 +119,14 @@
           "radiansPerSecond": 5.4
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "PRODUCTION",
+        "STRUCTURE"
+      ],
+      "significant": true
     }
   ]
 }

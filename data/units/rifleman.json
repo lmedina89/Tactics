@@ -109,6 +109,14 @@
           "timeScale": 1.0
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "COMBAT",
+        "INFANTRY"
+      ],
+      "significant": true
     }
   ]
 }

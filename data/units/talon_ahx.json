@@ -68,6 +68,14 @@
           "radiansPerSecond": 42.0
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "COMBAT",
+        "AIRCRAFT"
+      ],
+      "significant": true
     }
   ]
 }

@@ -73,6 +73,14 @@
           "radiansPerSecond": 4.8
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "POWER",
+        "STRUCTURE"
+      ],
+      "significant": true
     }
   ]
 }

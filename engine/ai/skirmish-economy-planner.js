@@ -1,6 +1,7 @@
 import {CommandSource,CommandType} from '../commands/command-bus.js';
 import {moduleConfig} from '../entities/game-object.js';
 import {TeamState} from '../teams/team-manager.js';
+import {aiTargetCategories} from './target-evaluator.js';
 
 const clone=v=>structuredClone(v);
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
@@ -13,8 +14,8 @@ function alternatingOffsets(count){
 }
 
 export class SkirmishEconomyPlanner{
-  constructor({playerId,profile,map,registry,players,teamManager,entitiesProvider,commandBus,economy,construction,production}){
-    this.playerId=playerId;this.profile=profile;this.cfg=profile.economy??{};this.map=map;this.registry=registry;this.players=players;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;this.economy=economy;this.construction=construction;this.production=production;
+  constructor({playerId,profile,map,registry,players,teamManager,entitiesProvider,commandBus,economy,resources,construction,production}){
+    this.playerId=playerId;this.profile=profile;this.cfg=profile.economy??{};this.map=map;this.registry=registry;this.players=players;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;this.economy=economy;this.resources=resources;this.construction=construction;this.production=production;
     const initial=profile.initialDelayTicks??0;this.nextHarvestTick=initial;this.nextConstructionTick=initial;this.nextProductionTick=initial;
   }
 
@@ -34,8 +35,9 @@ export class SkirmishEconomyPlanner{
     const congestion=new Map();for(const h of this._owned())if(h.collector?.targetResourceId)congestion.set(h.collector.targetResourceId,(congestion.get(h.collector.targetResourceId)||0)+1);
     return [...this.entitiesProvider()].filter(e=>e.alive&&e.kind==='resource'&&e.resourceRemaining>0).map(resource=>{
       const rcfg=this._module(resource,'Resource');if(!rcfg||!accepted.has(rcfg.resourceType))return null;
+      const approach=this.resources?.findHarvestApproach?.(collector,resource);if(!approach)return null;
       const assigned=congestion.get(resource.id)||0,capacity=Math.max(1,resource.resourceRemaining||1),congestionPenalty=assigned*Math.min(80,2400/capacity);
-      return {resource,score:dist(origin,resource)+dist(collector,resource)*0.25+congestionPenalty};
+      return {resource,approach,score:dist(origin,resource)+dist(collector,approach)*0.25+congestionPenalty};
     }).filter(Boolean).sort((a,b)=>a.score-b.score||a.resource.id.localeCompare(b.resource.id));
   }
 
@@ -68,6 +70,17 @@ export class SkirmishEconomyPlanner{
     return builder.yaw||0;
   }
 
+  _locationSafe(position,radius=this.cfg.constructionSafetyRadius??0){
+    if(!(radius>0))return true;
+    for(const enemy of this.entitiesProvider()){
+      if(!enemy.alive||!enemy.playerId||enemy.playerId===this.playerId)continue;
+      const categories=aiTargetCategories(this.registry,enemy);
+      if(!categories.includes('COMBAT')&&!categories.includes('DEFENSE'))continue;
+      if(dist(position,enemy)<=radius)return false;
+    }
+    return true;
+  }
+
   _findPlacement(builder,plan,context){
     const p=plan.placement??{},target=this._anchorPoint(p.anchor??'HOME',context),builderDef=this.registry.definition(builder.definitionId),builderCfg=moduleConfig(builderDef,'Builder');
     const maxBuildRadius=Number.isFinite(builderCfg?.placementRadius)?builderCfg.placementRadius:140;
@@ -77,7 +90,7 @@ export class SkirmishEconomyPlanner{
       for(const offset of offsets){
         const a=toward+offset*angleStep,x=builder.x+Math.sin(a)*radius,z=builder.z+Math.cos(a)*radius,candidate={x,z};
         const yaw=this._candidateYaw(p.yawMode??'MATCH_BUILDER',builder,candidate,target,p),check=this.construction.validatePlacement(builder.id,plan.definition,x,z,yaw,this.playerId);
-        if(check.ok)return {x,z,yaw};
+        if(check.ok&&this._locationSafe(candidate,p.safetyRadius??this.cfg.constructionSafetyRadius??0))return {x,z,yaw};
       }
     }
     return null;
@@ -114,7 +127,7 @@ export class SkirmishEconomyPlanner{
     const harvester=this.cfg.harvester;if(harvester?.definition){const alive=this._ownedDefinitionCount(harvester.definition);add(harvester.definition,Math.max(0,(harvester.desiredCount??0)-alive),harvester.priority??1000,'GATHERER');}
     const planPriority=new Map((this.profile.teamPlans||[]).map(p=>[p.id,p.productionPriority??500]));
     for(const team of this.teamManager.teams.values()){
-      if(team.playerId!==this.playerId||team.state!==TeamState.RECRUITING)continue;const proto=this.teamManager.prototype(team.prototypeId);if(!proto)continue;
+      if(team.playerId!==this.playerId||![TeamState.RECRUITING,TeamState.REFORMING].includes(team.state))continue;const proto=this.teamManager.prototype(team.prototypeId);if(!proto)continue;
       const members=this.teamManager.members(team);for(const entry of proto.composition||[]){const have=members.filter(e=>e.definitionId===entry.definition).length;add(entry.definition,Math.max(0,(entry.min??0)-have),planPriority.get(team.planId)??500,`TEAM:${team.planId??team.prototypeId}`);}
     }
     for(const reserve of this.cfg.unitReserves||[]){const free=this._freeCount(reserve.definition);add(reserve.definition,Math.max(0,(reserve.desiredFree??0)-free),reserve.priority??250,'RESERVE');}

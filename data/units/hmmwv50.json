@@ -116,6 +116,14 @@
           "multiplier": 1.0
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "COMBAT",
+        "VEHICLE"
+      ],
+      "significant": true
     }
   ]
 }

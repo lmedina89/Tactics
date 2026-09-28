@@ -1,0 +1,20 @@
+{
+  "id": "crimson_assault_targets",
+  "name": "Crimson Assault Target Priorities",
+  "defaultPriority": 2,
+  "distanceModifier": 55,
+  "recentAttackerBonus": 5,
+  "ignoreInsignificant": true,
+  "priorities": {
+    "COMMAND": 30,
+    "PRODUCTION": 24,
+    "ECONOMY": 21,
+    "POWER": 18,
+    "DEFENSE": 16,
+    "HARVESTER": 15,
+    "COMBAT": 12,
+    "VEHICLE": 10,
+    "INFANTRY": 8,
+    "STRUCTURE": 7
+  }
+}

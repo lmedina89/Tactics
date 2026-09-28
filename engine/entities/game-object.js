@@ -70,7 +70,7 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
     turretYaw:turretAI?(spawn.yaw||0):null,turretAngularSpeed:0,
     combat:{manualTargetId:null,autoTargetId:null,activeTargetId:null,nextScanTick:0},
     resourceRemaining:spawn.resourceRemaining??resource?.capacity??null,initialResourceCapacity:spawn.resourceRemaining??resource?.capacity??null,
-    collector:collector?{state:'IDLE',cargo:0,cargoCapacity:collector.cargoCapacity??0,targetResourceId:null,resumeResourceId:null,targetRefineryId:null,sessionId:null,exitPoint:null}:null,
+    collector:collector?{state:'IDLE',cargo:0,cargoCapacity:collector.cargoCapacity??0,targetResourceId:null,resumeResourceId:null,targetRefineryId:null,sessionId:null,exitPoint:null,harvestApproach:null,approachResourceId:null,nextApproachRetryTick:0}:null,
     production:production?{queue:[],rallyPoint:null}:null,productionExit:null,
     modules:runtimeModules
   };

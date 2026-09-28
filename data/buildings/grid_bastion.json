@@ -38,6 +38,15 @@
           "radiansPerSecond": 4.2
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "POWER",
+        "DEFENSE",
+        "STRUCTURE"
+      ],
+      "significant": true
     }
   ]
 }

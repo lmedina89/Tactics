@@ -111,7 +111,7 @@ Rules:
 
 ForgeRTS models the first computer player layer after the released Generals / Zero Hour distinction between invariant team-template/prototype information, runtime Team instances, and an AIPlayer controller. Team composition and policy live in JSON; `TeamManager` owns deterministic membership/lifecycle; `SkirmishAIPlayer` performs timer-bounded strategic decisions and expresses them exclusively as ordinary authoritative CommandBus orders.
 
-The current vertical slice intentionally recruits already-authored enemy combat units so the team/strategy/control architecture can be proven before introducing an autonomous AI economy. AI harvesting, construction, production, reinforcement, rebuild logic, diplomacy, personality/difficulty, common-target coordination, and full formation routing are later v0.6.x layers and must build on this same separation rather than bypass it.
+The current vertical slice intentionally recruits already-authored enemy combat units so the team/strategy/control architecture can be proven before introducing an autonomous AI economy. AI harvesting/construction/production arrived in v0.6.1, while common-target coordination, threat valuation and reinforcement/reform arrive in v0.6.2. Diplomacy, personality/difficulty, expansion strategy and full formation routing remain later layers and must build on this same separation rather than bypass it.
 
 No EA AI/Team C++ implementation was directly translated for v0.6.0. The released source is the architectural/behavioral reference; the runtime is original ForgeRTS JavaScript designed around the existing browser simulation.
 
@@ -137,3 +137,24 @@ Rules:
 - No concrete production object ID may become a runtime branch when module/capability data can express the same behavior.
 
 The released Generals / Zero Hour AIPlayer/AISkirmishPlayer source is the architecture/behavior reference for build lists, desired gatherers, factory work orders, and timer-bounded base-building. v0.6.1 remains an original browser-native implementation and does not directly translate those C++ functions.
+
+
+## v0.6.2 tactical-battlefield-intelligence rule
+
+The released Generals / Zero Hour AI interfaces are the reference for four specific behaviors used here: named attack-priority policy with distance weighting, supply/economy attack detection and guarding, location-safety checks, and Team casualty/common-target coordination. ForgeRTS maps those concepts to original browser-native systems rather than translating the C++ line-for-line.
+
+The tactical split is:
+
+`AI profile / TeamPrototype / AttackPrioritySet data → SkirmishAIPlayer + TargetEvaluator → Team state → CommandBus → ordinary UnitAI/Combat`
+
+Rules:
+
+- Target categories and priorities are data. Strategic AI must not branch on concrete unit/building IDs when a category can express intent.
+- Effective target value may be distance-weighted so a nearer combat threat can outrank a higher-value but distant structure.
+- Economic defense is event/state driven from authoritative recent-damage fields; the renderer is never consulted.
+- Team casualty response is explicit state. `REFORMING` is not a teleport or spawn path: survivors retreat through normal MOVE, and missing composition becomes ordinary production demand.
+- `attackCommonTarget` is TeamPrototype policy and uses normal ATTACK commands; a Team never receives privileged direct target mutation.
+- AI construction safety is an additional strategic filter only. Final legality remains `ConstructionSystem` + `PlacementValidator`.
+- A resource is harvestable only if a compatible collector has a navigation-valid terminal approach that remains inside harvest range after path-grid snapping and arrival tolerance.
+- AI resource selection must skip unreachable resource fields rather than repeatedly issuing doomed orders.
+- Tactical timers/reform/target state that can change future decisions is serialized; derived target scores and harvest-search candidates are not.

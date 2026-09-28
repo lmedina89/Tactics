@@ -14,18 +14,35 @@ export class ResourceSystem{
   _collectorCfg(entity){return moduleConfig(this._def(entity),'ResourceCollector');}
   _resourceCfg(entity){return moduleConfig(this._def(entity),'Resource');}
   _dockCfg(entity){return moduleConfig(this._def(entity),'DockingProvider');}
+  _pathProfile(entity){const loco=this.registry.locomotor?.(entity?.locomotorId);return {clearance:loco?.pathfindRadius??entity?.radius??0,maxSlopeDeg:loco?.maxSlopeDeg??32,allowWater:loco?.kind==='air'};}
+
+  findHarvestApproach(entity,resource){
+    if(!entity?.alive||!entity.collector||!resource?.alive||resource.resourceRemaining<=0)return null;
+    const cfg=this._collectorCfg(entity),res=this._resourceCfg(resource);if(!cfg||!res||!(cfg.resourceTypes||[]).includes(res.resourceType))return null;
+    const radius=cfg.harvestRadius??5.5,profile=this._pathProfile(entity),loco=this.registry.locomotor?.(entity.locomotorId),reach=Math.max(loco?.arrivalRadius??0.6,(entity.radius??0)*0.35),safeRadius=Math.max(radius*0.35,radius-reach*1.2),base=Math.atan2(entity.x-resource.x,entity.z-resource.z),rings=[0,safeRadius*0.45,safeRadius*0.72,safeRadius],steps=16;
+    let best=null,bestScore=Infinity;const seen=new Set();
+    for(const r of rings){for(let i=0;i<(r===0?1:steps);i++){const offset=i===0?0:((i+1)>>1)*(i%2?1:-1),a=base+offset*(Math.PI*2/steps),candidate={x:resource.x+Math.sin(a)*r,z:resource.z+Math.cos(a)*r};
+      if(!this.pathfinder.isWalkableWorld(candidate.x,candidate.z,profile))continue;
+      const snapped=this.pathfinder.nearestWalkable(candidate.x,candidate.z,profile,0);if(!snapped||dist(snapped,resource)>safeRadius+1e-6)continue;const k=`${snapped.x.toFixed(3)},${snapped.z.toFixed(3)}`;if(seen.has(k))continue;seen.add(k);
+      const route=this.pathfinder.findPath(entity.x,entity.z,snapped.x,snapped.z,profile);if(!route.length)continue;let routeLength=0;for(let n=1;n<route.length;n++)routeLength+=dist(route[n-1],route[n]);const score=routeLength+dist(snapped,resource)*0.05;
+      if(score<bestScore-1e-9||(Math.abs(score-bestScore)<=1e-9&&(snapped.x<(best?.x??Infinity)||(snapped.x===best?.x&&snapped.z<(best?.z??Infinity))))){best=snapped;bestScore=score;}
+    }}
+    return best;
+  }
 
   cancel(entity,reason='MANUAL_ORDER'){
     const c=entity?.collector;if(!c)return;
     if(c.sessionId)this.interactions.cancel(c.sessionId,reason);
-    c.state='IDLE';c.targetResourceId=null;c.targetRefineryId=null;c.sessionId=null;c.resumeResourceId=null;
+    c.state='IDLE';c.targetResourceId=null;c.targetRefineryId=null;c.sessionId=null;c.resumeResourceId=null;c.harvestApproach=null;c.approachResourceId=null;c.nextApproachRetryTick=0;
   }
 
   issueHarvest(entity,resource){
     if(!entity?.alive||!entity.collector||!resource?.alive||resource.resourceRemaining<=0)return false;
     const cfg=this._collectorCfg(entity),res=this._resourceCfg(resource);if(!cfg||!res||!(cfg.resourceTypes||[]).includes(res.resourceType))return false;
+    const approach=this.findHarvestApproach(entity,resource);if(!approach)return false;
     if(entity.collector.sessionId)this.interactions.cancel(entity.collector.sessionId,'RETARGETED');
     entity.collector.targetResourceId=resource.id;entity.collector.resumeResourceId=resource.id;entity.collector.targetRefineryId=null;entity.collector.sessionId=null;
+    entity.collector.harvestApproach=clone(approach);entity.collector.approachResourceId=resource.id;entity.collector.nextApproachRetryTick=0;
     entity.collector.state=entity.collector.cargo>=entity.collector.cargoCapacity-0.001?'RETURNING':'TO_RESOURCE';
     return true;
   }
@@ -72,7 +89,10 @@ export class ResourceSystem{
         if(!resource?.alive||resource.resourceRemaining<=0){c.state='IDLE';c.targetResourceId=null;clearOrders(entity);continue;}
         const radius=cfg.harvestRadius??5.5;
         if(dist(entity,resource)<=radius){clearOrders(entity);c.state='HARVESTING';continue;}
-        this._ensureMove(entity,{x:resource.x,z:resource.z});continue;
+        let approach=c.approachResourceId===resource.id?c.harvestApproach:null;
+        const blocked=entity.ai?.state==='BLOCKED';
+        if(!approach||(blocked&&tick>=(c.nextApproachRetryTick??0))){approach=this.findHarvestApproach(entity,resource);c.nextApproachRetryTick=tick+30;if(!approach){c.state='IDLE';c.targetResourceId=null;c.harvestApproach=null;c.approachResourceId=null;clearOrders(entity);continue;}c.harvestApproach=clone(approach);c.approachResourceId=resource.id;}
+        this._ensureMove(entity,approach);continue;
       }
 
       if(c.state==='HARVESTING'){
@@ -118,7 +138,7 @@ export class ResourceSystem{
         c.sessionId=null;c.targetRefineryId=null;c.exitPoint=null;
         const resource=this.entityLookup(c.resumeResourceId);
         if(resource?.alive&&resource.resourceRemaining>0){c.targetResourceId=resource.id;c.state='TO_RESOURCE';}
-        else {c.targetResourceId=null;c.resumeResourceId=null;c.state='IDLE';}
+        else {c.targetResourceId=null;c.resumeResourceId=null;c.harvestApproach=null;c.approachResourceId=null;c.state='IDLE';}
       }
     }
   }

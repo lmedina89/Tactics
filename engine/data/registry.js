@@ -10,6 +10,7 @@ export class DataRegistry {
     this.armors = new Map();
     this.weapons = new Map();
     this.commandSets = new Map();
+    this.targetPrioritySets = new Map();
     this.teamPrototypes = new Map();
     this.aiProfiles = new Map();
   }
@@ -31,6 +32,7 @@ export class DataRegistry {
     for (const p of registry.armors || []) this._insertUnique(this.armors, await get(p), p);
     for (const p of registry.weapons || []) this._insertUnique(this.weapons, await get(p), p);
     for (const p of registry.commandSets || []) this._insertUnique(this.commandSets, await get(p), p);
+    for (const p of registry.targetPrioritySets || []) { const value=await get(p); this._validateTargetPrioritySet(value,p); this._insertUnique(this.targetPrioritySets,value,p); }
     const defs=[];
     for (const p of registry.definitions || []) {
       const value=await get(p);moduleBindings(value);this._validateDefinitionRefs(value,p);this._insertUnique(this.definitions,value,p);defs.push([value,p]);
@@ -68,6 +70,7 @@ export class DataRegistry {
     const dock=moduleConfig(def,'DockingProvider');if(dock?.protocol&&!this.interactions.has(dock.protocol))throw new Error(`${source}: unknown docking protocol ${dock.protocol}`);
     const commandSet=moduleConfig(def,'CommandSet');if(commandSet&&!this.commandSets.has(commandSet.id))throw new Error(`${source}: unknown CommandSet ${commandSet.id}`);
     const geom=moduleConfig(def,'Geometry');if(geom){if(!['BOX','CYLINDER','SPHERE'].includes(geom.shape))throw new Error(`${source}: invalid Geometry shape ${geom.shape}`);if(!(geom.majorRadius>0))throw new Error(`${source}: Geometry majorRadius must be > 0`);if(geom.shape==='BOX'&&!(geom.minorRadius>0))throw new Error(`${source}: BOX Geometry minorRadius must be > 0`);if(geom.height!=null&&!(geom.height>0))throw new Error(`${source}: Geometry height must be > 0`);}
+    const targetable=moduleConfig(def,'AITargetable');if(targetable){if(!Array.isArray(targetable.categories)||!targetable.categories.length)throw new Error(`${source}: AITargetable.categories must not be empty`);for(const c of targetable.categories)if(typeof c!=='string'||!c)throw new Error(`${source}: invalid AITargetable category`);}
   }
 
   _validateLateDefinitionRefs(def,source){
@@ -76,12 +79,24 @@ export class DataRegistry {
   }
 
 
+
+  _validateTargetPrioritySet(value,source){
+    if(!value?.id)throw new Error(`${source}: target priority set missing id`);
+    if(value.distanceModifier!=null&&!(value.distanceModifier>0))throw new Error(`${source}: distanceModifier must be > 0`);
+    for(const [key,v] of Object.entries(value.priorities??{}))if(!Number.isFinite(v))throw new Error(`${source}: priority ${key} must be numeric`);
+    for(const key of ['defaultPriority','recentAttackerBonus'])if(value[key]!=null&&!Number.isFinite(value[key]))throw new Error(`${source}: ${key} must be numeric`);
+  }
+
   _validateTeamPrototype(value,source){
     if(!value?.id)throw new Error(`${source}: TeamPrototype missing id`);
     if(!value.role||typeof value.role!=='string')throw new Error(`${source}: TeamPrototype missing role`);
     if(value.maxInstances!=null&&(!Number.isInteger(value.maxInstances)||value.maxInstances<1))throw new Error(`${source}: maxInstances must be >= 1`);
     for(const key of ['recruitRadius','recruitTimeoutTicks','rallyRadius','rallyTimeoutTicks'])if(value[key]!=null&&!(value[key]>=0))throw new Error(`${source}: ${key} must be >= 0`);
     if(value.initialStance&&!['GUARD','AGGRESSIVE','HOLD_POSITION'].includes(value.initialStance))throw new Error(`${source}: invalid initialStance ${value.initialStance}`);
+    if(value.attackPrioritySet&&!this.targetPrioritySets.has(value.attackPrioritySet))throw new Error(`${source}: unknown attackPrioritySet ${value.attackPrioritySet}`);
+    const reinforce=value.reinforcement??{};
+    if(reinforce.retreatBelowStrength!=null&&(!(reinforce.retreatBelowStrength>0)||reinforce.retreatBelowStrength>1))throw new Error(`${source}: reinforcement.retreatBelowStrength must be > 0 and <= 1`);
+    for(const key of ['reformTimeoutTicks'])if(reinforce[key]!=null&&(!Number.isInteger(reinforce[key])||reinforce[key]<1))throw new Error(`${source}: reinforcement.${key} must be a positive integer`);
     if(value.formation?.spacing!=null&&!(value.formation.spacing>=0))throw new Error(`${source}: formation spacing must be >= 0`);
     if(!Array.isArray(value.composition)||!value.composition.length)throw new Error(`${source}: TeamPrototype composition must not be empty`);
     for(const entry of value.composition){
@@ -95,9 +110,11 @@ export class DataRegistry {
     if(!value?.id)throw new Error(`${source}: AI profile missing id`);
     for(const key of ['thinkIntervalTicks','enemyAcquireIntervalTicks','orderRefreshTicks'])if(value[key]!=null&&(!Number.isInteger(value[key])||value[key]<1))throw new Error(`${source}: ${key} must be a positive integer`);
     for(const key of ['initialDelayTicks','baseThreatRadius'])if(value[key]!=null&&!(value[key]>=0))throw new Error(`${source}: ${key} must be >= 0`);
+    const tactical=value.tactical??{};for(const key of ['targetReassessTicks','economicThreatRecentTicks','economicDefenseHoldTicks'])if(tactical[key]!=null&&(!Number.isInteger(tactical[key])||tactical[key]<1))throw new Error(`${source}: tactical.${key} must be a positive integer`);if(tactical.maxRetaliateDistance!=null&&!(tactical.maxRetaliateDistance>=0))throw new Error(`${source}: tactical.maxRetaliateDistance must be >= 0`);if(tactical.economicProtectedCategories&&!Array.isArray(tactical.economicProtectedCategories))throw new Error(`${source}: tactical.economicProtectedCategories must be an array`);
     const economy=value.economy??{};
     for(const key of ['harvestCheckIntervalTicks','constructionCheckIntervalTicks','productionCheckIntervalTicks'])if(economy[key]!=null&&(!Number.isInteger(economy[key])||economy[key]<1))throw new Error(`${source}: economy.${key} must be a positive integer`);
     if(economy.maxActiveConstructionSites!=null&&(!Number.isInteger(economy.maxActiveConstructionSites)||economy.maxActiveConstructionSites<1))throw new Error(`${source}: economy.maxActiveConstructionSites must be >= 1`);
+    if(economy.constructionSafetyRadius!=null&&!(economy.constructionSafetyRadius>=0))throw new Error(`${source}: economy.constructionSafetyRadius must be >= 0`);
     if(economy.harvester){
       const def=this.definitions.get(economy.harvester.definition);if(!def||!moduleConfig(def,'ResourceCollector'))throw new Error(`${source}: economy.harvester must reference a ResourceCollector definition`);
       if(!Number.isInteger(economy.harvester.desiredCount??0)||(economy.harvester.desiredCount??0)<0)throw new Error(`${source}: economy.harvester.desiredCount must be a nonnegative integer`);
@@ -138,6 +155,7 @@ export class DataRegistry {
   armor(id) { return this.armors.get(id); }
   weapon(id) { return this.weapons.get(id); }
   commandSet(id){return this.commandSets.get(id);}
+  targetPrioritySet(id){return this.targetPrioritySets.get(id);}
   teamPrototype(id){return this.teamPrototypes.get(id);}
   aiProfile(id){return this.aiProfiles.get(id);}
   module(definitionOrId,type){

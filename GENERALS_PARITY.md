@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.1 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.2 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
@@ -29,7 +29,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Rivers/water | map cells/water logic | terrain/water systems | water as independent feature data | map `water` + renderer | Foundation implemented |
 | Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | Owner/threat/resources/activity/discovery implemented |
 | Stable starts/waypoints | cell/waypoint mission logic | player start/rally waypoints | named anchors | map `waypoints[]` | Data implemented |
-| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v10 adds Team + SkirmishAI strategic state; v8/v9 restore accepted** |
+| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v12 includes Team/SkirmishAI/economy/tactical reform-target state; v8-v11 restore accepted** |
 | Player economy/power | house/resources | `Player` | player/faction data | `FactionEconomySystem` / player state | **Credits + power + low-power policy implemented** |
 | Production | factory queues/service | production update modules | Production behavior | `engine/production/production-system.js` | **Generic queues, costs, build time, cancellation, dynamic spawn, rollout/rally implemented** |
 | Command sets / contextual UI | sidebar/build lists | `CommandButton` / control bar / GUI command staging | `CommandSet` on `GameObject` | `data/commandsets/*` + HUD renderer | **BUILD / PRODUCE / RETURN / CANCEL + tactical ATTACK_MOVE / GUARD / QUEUE / STANCE presentation** |
@@ -39,11 +39,12 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Construction approach sockets | docking/build approach points | `DozerAIUpdate` build dock locations | structure behavior data | `Construction.sockets[]` | **Data foundation implemented; current Command Post uses yard style, mobile-builder path is scaffolded** |
 | Dynamic structure occupancy | cell occupancy | pathing/object footprint integration | geometry/placement separate from art | `GridPathfinder` dynamic obstacles | **New/cancelled structures update navigation at runtime** |
 | Resource-field presentation | ore/gem field readability | supply-resource visual readability | client visual modules separate from resource behavior | `ResourceFieldVisual` + renderer | **One logical Resource renders deterministic multi-cluster GLB field/glow/depletion cues** |
+| Resource harvest accessibility | cell/service approach logic | supply/gatherer path safety | interaction approach policy in data/runtime | `ResourceSystem.findHarvestApproach` | **Path-valid terminal approach with arrival margin; unreachable fields rejected/skipped** |
 | Client animation / draw-state motion | unit/building visual anim | GameClient / Draw modules | Draws / ClientUpdates / ClientBehaviors / model animation states | `ClientAnimation` data + `renderer/client-animation-system.js` | **Embedded GLB clips + procedural authored pivots; presentation-only, simulation remains authoritative** |
 | Command authority/source | house/player ownership | player/script/AI command-origin distinction | commands are data, owner checks in gameplay | `CommandBus` + `Simulation._apply` | **Issuer/source metadata + authoritative ownership validation** |
 | Group/queued tactical orders | grouped orders | attack-move / guard / appended user paths | generic behavior command data | InputController + UnitAIUpdate | **Multi-select, box/add, ATTACK_MOVE, GUARD, serialized appended order queue** |
 | Teams/attack groups | teams/groups | `TeamTemplateInfo` / `TeamPrototype` / runtime `Team` | invariant team data + runtime instances | `engine/teams/team-manager.js` | **TeamPrototype composition, stable runtime membership, recruit/rally/active lifecycle + snapshot implemented** |
-| Strategic AI | house AI | `AIPlayer` / `AISkirmishPlayer` | AI policy/profile data | `engine/ai/skirmish-ai-player.js` + `skirmish-economy-planner.js` | **Timer-bounded enemy acquisition, Teams, autonomous harvesting, build-list construction and factory work orders through normal CommandBus** |
+| Strategic AI | house AI | `AIPlayer` / `AISkirmishPlayer` | AI policy/profile data | `engine/ai/skirmish-ai-player.js` + `skirmish-economy-planner.js` | **Timer-bounded Teams/economy plus distance-weighted target priorities, economic defense, common targets and casualty reform through normal CommandBus** |
 | Mission conditions/actions | triggers/actions | Scripts / Conditions / Actions | script data | `MissionSystem` | Planned; never owns world lifetime |
 | Fog/shroud/radar | map visibility | shroud/radar systems | client/game visibility split | `VisibilitySystem` | Planned |
 | Veterancy/upgrades/sciences | veteran/unit upgrades | experience / upgrades | upgrade modules | data modules | Planned |
@@ -111,3 +112,10 @@ The released Generals / Zero Hour `AIPlayer` / `AISkirmishPlayer` source is the 
 ForgeRTS maps that pattern to data-defined `economy` policy inside AI profiles plus a generic `SkirmishEconomyPlanner`. The planner queries existing authoritative Construction/Production services but performs no direct gameplay mutation; harvesting, construction and production are expressed as `FROM_AI` CommandBus commands and then pass through the same simulation code as human orders. Missing Team composition therefore becomes real factory demand rather than an AI-only spawn path.
 
 No Generals economy/base-building C++ was copied line-for-line. The shared ForgeRTS systems already provide the relevant authority boundaries, making an original JS implementation both cleaner and more consistent with the project's deterministic browser architecture.
+
+
+## v0.6.2 tactical battlefield reference boundary
+
+The released Generals / Zero Hour AI code is the primary reference for this layer: global AI data documents distance-weighted AttackPriority behavior and retaliation ranges; AIPlayer exposes supply-source attacked/safe, supply-center guarding and location-safety decisions; Team/runtime AI provides common-target and casualty bookkeeping concepts. ForgeRTS maps those proven boundaries to named `AttackPrioritySet` JSON, generic `AITargetable` categories, recent-damage economic defense, `REFORMING` Team state, construction safety filtering, and shared authoritative commands.
+
+No EA tactical-AI C++ was copied line-for-line. The implementation remains original JavaScript and composes with the existing CommandBus, TeamManager, ProductionSystem, ResourceSystem, UnitAI and snapshot architecture.

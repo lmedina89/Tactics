@@ -93,6 +93,14 @@
           "radiansPerSecond": 5.4
         }
       ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "ECONOMY",
+        "STRUCTURE"
+      ],
+      "significant": true
     }
   ]
 }
