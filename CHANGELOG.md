@@ -2,6 +2,8 @@
 
 ## v0.6.1 — Autonomous AI Economy + Construction + Production
 
+- Corrected stale v0.6.0 client/version labels in the HUD/title/startup status and asset-catalog metadata; gameplay code was already v0.6.1.
+
 - Added generic `SkirmishEconomyPlanner` as the economy/base-building layer beneath `SkirmishAIPlayer`; policy is defined by AI-profile JSON rather than concrete unit/building branches.
 - Added autonomous Harvester control through ordinary authoritative `HARVEST` / `RETURN_CARGO` commands. Idle collectors only seek resources once an owned operational Refinery exists, and resource choice considers distance plus current collector congestion.
 - Added data-driven AI `buildList` goals with desired counts, priority, placement anchor/yaw policy, spacing/search parameters, and a configurable active-construction-site limit. Existing construction sites count toward desired structure totals so the planner cannot spam duplicate pending builds.
