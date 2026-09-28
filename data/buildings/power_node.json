@@ -58,6 +58,21 @@
     {
       "type": "PowerProducer",
       "amount": 80
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "cooling_fans",
+          "driver": "CONTINUOUS_SPIN",
+          "nodes": [
+            "CoolingFanRoot_1",
+            "CoolingFanRoot_2"
+          ],
+          "axis": "z",
+          "radiansPerSecond": 4.8
+        }
+      ]
     }
   ]
 }

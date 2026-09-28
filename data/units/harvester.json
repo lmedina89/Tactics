@@ -57,6 +57,84 @@
       "queueType": "vehicle",
       "credits": 800,
       "buildTimeSeconds": 7.0
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "wheels",
+          "driver": "WHEEL_SPIN",
+          "nodes": [
+            "FrontLeftWheelSpinRoot",
+            "FrontRightWheelSpinRoot",
+            "MidLeftWheelSpinRoot",
+            "MidRightWheelSpinRoot",
+            "RearLeftWheelSpinRoot",
+            "RearRightWheelSpinRoot"
+          ],
+          "axis": "x",
+          "radius": 0.855
+        },
+        {
+          "id": "front_steer",
+          "driver": "STEERING",
+          "nodes": [
+            "FrontLeftSteerRoot",
+            "FrontRightSteerRoot"
+          ],
+          "axis": "z",
+          "multiplier": 1.0
+        },
+        {
+          "id": "collector_drum",
+          "driver": "STATE_SPIN",
+          "nodes": [
+            "CollectorDrumRoot"
+          ],
+          "axis": "x",
+          "radiansPerSecond": 8.0,
+          "activeWhen": {
+            "path": "collector.state",
+            "in": [
+              "HARVESTING"
+            ]
+          }
+        },
+        {
+          "id": "left_gather_arm",
+          "driver": "OSCILLATE",
+          "nodes": [
+            "LeftGatheringArmRoot"
+          ],
+          "axis": "z",
+          "amplitudeRadians": 0.2,
+          "frequencyHz": 0.85,
+          "phase": 0.0,
+          "activeWhen": {
+            "path": "collector.state",
+            "in": [
+              "HARVESTING"
+            ]
+          }
+        },
+        {
+          "id": "right_gather_arm",
+          "driver": "OSCILLATE",
+          "nodes": [
+            "RightGatheringArmRoot"
+          ],
+          "axis": "z",
+          "amplitudeRadians": 0.2,
+          "frequencyHz": 0.85,
+          "phase": 3.141592653589793,
+          "activeWhen": {
+            "path": "collector.state",
+            "in": [
+              "HARVESTING"
+            ]
+          }
+        }
+      ]
     }
   ]
 }

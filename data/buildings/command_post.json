@@ -46,6 +46,26 @@
     {
       "type": "PowerProducer",
       "amount": 20
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "radar_sweep",
+          "driver": "GROUP_SPIN",
+          "parentNode": "BuildingRoot",
+          "nodePrefixes": [
+            "RadarDishPitchRoot_"
+          ],
+          "pivotLocal": {
+            "x": 0.0,
+            "y": 16.55,
+            "z": 0.0
+          },
+          "axis": "y",
+          "radiansPerSecond": 0.44
+        }
+      ]
     }
   ]
 }

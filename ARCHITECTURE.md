@@ -59,3 +59,18 @@ The validation UI remains a client layer: objectives, command-dock labels, place
 The player command layer must use the same serializable vocabulary intended for future AI, scripts, replay and networking. `InputController` resolves selection and context only; it does not contain combat/pathing implementations. `UnitAIUpdate` owns persistent Attack Move / Guard / stance behavior, and all tunable acquisition/leash/return values are definition data.
 
 Resource readability follows the opposite ownership boundary: multi-cluster mineral fields, emissive emphasis, ground glow and depletion presentation are renderer-only projections of one authoritative resource entity. Visual multiplicity must not multiply resource capacity, blockers, interaction endpoints or snapshot entities.
+
+
+## v0.5.3 client-animation rule
+
+Client animation is a **presentation-only consumer of authoritative simulation state**. GameLogic never reads wheel, rotor, fan, skeletal, door, or other render transforms back from Three.js. Object definitions opt into a generic `ClientAnimation` module; the renderer may then bind authored GLB clips through `AnimationMixer` or drive named mechanical pivots procedurally from simulation state. This mirrors the C&C family separation between gameplay modules and client/draw behavior while remaining an original browser-native implementation.
+
+Rules:
+
+- Never branch in the animation runtime on a concrete unit/building definition ID.
+- Embedded clip names and procedural node/prefix bindings live in data.
+- Movement-driven animation consumes authoritative speed/steering state; weapon animation consumes combat events; state-driven machinery consumes authoritative module state.
+- Continuous presentation machinery (fans/radar/rotors) is client-time animation and is not serialized because it has no gameplay consequence.
+- Only create `AnimationMixer` instances for objects that actually declare embedded clips.
+- If an authored pivot lacks a trustworthy gameplay semantic or axis, leave it dormant until the corresponding state exists rather than inventing fake motion.
+- Procedural animation must remain disposable with the rendered view and must not enlarge simulation snapshots.

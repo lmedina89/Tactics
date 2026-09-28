@@ -1,8 +1,8 @@
-# ForgeRTS v0.5.2 — Tactical Commands + Resource Readability
+# ForgeRTS v0.5.3 — Client Animation Foundation
 
 ForgeRTS is a separate browser-native RTS engine. WorldForge / Skirmish remains untouched and serves only as the older asset/reference project.
 
-v0.5.2 builds on the validated v0.5.1 construction/economy slice. It does **not** add strategic enemy AI yet. The goal is to finish the player-side C&C-style command vocabulary and make the existing mineral economy readable from an RTS camera before Teams/AIPlayer work begins.
+v0.5.3 builds on the validated v0.5.2 tactical-command/resource-readability slice. It does **not** add strategic enemy AI yet. This pass activates the animation-ready presentation work already authored into the production GLBs while keeping simulation state authoritative and the runtime fully data-driven.
 
 ## What changed
 
@@ -47,6 +47,15 @@ Attack Move and Guard are persistent UnitAI orders rather than UI shortcuts. Att
 - Camera pan/zoom uses a maintained camera focus instead of zooming toward world origin.
 - Player resource-harvest totals are explicit simulation state, so validation/objectives do not depend on any resource being depleted by somebody else.
 
+### Client animation integration
+
+- Added a generic `ClientAnimation` definition module and renderer-side animation system.
+- Rifleman plays the authored `CombatWalk` GLB clip from real movement speed and `AimFire` from authoritative weapon-fire events.
+- Vehicles use authored pivots for wheel spin/steering or running gear; Harvester collection machinery is state-driven while harvesting.
+- Talon rotors and building fans/radar mechanisms use data-defined procedural presentation animation.
+- Animation never changes pathfinding, collision, combat, saves, or authoritative transforms.
+- See `ANIMATION_AUDIT.md` for the complete 16-GLB inventory and intentionally dormant pivots.
+
 ## Current playable chain
 
 The v0.5.1 construction/economy validation remains intact:
@@ -87,6 +96,7 @@ Build/production/Harvester contextual controls remain data-driven through their 
 - `CombatSystem` — weapons / armor / projectiles / turret behavior
 - pathfinder + locomotor — route choice separated from physical movement
 - Three.js renderer — disposable presentation; multi-cluster resource visuals never become simulation entities
+- `ClientAnimation` — data-driven embedded-clip and mechanical-pivot presentation driven from authoritative simulation state
 
 ## C&C reference boundary
 
@@ -106,7 +116,7 @@ Run:
 npm test
 ```
 
-The release suite covers construction, economy, production, combat, movement, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, resource-field visual configuration, map identity, snapshot determinism, and the original mobile construction vertical slice.
+The release suite covers construction, economy, production, combat, movement, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, resource-field visual configuration, client-animation GLB binding validation, map identity, snapshot determinism, and the original mobile construction vertical slice. Current result: **66/66 tests passing**.
 
 ## Run
 

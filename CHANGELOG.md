@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.3 — Client Animation Foundation
+
+- Added generic data-driven `ClientAnimation` presentation modules, following the C&C GameLogic/client-draw separation: simulation state remains authoritative while the renderer drives embedded GLB clips and authored mechanical pivots.
+- Audited all 16 current production/reference GLBs. Only Rifleman (`CombatWalk`, `AimFire`) and the reference-only legacy BTR (`Btr anima`) contain embedded glTF animation clips; the other ForgeRTS assets expose named mechanical pivots intended for runtime animation.
+- Added embedded GLB clip playback through per-view `THREE.AnimationMixer` instances only for definitions that declare clips; Rifleman now uses `CombatWalk` while moving and one-shot `AimFire` on weapon-fire events, with movement-speed-scaled playback and fades.
+- Added generic procedural animation drivers for `WHEEL_SPIN`, `STEERING`, `CONTINUOUS_SPIN`, `STATE_SPIN`, `OSCILLATE`, and generated-pivot `GROUP_SPIN`, all configured in object definition data rather than concrete unit/building branches.
+- Activated authored mechanical motion for Aegis-X running gear, HMMWV wheels/steering, Harvester wheels/steering/harvest drum/gathering arms, Talon rotors, Power Node/Grid Bastion cooling fans, Refinery dust fan, Command Nexus radar, Tactical Command Post radar, Barracks roof fans, and Vehicle Factory roof fans. Existing simulation-driven turret yaw remains authoritative for armed vehicles/Guardian Turret.
+- Stateful pivots that do not yet have an authoritative semantic driver (service/production doors, conveyors/feeders, gun pitch/recoil, hopper/intake mechanisms, sensor heads, etc.) remain deliberately dormant instead of receiving fake cosmetic motion.
+- Animation runtime precompiles clip-driver/state paths and only creates `AnimationMixer` instances for definitions that actually bind embedded clips; procedural clients stay lightweight for mobile.
+- Added regression coverage validating every configured clip/node/prefix/pivot against the production GLBs, exhaustively inventories all embedded clips, and forbids concrete ForgeRTS object-name branching in the generic animation runtime.
+- Production GLBs remain byte-for-byte unchanged.
+- Full suite: **66/66 tests passing**.
+
 ## v0.5.2 — Tactical Commands + Resource Readability
 
 - Added data-driven `ResourceFieldVisual` presentation: each logical mineral deposit can render deterministic multi-cluster copies of the existing GLB with definition-controlled radius, scale variation, crystal-material matching, emissive strength, glow color, and ground glow.

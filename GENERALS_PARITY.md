@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.5.2 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.5.3 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
@@ -37,6 +37,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Construction approach sockets | docking/build approach points | `DozerAIUpdate` build dock locations | structure behavior data | `Construction.sockets[]` | **Data foundation implemented; current Command Post uses yard style, mobile-builder path is scaffolded** |
 | Dynamic structure occupancy | cell occupancy | pathing/object footprint integration | geometry/placement separate from art | `GridPathfinder` dynamic obstacles | **New/cancelled structures update navigation at runtime** |
 | Resource-field presentation | ore/gem field readability | supply-resource visual readability | client visual modules separate from resource behavior | `ResourceFieldVisual` + renderer | **One logical Resource renders deterministic multi-cluster GLB field/glow/depletion cues** |
+| Client animation / draw-state motion | unit/building visual anim | GameClient / Draw modules | Draws / ClientUpdates / ClientBehaviors / model animation states | `ClientAnimation` data + `renderer/client-animation-system.js` | **Embedded GLB clips + procedural authored pivots; presentation-only, simulation remains authoritative** |
 | Command authority/source | house/player ownership | player/script/AI command-origin distinction | commands are data, owner checks in gameplay | `CommandBus` + `Simulation._apply` | **Issuer/source metadata + authoritative ownership validation** |
 | Group/queued tactical orders | grouped orders | attack-move / guard / appended user paths | generic behavior command data | InputController + UnitAIUpdate | **Multi-select, box/add, ATTACK_MOVE, GUARD, serialized appended order queue** |
 | Teams/attack groups | teams/groups | `Team` / `AIGroup` | team data | `TeamManager` | Planned |
@@ -78,3 +79,8 @@ v0.5.1 does not add another C&C subsystem. It validates the existing v0.5.0 cons
 v0.5.2 uses the released Generals / Zero Hour command vocabulary as an architectural reference: move, attack-move, guard-position/object, appended paths, and explicit command origin are high-level AI/game commands rather than UI-specific behaviors. ForgeRTS mirrors that separation with serializable CommandBus records and persistent UnitAI state, but the implementation is original JavaScript rather than a line-for-line source port. Combat acquisition/leash/return policy is definition data so future AIPlayer/Team logic can issue the same orders as the human client.
 
 Mineral readability remains deliberately renderer-side. `ResourceFieldVisual` composes deterministic copies of the existing GLB plus emissive/ground-glow cues around one simulation Resource. This follows the broader RA3-style client/game separation without multiplying authoritative resource objects.
+
+
+## v0.5.3 client-animation reference boundary
+
+The C&C family keeps visual presentation separate from authoritative GameLogic, and the RA3 data model exposes draw/client behavior separately from gameplay behaviors. ForgeRTS follows that boundary with a data-driven `ClientAnimation` module. Authored GLB clips are played by the renderer, while named mechanical pivots are driven procedurally from authoritative speed, steering, combat events, harvesting state, or harmless client-time presentation state. No EA animation implementation was translated directly; the runtime is original JavaScript/Three.js.

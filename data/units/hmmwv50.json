@@ -81,6 +81,33 @@
     {
       "type": "CommandSet",
       "id": "aegis_combat_unit"
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "wheels",
+          "driver": "WHEEL_SPIN",
+          "nodes": [
+            "WheelSpinRoot_FL",
+            "WheelSpinRoot_FR",
+            "WheelSpinRoot_RL",
+            "WheelSpinRoot_RR"
+          ],
+          "axis": "z",
+          "radius": 0.54
+        },
+        {
+          "id": "front_steer",
+          "driver": "STEERING",
+          "nodes": [
+            "SteeringRoot_FL",
+            "SteeringRoot_FR"
+          ],
+          "axis": "y",
+          "multiplier": 1.0
+        }
+      ]
     }
   ]
 }

@@ -21,6 +21,23 @@
       "asset": "aegis_grid_bastion_power_plant",
       "scale": 1.0,
       "headingOffset": 0.0
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "cooling_fans",
+          "driver": "CONTINUOUS_SPIN",
+          "nodes": [
+            "CoolingFanRoot_1",
+            "CoolingFanRoot_2",
+            "CoolingFanRoot_3",
+            "CoolingFanRoot_4"
+          ],
+          "axis": "z",
+          "radiansPerSecond": 4.2
+        }
+      ]
     }
   ]
 }

@@ -21,6 +21,20 @@
       "asset": "aegis_command_nexus_hq",
       "scale": 1.0,
       "headingOffset": 0.0
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "radar_sweep",
+          "driver": "CONTINUOUS_SPIN",
+          "nodes": [
+            "RadarYawRoot"
+          ],
+          "axis": "z",
+          "radiansPerSecond": 0.42
+        }
+      ]
     }
   ]
 }

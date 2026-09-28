@@ -76,6 +76,31 @@
     {
       "type": "CommandSet",
       "id": "aegis_combat_unit"
+    },
+    {
+      "type": "ClientAnimation",
+      "clips": [
+        {
+          "id": "move",
+          "driver": "MOVING",
+          "clip": "CombatWalk",
+          "loop": true,
+          "fadeSeconds": 0.1,
+          "minSpeed": 0.12,
+          "speedFromMovement": true,
+          "referenceSpeed": 5.4,
+          "minTimeScale": 0.55,
+          "maxTimeScale": 1.55
+        },
+        {
+          "id": "fire",
+          "driver": "WEAPON_FIRE",
+          "clip": "AimFire",
+          "loop": false,
+          "fadeSeconds": 0.04,
+          "timeScale": 1.0
+        }
+      ]
     }
   ]
 }

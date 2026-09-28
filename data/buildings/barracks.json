@@ -83,6 +83,42 @@
     {
       "type": "PowerConsumer",
       "amount": 10
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "roof_fan_0",
+          "driver": "GROUP_SPIN",
+          "pivotNode": "fan_hub_0",
+          "nodePrefixes": [
+            "fan_blade_0_"
+          ],
+          "axis": "y",
+          "radiansPerSecond": 5.2
+        },
+        {
+          "id": "roof_fan_1",
+          "driver": "GROUP_SPIN",
+          "pivotNode": "fan_hub_1",
+          "nodePrefixes": [
+            "fan_blade_1_"
+          ],
+          "axis": "y",
+          "radiansPerSecond": 5.0,
+          "direction": -1
+        },
+        {
+          "id": "roof_fan_2",
+          "driver": "GROUP_SPIN",
+          "pivotNode": "fan_hub_2",
+          "nodePrefixes": [
+            "fan_blade_2_"
+          ],
+          "axis": "y",
+          "radiansPerSecond": 5.4
+        }
+      ]
     }
   ]
 }

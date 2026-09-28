@@ -79,6 +79,20 @@
     {
       "type": "PowerConsumer",
       "amount": 20
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "dust_fan",
+          "driver": "CONTINUOUS_SPIN",
+          "nodes": [
+            "DustCollectorFanRoot"
+          ],
+          "axis": "z",
+          "radiansPerSecond": 5.4
+        }
+      ]
     }
   ]
 }

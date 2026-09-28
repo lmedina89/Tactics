@@ -37,6 +37,29 @@
       "asset": "aegis_talon_ahx",
       "scale": 1.0,
       "headingOffset": 0.0
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "main_rotor",
+          "driver": "CONTINUOUS_SPIN",
+          "nodes": [
+            "MainRotorRoot"
+          ],
+          "axis": "y",
+          "radiansPerSecond": 22.0
+        },
+        {
+          "id": "tail_rotor",
+          "driver": "CONTINUOUS_SPIN",
+          "nodes": [
+            "TailRotorRoot"
+          ],
+          "axis": "z",
+          "radiansPerSecond": 42.0
+        }
+      ]
     }
   ]
 }

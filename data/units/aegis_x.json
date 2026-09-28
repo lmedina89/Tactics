@@ -81,6 +81,41 @@
     {
       "type": "CommandSet",
       "id": "aegis_combat_unit"
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "road_wheels",
+          "driver": "WHEEL_SPIN",
+          "nodePrefixes": [
+            "RoadWheel_"
+          ],
+          "axis": "z",
+          "radius": 0.48
+        },
+        {
+          "id": "return_rollers",
+          "driver": "WHEEL_SPIN",
+          "nodePrefixes": [
+            "ReturnRoller_"
+          ],
+          "axis": "z",
+          "radius": 0.17
+        },
+        {
+          "id": "drive_wheels",
+          "driver": "WHEEL_SPIN",
+          "nodes": [
+            "Idler_L",
+            "Idler_R",
+            "Sprocket_L",
+            "Sprocket_R"
+          ],
+          "axis": "z",
+          "radius": 0.54
+        }
+      ]
     }
   ]
 }
