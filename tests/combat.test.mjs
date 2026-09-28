@@ -9,6 +9,7 @@ import {validateMapManifest} from '../engine/maps/map-manifest.js';
 import {estimateAdjustedDamage} from '../engine/combat/damage-system.js';
 import {ProjectileSystem} from '../engine/combat/projectile-system.js';
 import {segmentEntityIntersection} from '../engine/geometry/collision-geometry.js';
+import {PlayerRelationMap} from '../engine/players/player-relations.js';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=async p=>JSON.parse(await fs.readFile(path.join(root,p),'utf8'));
@@ -162,6 +163,7 @@ test('world-collision broadphase includes intervening units that cross the shell
   const crossing={id:'cross',playerId:'enemy',alive:true,kind:'vehicle',x:3,y:0,z:4,motionVX:0,motionVY:0,motionVZ:240,modules:{Geometry:{shape:'CYLINDER',radius:.7,height:2}}};
   const weapon={id:'sweep_cross',range:120,projectile:{speed:180,radius:.1,behavior:'DUMB_PROJECTILE',leadTarget:false,designatedTargetCollision:true,targetHeightFactor:.5,worldCollision:{enabled:true,relations:['ENEMY'],kinds:['unit'],terrain:false}}};
   let impact=null;ps.spawn({source,target,weapon,start:{x:0,y:1,z:0},tick:0});
-  ps.step(FIXED_DT,{entityLookup:id=>id==='t'?target:id==='cross'?crossing:null,entitiesProvider:()=>[target,crossing],onImpact:(p,t,hit,info)=>{impact={p,t,hit,info};}});
+  const relations=new PlayerRelationMap({playerIds:['player','enemy']});
+  ps.step(FIXED_DT,{entityLookup:id=>id==='t'?target:id==='cross'?crossing:null,entitiesProvider:()=>[target,crossing],relations,onImpact:(p,t,hit,info)=>{impact={p,t,hit,info};}});
   assert.ok(impact?.hit,'swept moving blocker should collide during the tick');assert.equal(impact.t?.id,'cross');assert.equal(impact.info.type,'WORLD_ENTITY');
 });

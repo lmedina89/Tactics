@@ -1,68 +1,32 @@
-# ForgeRTS v0.6.5 Test Report
+# ForgeRTS v0.6.6 Test Report
 
-**Release:** ForgeRTS v0.6.5 — Content Expansion + World Composition Foundation  
+**Release:** ForgeRTS v0.6.6 — Player Relations + Hostility Authority  
 **Content contract:** v1  
-**Snapshot schema:** v15 (restore accepts v8-v15)
+**Snapshot schema:** v16 (restore accepts v8-v16)
 
 ## Automated regression suite
 
-- **116 / 116 tests pass**.
-- Existing construction, economy, production, harvesting, AI, Team, movement/collision, client-animation and projectile/combat regressions remain green.
-- New content-foundation coverage verifies:
-  - content-contract/template validation
-  - explicit `ContentMeta` on registered production definitions
-  - batch content-pack registration without engine/root-definition edits
-  - category/affiliation indexing
-  - generic wall/gate socket metadata
-  - deterministic wall snapping without concrete wall IDs
-  - ownerless CIVILIAN/NEUTRAL authoritative GameObjects
-  - GLB audit coverage and non-authoritative visual-bound suggestions
-  - v15 snapshot compatibility through the existing snapshot regression suite
-  - release version metadata consistency
+- **125 / 125 tests pass** after the final recovery rerun.
+- All pre-existing construction, economy, production, harvesting, movement/collision, Team/AI, combat/projectile, animation, content-pipeline and mobile-input regressions remain green after updating snapshot-version expectations from v15 to v16.
+- New relationship coverage verifies:
+  - directional SELF / ALLY / NEUTRAL / ENEMY semantics
+  - legacy default hostility for distinct known authored players
+  - neutral handling for unknown/ownerless endpoints
+  - strict map relation validation
+  - ATTACK and allied GUARD_OBJECT authorization
+  - UnitAI and TurretAI target acquisition
+  - projectile world-collision relationship filtering
+  - SkirmishAI, StrategicAI, economic-defense and construction-safety hostility queries
+  - live ENEMY→NEUTRAL revocation of active attack/acquisition
+  - v16 relation snapshot/restore plus v15 compatibility behavior
 
-## Static validation
+## Content and asset gates
 
-- **60 / 60 JS/MJS files** pass `node --check`.
-- **75 / 75 JSON files** parse successfully (including generated machine-readable reports).
-- `npm run validate:content`: **0 errors / 0 warnings** across:
-  - 18 GameObject definitions
-  - 16 registered GLB assets
-  - 8 content templates
-  - 1 content pack
-  - 3 maps
-- **21 / 21 production asset hashes** match `ASSET_HASHES.sha256`.
-- No production GLB or terrain asset bytes changed in v0.6.5.
+- `npm run validate:content`: **0 errors, 0 warnings**.
+- Validated inventory: **18 definitions · 16 assets · 3 maps**.
+- `sha256sum -c ASSET_HASHES.sha256`: **all 21 tracked assets OK**.
+- Production/reference GLB files are unchanged by v0.6.6.
 
-## Asset-ingestion audit
+## Release boundary
 
-`npm run audit:assets` successfully inventories all 16 registered GLBs and emits:
-
-- transformed visual bounds
-- embedded animation clips
-- mesh/material names
-- likely mechanical/animation pivot hints
-- advisory Geometry envelope suggestions
-
-The audit is deliberately non-authoritative: it never writes gameplay collision/balance from the GLB.
-
-## Engineering sanity run
-
-Using the production `construction_validation` map after a 300-tick warmup:
-
-- measured simulation ticks: 3,000
-- final tick: 3,300
-- measured time: 988.874 ms total
-- average: **~0.3296 ms/tick** in this container
-- alive entities: 24
-- runtime Team records: 2
-- snapshot version: 15
-
-This is an engineering sanity measurement, **not an iPhone benchmark**. v0.6.5 intentionally adds very little per-tick work; most new work happens during registry/content/map load and validation.
-
-## Browser / phone validation
-
-Container headless rendering remains unsuitable for the project's external jsDelivr Three.js import because external DNS is unavailable in that environment. Real GitHub Pages/iPhone validation is still recommended, although v0.6.5 intentionally leaves existing production assets/render/gameplay behavior unchanged.
-
-## Release criteria
-
-PASS. The content contract, content-pack registry, neutral/civilian object foundation, wall/gate metadata, GLB audit, content validator and validation map are ready for field use and for the next asset-authoring batch.
+v0.6.6 is intentionally a narrow simulation-authority patch. It does not add diplomacy UI, treaties, team-level relation overrides, mission scripting, player-knowledge/fog systems, ownership transfer, or faction switching. Those remain later layers.

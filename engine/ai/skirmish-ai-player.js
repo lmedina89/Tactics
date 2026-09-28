@@ -10,13 +10,13 @@ const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const roundedPoint=p=>({x:Math.round(p.x*2)/2,z:Math.round(p.z*2)/2});
 
 export class SkirmishAIPlayer{
-  constructor({playerId,profile,map,players,teamManager,entityLookup,entitiesProvider,commandBus,registry,economy,resources,construction,production}){
-    this.playerId=playerId;this.profile=profile;this.entityLookup=entityLookup??(id=>[...entitiesProvider()].find(e=>e.id===id));this.tactical=profile.tactical??{};this.map=map;this.players=players;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;this.registry=registry;
+  constructor({playerId,profile,map,players,relations=null,teamManager,entityLookup,entitiesProvider,commandBus,registry,economy,resources,construction,production}){
+    this.playerId=playerId;this.profile=profile;this.entityLookup=entityLookup??(id=>[...entitiesProvider()].find(e=>e.id===id));this.tactical=profile.tactical??{};this.map=map;this.players=players;this.relations=relations;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;this.registry=registry;
     this.targetEvaluator=new TargetEvaluator({registry});
     const mp=map.players.find(p=>p.id===playerId)??{};this.mapConfig=mp.ai??{};
-    this.strategyPlanner=new StrategicAIPlanner({playerId,profile,mapConfig:this.mapConfig,players,registry,entitiesProvider});
-    this.economyPlanner=new SkirmishEconomyPlanner({playerId,profile,map,registry,players,teamManager,entitiesProvider,commandBus,economy,resources,construction,production});
-    this.economicDefense=new EconomicDefenseManager({playerId,profile,registry,teamManager,entityLookup:this.entityLookup,entitiesProvider,commandBus});
+    this.strategyPlanner=new StrategicAIPlanner({playerId,profile,mapConfig:this.mapConfig,players,registry,entitiesProvider,relations});
+    this.economyPlanner=new SkirmishEconomyPlanner({playerId,profile,map,registry,players,relations,teamManager,entitiesProvider,commandBus,economy,resources,construction,production});
+    this.economicDefense=new EconomicDefenseManager({playerId,profile,registry,relations,teamManager,entityLookup:this.entityLookup,entitiesProvider,commandBus});
     this.currentEnemyPlayerId=null;this.nextThinkTick=this.profile.initialDelayTicks??0;this.nextEnemyAcquireTick=0;this.planRetryTicks={};
   }
 
@@ -33,10 +33,10 @@ export class SkirmishAIPlayer{
   _teamCenter(team){const members=this._teamMembers(team);if(!members.length)return team.rally??team.home??this._baseCenter();return {x:members.reduce((s,e)=>s+e.x,0)/members.length,z:members.reduce((s,e)=>s+e.z,0)/members.length};}
 
   _acquireEnemy(tick){
-    if(tick<this.nextEnemyAcquireTick&&this.currentEnemyPlayerId&&this._owned(this.currentEnemyPlayerId).length)return this.currentEnemyPlayerId;
+    if(tick<this.nextEnemyAcquireTick&&this.currentEnemyPlayerId&&this.relations?.isEnemy(this.playerId,this.currentEnemyPlayerId)&&this._owned(this.currentEnemyPlayerId).length)return this.currentEnemyPlayerId;
     this.nextEnemyAcquireTick=tick+(this.profile.enemyAcquireIntervalTicks??150);const home=this._baseCenter();let best=null,bestScore=Infinity;
     for(const p of this.players.values()){
-      if(p.id===this.playerId||!this._owned(p.id).length)continue;let score=dist(home,this._baseCenter(p.id));if(score<bestScore||(score===bestScore&&p.id<(best?.id??'~'))){best=p;bestScore=score;}
+      if(!this.relations?.isEnemy(this.playerId,p.id)||!this._owned(p.id).length)continue;let score=dist(home,this._baseCenter(p.id));if(score<bestScore||(score===bestScore&&p.id<(best?.id??'~'))){best=p;bestScore=score;}
     }
     this.currentEnemyPlayerId=best?.id??null;return this.currentEnemyPlayerId;
   }
@@ -54,7 +54,7 @@ export class SkirmishAIPlayer{
   _prioritySet(team){return this.teamManager.prototype(team.prototypeId)?.attackPrioritySet??null;}
 
   _findBaseThreat(team){
-    const center=this._defensePoint(),radius=(this.profile.baseThreatRadius??110)*(this.strategyPlanner.state.defenseRadiusScale??1),candidates=[...this.entitiesProvider()].filter(e=>e.alive&&e.playerId&&e.playerId!==this.playerId&&dist(center,e)<=radius);
+    const center=this._defensePoint(),radius=(this.profile.baseThreatRadius??110)*(this.strategyPlanner.state.defenseRadiusScale??1),candidates=[...this.entitiesProvider()].filter(e=>e.alive&&this.relations?.isEnemy(this.playerId,e.playerId)&&dist(center,e)<=radius);
     return this.targetEvaluator.choose(candidates,{from:center,prioritySetId:this._prioritySet(team)})?.target??null;
   }
 
@@ -64,7 +64,7 @@ export class SkirmishAIPlayer{
     for(const victim of this._owned()){
       const categories=aiTargetCategories(this.registry,victim);if(!categories.some(c=>protectedCategories.has(c)))continue;
       if(victim.lastDamagedTick==null||tick-victim.lastDamagedTick>recent||!victim.lastDamagedBy)continue;
-      const attacker=this.entityLookup(victim.lastDamagedBy);if(!attacker?.alive||!attacker.playerId||attacker.playerId===this.playerId)continue;
+      const attacker=this.entityLookup(victim.lastDamagedBy);if(!attacker?.alive||!this.relations?.isEnemy(this.playerId,attacker.playerId))continue;
       if(dist(victim,attacker)>maxDistance)continue;
       if(victim.lastDamagedTick>bestTick||(victim.lastDamagedTick===bestTick&&victim.id<(best?.victim.id??'~'))){best={victim,attacker};bestTick=victim.lastDamagedTick;}
     }
@@ -72,7 +72,7 @@ export class SkirmishAIPlayer{
   }
 
   _enemyObjective(team,tick){
-    const id=this.currentEnemyPlayerId;if(!id)return null;
+    const id=this.currentEnemyPlayerId;if(!id||!this.relations?.isEnemy(this.playerId,id))return null;
     const currentId=team.objective?.type==='ATTACK_PLAYER'?team.objective.targetId:null,current=currentId?this.entityLookup(currentId):null;
     if(current?.alive&&current.playerId===id&&tick<(team.nextTargetEvalTick??0))return {playerId:id,targetId:current.id,position:{x:current.x,z:current.z}};
     const targets=this._owned(id);if(!targets.length)return null;const center=this._teamCenter(team),choice=this.targetEvaluator.choose(targets,{from:center,prioritySetId:this._prioritySet(team)});
@@ -159,10 +159,10 @@ export class SkirmishAIPlayer{
 }
 
 export class SkirmishAISystem{
-  constructor({registry,map,players,teamManager,entityLookup,entitiesProvider,commandBus,economy,resources,construction,production}){
+  constructor({registry,map,players,relations=null,teamManager,entityLookup,entitiesProvider,commandBus,economy,resources,construction,production}){
     this.controllers=new Map();
     if(typeof registry.aiProfile!=='function')return;
-    for(const p of map.players||[]){if(p.isHuman||!p.ai?.profile)continue;const profile=registry.aiProfile(p.ai.profile);if(!profile)throw new Error(`Unknown AI profile ${p.ai.profile} for player ${p.id}`);this.controllers.set(p.id,new SkirmishAIPlayer({playerId:p.id,profile,map,players,teamManager,entityLookup,entitiesProvider,commandBus,registry,economy,resources,construction,production}));}
+    for(const p of map.players||[]){if(p.isHuman||!p.ai?.profile)continue;const profile=registry.aiProfile(p.ai.profile);if(!profile)throw new Error(`Unknown AI profile ${p.ai.profile} for player ${p.id}`);this.controllers.set(p.id,new SkirmishAIPlayer({playerId:p.id,profile,map,players,relations,teamManager,entityLookup,entitiesProvider,commandBus,registry,economy,resources,construction,production}));}
   }
   update(tick){for(const c of this.controllers.values())c.update(tick);}
   snapshot(){return {controllers:[...this.controllers.values()].map(c=>c.snapshot())};}

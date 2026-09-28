@@ -70,7 +70,7 @@ function segmentTerrainIntersection(start,end,terrain,{projectileRadius=0,sample
   return null;
 }
 
-function relationToProjectile(p,entity){if(entity.playerId==null)return 'NEUTRAL';if(entity.playerId===p.sourcePlayerId)return 'ALLY';return 'ENEMY';}
+function relationToProjectile(p,entity,relations){return relations?.get?relations.get(p.sourcePlayerId,entity?.playerId):'NEUTRAL';}
 function collisionKind(entity){if(entity.kind==='building')return 'building';if(entity.kind==='resource')return 'resource';return 'unit';}
 
 function broadphaseSegmentEntity(start,end,entity,dt,radius=0){
@@ -82,10 +82,10 @@ function broadphaseSegmentEntity(start,end,entity,dt,radius=0){
   return entityMaxX>=segMinX&&entityMinX<=segMaxX&&entityMaxZ>=segMinZ&&entityMinZ<=segMaxZ;
 }
 
-function worldCollisionAllows(p,entity){
+function worldCollisionAllows(p,entity,relationMap){
   const cfg=p.worldCollision;if(!cfg?.enabled||!entity?.alive||entity.id===p.sourceId||entity.id===p.targetId)return false;
-  const relations=cfg.relations??['ENEMY'],kinds=cfg.kinds??['unit','building'];
-  return relations.includes(relationToProjectile(p,entity))&&kinds.includes(collisionKind(entity));
+  const allowedRelations=cfg.relations??['ENEMY'],kinds=cfg.kinds??['unit','building'];
+  return allowedRelations.includes(relationToProjectile(p,entity,relationMap))&&kinds.includes(collisionKind(entity));
 }
 
 export class ProjectileSystem{
@@ -122,7 +122,7 @@ export class ProjectileSystem{
 
   _finish(id,p,target,hit,onImpact,info={}){onImpact?.(p,target,hit,info);this.projectiles.delete(id);}
 
-  _earliestCollision(p,start,end,dt,{entityLookup,entitiesProvider,terrain}){
+  _earliestCollision(p,start,end,dt,{entityLookup,entitiesProvider,terrain,relations}){
     let best=null;const consider=(t,target,type)=>{if(t==null||t<0||t>1)return;const key=target?.id??type;if(!best||t<best.t-EPS||(Math.abs(t-best.t)<=EPS&&String(key)<String(best.key))){best={t,target:type==='TERRAIN'?null:target,type,key};}};
     const designated=entityLookup(p.targetId);
     if(designated?.alive&&p.designatedTargetCollision!==false){
@@ -130,7 +130,7 @@ export class ProjectileSystem{
     }
     if(p.worldCollision?.enabled&&entitiesProvider){
       for(const entity of entitiesProvider()){
-        if(!worldCollisionAllows(p,entity)||!broadphaseSegmentEntity(start,end,entity,dt,(p.radius??0)+(p.impactPadding??0)))continue;
+        if(!worldCollisionAllows(p,entity,relations)||!broadphaseSegmentEntity(start,end,entity,dt,(p.radius??0)+(p.impactPadding??0)))continue;
         consider(movingTargetIntersection(start,end,entity,dt,{projectileRadius:p.radius??0,padding:p.impactPadding??0}),entity,'WORLD_ENTITY');
       }
     }
@@ -140,10 +140,10 @@ export class ProjectileSystem{
     return best;
   }
 
-  step(dt,{entityLookup,entitiesProvider=null,terrain=null,onImpact}){
+  step(dt,{entityLookup,entitiesProvider=null,terrain=null,relations=null,onImpact}){
     for(const [id,p] of [...this.projectiles]){
       p.age=(p.age??0)+dt;const target=entityLookup(p.targetId);this._guide(p,target,dt);
-      const start={x:p.x,y:p.y,z:p.z},end={x:p.x+p.vx*dt,y:p.y+p.vy*dt,z:p.z+p.vz*dt},collision=this._earliestCollision(p,start,end,dt,{entityLookup,entitiesProvider,terrain});
+      const start={x:p.x,y:p.y,z:p.z},end={x:p.x+p.vx*dt,y:p.y+p.vy*dt,z:p.z+p.vz*dt},collision=this._earliestCollision(p,start,end,dt,{entityLookup,entitiesProvider,terrain,relations});
       if(collision){p.x=start.x+(end.x-start.x)*collision.t;p.y=start.y+(end.y-start.y)*collision.t;p.z=start.z+(end.z-start.z)*collision.t;this._finish(id,p,collision.target,true,onImpact,{type:collision.type,intendedTargetId:p.targetId});continue;}
       p.x=end.x;p.y=end.y;p.z=end.z;
       if(p.age>=(p.maxLifetimeSeconds??3))this._finish(id,p,target,false,onImpact,{type:'EXPIRED',intendedTargetId:p.targetId});

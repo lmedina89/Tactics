@@ -7,11 +7,11 @@ const headingTo=(a,b)=>Math.atan2(b.x-a.x,b.z-a.z);
 const ticks=(seconds)=>Math.max(0,Math.ceil((seconds??0)*30));
 
 export class CombatSystem{
-  constructor({registry,entityLookup,projectiles,terrain=null}){
-    this.registry=registry;this.entityLookup=entityLookup;this.projectiles=projectiles;this.terrain=terrain;this.events=[];this.eventSerial=0;
+  constructor({registry,entityLookup,projectiles,terrain=null,relations=null}){
+    this.registry=registry;this.entityLookup=entityLookup;this.projectiles=projectiles;this.terrain=terrain;this.relations=relations;this.events=[];this.eventSerial=0;
   }
   _emit(event){this.events.push({serial:++this.eventSerial,...event});if(this.events.length>128)this.events.shift();}
-  _enemy(a,b){return !!(a?.playerId&&b?.playerId&&a.playerId!==b.playerId&&b.alive);}
+  _enemy(a,b){return !!(b?.alive&&this.relations?.isEnemy(a?.playerId,b?.playerId));}
   _targetValid(source,target,weapon=null){return this._enemy(source,target)&&(!weapon||weaponCanTarget(weapon,target));}
   _nearestAutoTarget(source,range){
     let best=null,bestD=Infinity;
@@ -93,7 +93,7 @@ export class CombatSystem{
       const distance=Math.hypot(target.x-entity.x,target.z-entity.z),aimError=this._turnAim(entity,target,dt);
       if(this._canFireSlot(choice.slot,choice.weapon,target,tick,aimError,distance))this._fire(entity,target,choice,tick);
     }
-    this.projectiles.step(dt,{entityLookup:this.entityLookup,entitiesProvider:()=>this._allEntities(),terrain:this.terrain,onImpact:(p,target,hit,info={})=>{
+    this.projectiles.step(dt,{entityLookup:this.entityLookup,entitiesProvider:()=>this._allEntities(),terrain:this.terrain,relations:this.relations,onImpact:(p,target,hit,info={})=>{
       const weapon=this.registry.weapon(p.weaponId);let result={applied:0,destroyed:false};
       if(hit&&target?.alive)result=applyDamage({registry:this.registry,target,weapon,sourceId:p.sourceId,tick});
       const actualTargetId=target?.id??null;

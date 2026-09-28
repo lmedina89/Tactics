@@ -12,15 +12,15 @@ const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
  * combat/economy state directly.
  */
 export class EconomicDefenseManager{
-  constructor({playerId,profile,registry,teamManager,entityLookup,entitiesProvider,commandBus}){
-    this.playerId=playerId;this.registry=registry;this.teamManager=teamManager;this.entityLookup=entityLookup;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;
+  constructor({playerId,profile,registry,relations=null,teamManager,entityLookup,entitiesProvider,commandBus}){
+    this.playerId=playerId;this.registry=registry;this.relations=relations;this.teamManager=teamManager;this.entityLookup=entityLookup;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;
     this.cfg=profile.tactical?.economicDefense??{};
     this.nextScanTick=0;this.activeTeamId=null;this.borrowedTeamIds=[];this.protectedTargetId=null;this.primaryThreatId=null;this.holdUntilTick=0;this.escortUntilTick=0;
     this.lastSeenDamageTick={};this.incidents={};
   }
 
   _owned(){return [...this.entitiesProvider()].filter(e=>e.alive&&e.playerId===this.playerId);}
-  _hostiles(){return [...this.entitiesProvider()].filter(e=>e.alive&&e.playerId&&e.playerId!==this.playerId);}
+  _hostiles(){return [...this.entitiesProvider()].filter(e=>e.alive&&this.relations?.isEnemy(this.playerId,e.playerId));}
   _categories(e){return aiTargetCategories(this.registry,e);}
   _protected(e){const wanted=new Set(this.cfg.protectedCategories??['HARVESTER','ECONOMY','BUILDER']);return this._categories(e).some(c=>wanted.has(c));}
   _team(){const t=this.activeTeamId?this.teamManager.team(this.activeTeamId):null;return t&&!([TeamState.DESTROYED,TeamState.DISBANDED].includes(t.state))?t:null;}
@@ -30,7 +30,7 @@ export class EconomicDefenseManager{
     const recent=Math.max(1,this.cfg.recentDamageTicks??180);let best=null;
     for(const victim of this._owned()){
       if(!this._protected(victim)||victim.lastDamagedTick==null||tick-victim.lastDamagedTick>recent||!victim.lastDamagedBy)continue;
-      const attacker=this.entityLookup(victim.lastDamagedBy);if(!attacker?.alive||!attacker.playerId||attacker.playerId===this.playerId)continue;
+      const attacker=this.entityLookup(victim.lastDamagedBy);if(!attacker?.alive||!this.relations?.isEnemy(this.playerId,attacker.playerId))continue;
       const maxDistance=this.cfg.maxRetaliateDistance??170;if(maxDistance>0&&dist(victim,attacker)>maxDistance)continue;
       if(!best||victim.lastDamagedTick>best.damageTick||(victim.lastDamagedTick===best.damageTick&&victim.id<best.victim.id))best={victim,attacker,damageTick:victim.lastDamagedTick};
     }

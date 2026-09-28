@@ -1,5 +1,17 @@
 # ForgeRTS Changelog
 
+## v0.6.6 — Player Relations + Hostility Authority
+
+- Added simulation-owned, deterministic `PlayerRelationMap` with implicit `SELF` and directional `ALLY` / `NEUTRAL` / `ENEMY` overrides.
+- Added validated map `playerRelations[]` data with strict player-endpoint, relation-value, duplicate-pair and SELF-override rejection.
+- Preserved the v0.6.5 two-player baseline by treating distinct known authored players as ENEMY when no explicit relation exists; unknown/ownerless endpoints resolve as NEUTRAL.
+- Replaced different-owner hostility assumptions in ATTACK authorization, UnitAI target acquisition/chase, TurretAI, projectile world collision, SkirmishAI enemy/base-defense logic, StrategicAI threat evaluation, economic defense and AI construction-safety checks.
+- `GUARD_OBJECT` now accepts allied-owned targets through the same relation authority while ownership of ordinary player commands remains unchanged.
+- Added simulation relationship query/mutation APIs for future mission scripting. Runtime ENEMY→NEUTRAL changes revoke hostile attack/acquisition on the next fixed simulation step; already-fired projectiles remain physical simulation objects.
+- Snapshot schema advanced to **v16** and persists relation overrides; v8-v15 restore remains supported, with pre-v16 saves deriving map-start relationships.
+- Added `PLAYER_RELATIONS_AUDIT.md` and relation regression coverage. Full automated suite now passes **125/125** tests.
+- No production GLBs, terrain assets, movement rules, economy rules, production rules or renderer-owned gameplay authority were changed.
+
 ## v0.6.5 — Content Expansion + World Composition Foundation
 
 - Added versioned ForgeRTS content contract v1 and explicit `ContentMeta` classification to all registered production definitions.

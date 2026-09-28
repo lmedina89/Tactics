@@ -18,6 +18,7 @@ export function validateMapManifest(raw) {
   map.region.strategic.aiActivity ??= 0;
   map.region.strategic.discoveredBy ??= [];
   map.players ??= [];
+  map.playerRelations ??= [];
   map.objects ??= [];
   map.roads ??= [];
   map.water ??= { rivers: [], lakes: [] };
@@ -39,6 +40,15 @@ export function validateMapManifest(raw) {
     if (!p.id || !p.faction) throw new Error('Each map player needs id and faction');
     if (playerIds.has(p.id)) throw new Error(`Duplicate player id ${p.id}`);
     playerIds.add(p.id);
+  }
+  const relationKeys=new Set();
+  const validRelations=new Set(['ALLY','NEUTRAL','ENEMY']);
+  for(const r of map.playerRelations){
+    if(!r?.from||!r?.to)throw new Error('Each player relation needs from and to');
+    if(!playerIds.has(r.from)||!playerIds.has(r.to))throw new Error(`Player relation ${r.from} -> ${r.to} references unknown player`);
+    if(r.from===r.to)throw new Error(`Player relation ${r.from} -> ${r.to} cannot override SELF`);
+    if(!validRelations.has(r.relation))throw new Error(`Player relation ${r.from} -> ${r.to} has invalid relation ${r.relation}`);
+    const key=`${r.from}\u0000${r.to}`;if(relationKeys.has(key))throw new Error(`Duplicate player relation ${r.from} -> ${r.to}`);relationKeys.add(key);
   }
   const waypointIds=new Set();
   for(const w of map.waypoints){if(!w.id)throw new Error('Each waypoint needs id');if(waypointIds.has(w.id))throw new Error(`Duplicate waypoint id ${w.id}`);waypointIds.add(w.id);}

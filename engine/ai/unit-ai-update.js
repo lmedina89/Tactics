@@ -58,8 +58,10 @@ function stepMove(entity,locomotor,pathfinder,tick){stepMoveTo(entity,entity.ai.
 
 function attackApproachPoint(entity,target,range,minimumRange){const dx=entity.x-target.x,dz=entity.z-target.z,d=Math.hypot(dx,dz)||1;let desired=Math.max(minimumRange*1.25,range*0.82);if(d<minimumRange*1.05)desired=Math.max(minimumRange*1.35,range*0.18);return {x:target.x+dx/d*desired,z:target.z+dz/d*desired};}
 
+function isHostile(entity,target,context){return !!(target?.alive&&context?.relations?.isEnemy(entity?.playerId,target?.playerId));}
+
 function nearestEnemy(entity,context,range,{center=null,centerRange=Infinity,requireInWeaponRange=false}={}){
-  let best=null,bestD=Infinity;for(const target of context?.entitiesProvider?.()||[]){if(!target?.alive||!target.playerId||target.playerId===entity.playerId)continue;const engagement=engagementProfile(entity,target,context.registry);if(!engagement)continue;const d=dist(entity,target);if(d>range)continue;if(center&&dist(center,target)>centerRange)continue;if(requireInWeaponRange&&(d>engagement.range||d<engagement.minimumRange))continue;if(d<bestD){best=target;bestD=d;}}
+  let best=null,bestD=Infinity;for(const target of context?.entitiesProvider?.()||[]){if(!isHostile(entity,target,context))continue;const engagement=engagementProfile(entity,target,context.registry);if(!engagement)continue;const d=dist(entity,target);if(d>range)continue;if(center&&dist(center,target)>centerRange)continue;if(requireInWeaponRange&&(d>engagement.range||d<engagement.minimumRange))continue;if(d<bestD){best=target;bestD=d;}}
   return best;
 }
 
@@ -67,7 +69,7 @@ function beginEngagement(entity,target){const ai=entity.ai;ai.engagementTargetId
 function dropEngagement(entity){resetEngagement(entity.ai);resetRoute(entity.ai);if(entity.combat)entity.combat.manualTargetId=null;}
 
 function stepEngagement(entity,target,locomotor,pathfinder,tick,context,{chaseOrigin=null,chaseDistance=Infinity,holdPosition=false,onLost=()=>{}}={}){
-  const ai=entity.ai;if(!target?.alive||!target.playerId||target.playerId===entity.playerId){dropEngagement(entity);onLost();return;}
+  const ai=entity.ai;if(!isHostile(entity,target,context)){dropEngagement(entity);onLost();return;}
   if(chaseOrigin&&dist(chaseOrigin,target)>chaseDistance){dropEngagement(entity);onLost();return;}
   const engagement=engagementProfile(entity,target,context.registry);if(!engagement){dropEngagement(entity);onLost();return;}
   ai.engagementTargetId=target.id;if(entity.combat)entity.combat.manualTargetId=target.id;

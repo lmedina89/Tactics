@@ -16,6 +16,7 @@ import {ConstructionSystem} from '../construction/construction-system.js';
 import {TeamManager} from '../teams/team-manager.js';
 import {SkirmishAISystem} from '../ai/skirmish-ai-player.js';
 import {validateMapContent} from '../content/content-validator.js';
+import {PlayerRelationMap} from '../players/player-relations.js';
 
 export const FIXED_DT=1/30;
 
@@ -25,6 +26,7 @@ export class Simulation{
     this.contentValidation=validateMapContent(map,registry,{strict:!!registry.contentContract});
     this.tick=0;this.entities=new Map();this.players=new Map();this.rng=new SeededRng(map.seed??1);this.lastCommandResult=null;this.lastPlayerCommandResult=null;this.defaultIssuerPlayerId=map.players?.find(p=>p.isHuman)?.id??map.players?.[0]?.id??null;
     for(const p of map.players||[])this.players.set(p.id,{id:p.id,factionId:p.faction,isHuman:!!p.isHuman,credits:p.startingCredits??0,powerProduced:0,powerUsed:0,lowPower:false,resourcesHarvested:{}});
+    this.playerRelations=new PlayerRelationMap({playerIds:[...this.players.keys()],entries:map.playerRelations??[]});
     this.regionStates=new Map();
     const region=map.region||{id:map.id};
     this.regionStates.set(region.id,{id:region.id,owner:region.strategic?.owner??null,threat:region.strategic?.threat??0,resourceValue:region.strategic?.resourceValue??0,aiActivity:region.strategic?.aiActivity??0,discoveredBy:[...(region.strategic?.discoveredBy||[])]});
@@ -36,12 +38,12 @@ export class Simulation{
     this.teams=new TeamManager({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values()});
     this.interactions=new InteractionManager({registry:this.registry,entityLookup:id=>this.entities.get(id)});
     this.projectiles=new ProjectileSystem();
-    this.combat=new CombatSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),projectiles:this.projectiles,terrain:this.terrain}).bindEntitiesProvider(()=>this.entities.values());
+    this.combat=new CombatSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),projectiles:this.projectiles,terrain:this.terrain,relations:this.playerRelations}).bindEntitiesProvider(()=>this.entities.values());
     this.economy=new FactionEconomySystem({registry:this.registry,players:this.players,entitiesProvider:()=>this.entities.values()});
     this.resources=new ResourceSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),interactions:this.interactions,economy:this.economy,pathfinder:this.pathfinder});
     this.production=new ProductionSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),economy:this.economy,interactions:this.interactions,pathfinder:this.pathfinder,spawnEntity:o=>this._spawnEntity(o)});
     this.construction=new ConstructionSystem({registry:this.registry,map:this.map,terrain:this.terrain,economy:this.economy,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),pathfinder:this.pathfinder,spawnEntity:o=>this._spawnEntity(o),removeEntity:id=>this._removeEntity(id)});
-    this.skirmishAI=new SkirmishAISystem({registry:this.registry,map:this.map,players:this.players,teamManager:this.teams,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),commandBus:this.commandBus,economy:this.economy,resources:this.resources,construction:this.construction,production:this.production});
+    this.skirmishAI=new SkirmishAISystem({registry:this.registry,map:this.map,players:this.players,relations:this.playerRelations,teamManager:this.teams,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),commandBus:this.commandBus,economy:this.economy,resources:this.resources,construction:this.construction,production:this.production});
   }
 
   _buildNavigationMap(map){const nav=structuredClone(map);nav.staticObstacles=[...(map.staticObstacles||[])];return nav;}
@@ -80,6 +82,11 @@ export class Simulation{
   issueBuildStructure(sourceId,definitionId,{x,z,yaw=0,issuerPlayerId=this.defaultIssuerPlayerId,commandSource=CommandSource.PLAYER}={}){return this.commandBus.issue({type:CommandType.BUILD_STRUCTURE,sourceId,definitionId,x,z,yaw,issuerPlayerId,commandSource,append:false});}
   issueCancelConstruction(siteId,options={}){return this.commandBus.issue({type:CommandType.CANCEL_CONSTRUCTION,siteId,...this._commandMeta(options),append:false});}
   previewBuild(sourceId,definitionId,{x,z,yaw=0}){return this.construction.validatePlacement(sourceId,definitionId,x,z,yaw);}
+  getPlayerRelation(fromPlayerId,toPlayerId){return this.playerRelations.get(fromPlayerId,toPlayerId);}
+  isHostile(fromPlayerId,toPlayerId){return this.playerRelations.isEnemy(fromPlayerId,toPlayerId);}
+  isAllied(fromPlayerId,toPlayerId){return this.playerRelations.isAllied(fromPlayerId,toPlayerId);}
+  setPlayerRelation(fromPlayerId,toPlayerId,relation){return this.playerRelations.set(fromPlayerId,toPlayerId,relation);}
+  removePlayerRelation(fromPlayerId,toPlayerId){return this.playerRelations.remove(fromPlayerId,toPlayerId);}
 
   step(dt=FIXED_DT){
     for(const c of this.commandBus.drain())this._apply(c);
@@ -93,7 +100,7 @@ export class Simulation{
     const motionStart=new Map(movers.map(e=>[e.id,{x:e.x,y:e.y,z:e.z}]));
     for(const e of movers){
       const cfg=this.registry.locomotor(e.locomotorId);
-      if(e.modules?.UnitAIUpdate)stepUnitAI(e,cfg,this.pathfinder,this.tick,{registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values()});
+      if(e.modules?.UnitAIUpdate)stepUnitAI(e,cfg,this.pathfinder,this.tick,{registry:this.registry,relations:this.playerRelations,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values()});
     }
     const motionConstraints=this.localAvoidance.prepare(movers,dt);
     for(const e of movers){const cfg=this.registry.locomotor(e.locomotorId);stepLocomotor(e,cfg,dt,this.terrain,motionConstraints.get(e.id));}
@@ -126,12 +133,12 @@ export class Simulation{
     if(c.type===CommandType.MOVE)return this._applyUnitGroup(c,e=>!!e.locomotorId,e=>{this.resources.cancel(e,'MOVE');assignMoveOrder(e,c);});
     if(c.type===CommandType.ATTACK){
       const target=this.entities.get(c.targetId);if(!target?.alive)return this._finishCommand(c,{reason:'INVALID_TARGET'});
-      return this._applyUnitGroup(c,e=>!!e.locomotorId&&!!e.weaponSlots?.slots?.length&&!!e.playerId&&!!target.playerId&&e.playerId!==target.playerId,e=>{this.resources.cancel(e,'ATTACK');assignAttackOrder(e,c);});
+      return this._applyUnitGroup(c,e=>!!e.locomotorId&&!!e.weaponSlots?.slots?.length&&this.playerRelations.isEnemy(e.playerId,target.playerId),e=>{this.resources.cancel(e,'ATTACK');assignAttackOrder(e,c);});
     }
     if(c.type===CommandType.ATTACK_MOVE)return this._applyUnitGroup(c,e=>!!e.locomotorId&&!!e.weaponSlots?.slots?.length,e=>{this.resources.cancel(e,'ATTACK_MOVE');assignAttackMoveOrder(e,c);});
     if(c.type===CommandType.GUARD_POSITION)return this._applyUnitGroup(c,e=>!!e.locomotorId&&!!e.weaponSlots?.slots?.length,e=>{this.resources.cancel(e,'GUARD');assignGuardPositionOrder(e,c);});
     if(c.type===CommandType.GUARD_OBJECT){
-      const target=this.entities.get(c.targetId);if(!target?.alive||!target.playerId||!this._authorized(c,target))return this._finishCommand(c,{reason:'INVALID_GUARD_TARGET'});
+      const target=this.entities.get(c.targetId);if(!target?.alive||!target.playerId||!this.playerRelations.isAllied(c.issuerPlayerId,target.playerId))return this._finishCommand(c,{reason:'INVALID_GUARD_TARGET'});
       return this._applyUnitGroup(c,e=>!!e.locomotorId&&!!e.weaponSlots?.slots?.length&&e.id!==target.id,e=>{this.resources.cancel(e,'GUARD');assignGuardObjectOrder(e,c);});
     }
     if(c.type===CommandType.SET_STANCE)return this._applyUnitGroup(c,e=>!!e.modules?.UnitAIUpdate&&!!e.weaponSlots?.slots?.length,e=>setUnitStance(e,c.stance));
@@ -150,7 +157,7 @@ export class Simulation{
 
   snapshot(){
     return {
-      version:15,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),constructionSystem:this.construction.snapshot(),teams:this.teams.snapshot(),skirmishAI:this.skirmishAI.snapshot(),
+      version:16,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),constructionSystem:this.construction.snapshot(),teams:this.teams.snapshot(),skirmishAI:this.skirmishAI.snapshot(),playerRelations:this.playerRelations.snapshot(),
       players:[...this.players.values()].map(p=>structuredClone(p)),regionStates:[...this.regionStates.values()].map(r=>structuredClone(r)),
       entities:[...this.entities.values()].map(e=>({
         id:e.id,definitionId:e.definitionId,playerId:e.playerId,teamId:e.teamId??null,factionId:e.factionId,affiliation:e.affiliation??null,contentCategories:[...(e.contentCategories||[])],kind:e.kind,
@@ -163,9 +170,9 @@ export class Simulation{
   }
 
   restore(snapshot){
-    if(![8,9,10,11,12,13,14,15].includes(snapshot?.version??0))throw new Error('Unsupported ForgeRTS snapshot version');
+    if(![8,9,10,11,12,13,14,15,16].includes(snapshot?.version??0))throw new Error('Unsupported ForgeRTS snapshot version');
     this.tick=snapshot.tick??0;this.rng.restore(snapshot.rngState??1);this.commandBus.restore(snapshot.commandBus??{});
-    this.players=new Map((snapshot.players||[]).map(p=>[p.id,{...structuredClone(p),resourcesHarvested:structuredClone(p.resourcesHarvested||{})}]));this.economy.players=this.players;this.construction.techTree.economy=this.economy;for(const c of this.skirmishAI.controllers.values()){c.players=this.players;if(c.economyPlanner)c.economyPlanner.players=this.players;if(c.strategyPlanner)c.strategyPlanner.players=this.players;}
+    this.players=new Map((snapshot.players||[]).map(p=>[p.id,{...structuredClone(p),resourcesHarvested:structuredClone(p.resourcesHarvested||{})}]));this.economy.players=this.players;this.construction.techTree.economy=this.economy;this.playerRelations.playerIds=new Set(this.players.keys());if((snapshot.version??0)>=16&&snapshot.playerRelations)this.playerRelations.restore(snapshot.playerRelations);else this.playerRelations.reset(this.map.playerRelations??[]);for(const c of this.skirmishAI.controllers.values()){c.players=this.players;if(c.economyPlanner)c.economyPlanner.players=this.players;if(c.strategyPlanner)c.strategyPlanner.players=this.players;}
     this.regionStates=new Map((snapshot.regionStates||[]).map(r=>[r.id,structuredClone(r)]));
     const snapshotIds=new Set((snapshot.entities||[]).map(e=>e.id));for(const id of [...this.entities.keys()])if(!snapshotIds.has(id))this.entities.delete(id);
     for(const s of snapshot.entities||[]){let e=this.entities.get(s.id);const def=this.registry.definition(s.definitionId);if(!e){const player=s.playerId?this.players.get(s.playerId):null;e=createGameObjectRuntime({definition:def,spawn:{id:s.id,definition:s.definitionId,owner:s.playerId,x:s.x,z:s.z,yaw:s.yaw,construction:s.construction},player,registry:this.registry,terrain:this.terrain});this.entities.set(s.id,e);}Object.assign(e,structuredClone(s));const meta=def?moduleConfig(def,'ContentMeta'):null;e.affiliation=s.affiliation??meta?.affiliation??(e.playerId?'FACTION':'WORLD');e.contentCategories=[...(s.contentCategories??meta?.categories??[])];}

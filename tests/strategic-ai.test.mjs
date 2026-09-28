@@ -59,8 +59,8 @@ test('expansion logic requires a real local-resource depletion baseline and then
   assert.notEqual(s.expansionResourceId,local.id);
 });
 
-test('strategic planner state survives v15 snapshot restore deterministically',async()=>{
-  const a=await makeSim();for(let i=0;i<240;i++)a.step(FIXED_DT);const snap=a.snapshot();assert.equal(snap.version,15);
+test('strategic planner state survives v16 snapshot restore deterministically',async()=>{
+  const a=await makeSim();for(let i=0;i<240;i++)a.step(FIXED_DT);const snap=a.snapshot();assert.equal(snap.version,16);
   const b=await makeSim();b.restore(snap);assert.deepEqual(b.snapshot(),snap);
   for(let i=0;i<180;i++){a.step(FIXED_DT);b.step(FIXED_DT);}assert.deepEqual(b.snapshot(),a.snapshot());
 });

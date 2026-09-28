@@ -50,7 +50,7 @@
 48. **Collision is ownership-independent.** Ground movers are physically solid based on layer/geometry, not player allegiance.
 49. **Visual assets never define gameplay implicitly.** GLB bounds, nodes and animations are inspection/presentation data; authoritative `Geometry`, `Footprint`, health, armor, locomotion and balance remain explicit content data.
 50. **Content packs are runtime-neutral registration.** New asset families should enter through validated manifests/definitions, not concrete runtime branches.
-51. **Civilian/neutral content classification is not diplomacy.** `ContentMeta.affiliation` organizes authoring/runtime content; authoritative ALLY/NEUTRAL/ENEMY relations belong to the future PlayerRelationMap.
+51. **Civilian/neutral content classification is not diplomacy.** `ContentMeta.affiliation` organizes authoring/runtime content; authoritative directional SELF/ALLY/NEUTRAL/ENEMY relations belong to simulation-owned `PlayerRelationMap`.
 52. **WorldForge is an exporter, never a runtime dependency.** ForgeRTS consumes stable GLB/JSON/content-pack/map data and must run without WorldForge code.
 53. **Playable towns remain object-addressable.** Buildings, gates, walls and relevant props are separate authoritative objects whenever later gameplay/mission logic may reference them.
 54. **Content is validated before play.** Missing assets/references, invalid modules, impossible authoring bindings and known reachability/placement hazards should be caught headlessly whenever practical.
@@ -206,7 +206,7 @@ GameObject factory
         └── disposable Render/ClientAnimation presentation
 ```
 
-`CIVILIAN`, `NEUTRAL` and `WORLD` affiliations are valid ownerless content classes in v0.6.5, but they do not implement diplomacy. Until PlayerRelationMap lands, do not infer ALLY/NEUTRAL/ENEMY gameplay relationships from ContentMeta.
+`CIVILIAN`, `NEUTRAL` and `WORLD` affiliations are valid ownerless content classes, but they do not implement diplomacy. v0.6.6 adds simulation-owned `PlayerRelationMap`; never infer ALLY/NEUTRAL/ENEMY gameplay relationships from `ContentMeta`. Known distinct authored players default to ENEMY only for backward compatibility unless an explicit map/runtime relationship overrides that state.
 
 Walls/gates use generic `WallConnection` metadata (`connectionGroup`, role, sockets, snapDistance) so future editors can compose them without runtime knowledge of concrete wall IDs. The current release establishes data and deterministic snapping only; drag-build, corner selection and gate pathing remain later behavior layers.
 

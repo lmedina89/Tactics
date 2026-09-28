@@ -1,4 +1,25 @@
-# ForgeRTS v0.6.5 — Content Expansion + World Composition Foundation
+# ForgeRTS v0.6.6 — Player Relations + Hostility Authority
+
+## v0.6.6 — Player Relations + Hostility Authority
+
+v0.6.6 inserts an authoritative player-relationship layer before mission scripting. Runtime hostility is no longer inferred from "different owner" checks. `SELF`, `ALLY`, `NEUTRAL`, and `ENEMY` are directional simulation relationships, independent from v0.6.5 `ContentMeta.affiliation`. Existing authored players remain enemies by default unless a map or runtime relationship overrides that behavior, preserving the validated Aegis-vs-Crimson baseline. Snapshot format is **v16** with restore support retained for v8-v15.
+
+### Relationship authority
+
+- Added deterministic `PlayerRelationMap` state with implicit `SELF` and authored directional `ALLY` / `NEUTRAL` / `ENEMY` relationships.
+- Added validated map-level `playerRelations[]` entries. Invalid endpoints, duplicate directional pairs, invalid values and attempts to author `SELF` are rejected at load time.
+- Added simulation-owned relationship queries/mutation (`getPlayerRelation`, `isHostile`, `isAllied`, `setPlayerRelation`, `removePlayerRelation`) so future mission scripts have one authoritative entry point.
+- ATTACK authorization, UnitAI acquisition/chase, turret acquisition, projectile world-collision relation filters, SkirmishAI enemy selection/base defense, StrategicAI threat queries, economic defense and AI construction-safety checks now consult the relationship map.
+- `GUARD_OBJECT` may protect objects owned by an allied player while ordinary selection/command ownership remains unchanged.
+- Runtime relationship changes take effect immediately: an ENEMY→NEUTRAL change revokes active hostile acquisition/explicit attack intent on the next fixed simulation step. In-flight projectiles remain physical objects rather than disappearing.
+- Unknown/ownerless endpoints are neutral by relationship policy. `CIVILIAN`, `NEUTRAL`, and `WORLD` content affiliations still do not imply diplomacy.
+
+### Compatibility and scope
+
+- Existing maps do not need relationship entries: two known distinct authored players continue to default to `ENEMY`, preserving pre-v0.6.6 gameplay.
+- v16 snapshots persist relationship overrides. Restoring v8-v15 derives relationships from current map-start relationship data.
+- This release does **not** add diplomacy UI, treaties, team-level relationship overrides, mission scripting, fog/shroud/player knowledge, or faction switching. Those remain separate layers.
+- See `PLAYER_RELATIONS_AUDIT.md` for the source comparison, pre-change call-site audit, implementation boundary and deferred work.
 
 ## v0.6.5 — Content Expansion + World Composition Foundation
 
@@ -7,7 +28,7 @@ v0.6.5 establishes the stable content/runtime contract needed before ForgeRTS ex
 ### Content pipeline
 
 - Added versioned `data/content-contract.json` and explicit `ContentMeta` on every registered production definition.
-- Added FACTION / CIVILIAN / NEUTRAL / WORLD affiliations plus stable content categories. These are content classifications; full ALLY/NEUTRAL/ENEMY diplomacy is still planned for v0.7.0.
+- Added FACTION / CIVILIAN / NEUTRAL / WORLD affiliations plus stable content categories. These are content classifications; v0.6.6 adds separate authoritative player relationships without changing that distinction.
 - Added eight authoring templates covering civilian/military buildings, vehicles, infantry, aircraft, walls, gates and props. Templates validate structure but do not become runtime inheritance.
 - Added batch `contentPacks` so future asset families can register definitions/catalogs without adding engine-source branches or bloating the root definition list.
 - Added generic `WallConnection` groups/sockets and deterministic snap math for future wall/gate authoring. Advanced drag-build/gate pathing remains deferred.
@@ -44,7 +65,7 @@ v0.6.4 closes the remaining known skirmish-defense and ordinary cannon-collision
 
 See `SKIRMISH_DEFENSE_COMBAT_AUDIT.md` for the source comparison, data model and deferred combat layers.
 
-ForgeRTS is a separate browser-native RTS engine. WorldForge remains a separate authoring/reference project; v0.6.5 establishes a shared export contract without creating a runtime dependency.
+ForgeRTS is a separate browser-native RTS engine. WorldForge remains a separate authoring/reference project; v0.6.5 established the shared export contract without creating a runtime dependency.
 
 v0.6.3 keeps the v0.6.2 tactical layer and closes a foundational combat gap before adding strategic intelligence. Physical shells now use launch prediction, fixed-step swept collision, real GameObject Geometry, and separate unguided/guided projectile policies. Above the existing Team/Tactical/Economy layers, a timer-bounded StrategicAIPlanner can adapt Team composition to observed enemy categories, wealth, difficulty, personality, and resource depletion while still acting through the same authoritative CommandBus and shared gameplay systems as the player.
 

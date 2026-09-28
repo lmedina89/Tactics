@@ -14,8 +14,8 @@ function alternatingOffsets(count){
 }
 
 export class SkirmishEconomyPlanner{
-  constructor({playerId,profile,map,registry,players,teamManager,entitiesProvider,commandBus,economy,resources,construction,production}){
-    this.playerId=playerId;this.profile=profile;this.cfg=profile.economy??{};this.map=map;this.registry=registry;this.players=players;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;this.economy=economy;this.resources=resources;this.construction=construction;this.production=production;
+  constructor({playerId,profile,map,registry,players,relations=null,teamManager,entitiesProvider,commandBus,economy,resources,construction,production}){
+    this.playerId=playerId;this.profile=profile;this.cfg=profile.economy??{};this.map=map;this.registry=registry;this.players=players;this.relations=relations;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;this.economy=economy;this.resources=resources;this.construction=construction;this.production=production;
     const initial=profile.initialDelayTicks??0;this.nextHarvestTick=initial;this.nextConstructionTick=initial;this.nextProductionTick=initial;
   }
 
@@ -74,7 +74,7 @@ export class SkirmishEconomyPlanner{
   _locationSafe(position,radius=this.cfg.constructionSafetyRadius??0){
     if(!(radius>0))return true;
     for(const enemy of this.entitiesProvider()){
-      if(!enemy.alive||!enemy.playerId||enemy.playerId===this.playerId)continue;
+      if(!enemy.alive||!this.relations?.isEnemy(this.playerId,enemy.playerId))continue;
       const categories=aiTargetCategories(this.registry,enemy);
       if(!categories.includes('COMBAT')&&!categories.includes('DEFENSE'))continue;
       if(dist(position,enemy)<=radius)return false;

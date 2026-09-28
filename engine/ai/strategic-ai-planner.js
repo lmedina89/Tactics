@@ -13,8 +13,8 @@ const finite=(v,fallback)=>Number.isFinite(v)?v:fallback;
  * policy consumed by the normal Team/Economy planners.
  */
 export class StrategicAIPlanner{
-  constructor({playerId,profile,mapConfig={},players,registry,entitiesProvider}){
-    this.playerId=playerId;this.profile=profile;this.cfg=profile.strategy??{};this.mapConfig=mapConfig;this.players=players;this.registry=registry;this.entitiesProvider=entitiesProvider;
+  constructor({playerId,profile,mapConfig={},players,registry,entitiesProvider,relations=null}){
+    this.playerId=playerId;this.profile=profile;this.cfg=profile.strategy??{};this.mapConfig=mapConfig;this.players=players;this.registry=registry;this.entitiesProvider=entitiesProvider;this.relations=relations;
     this.difficulty=mapConfig.difficulty??profile.defaultDifficulty??'NORMAL';
     this.personalityId=mapConfig.personality??this.cfg.defaultPersonality??this.cfg.personality?.id??'BALANCED';
     this.nextAssessmentTick=profile.initialDelayTicks??0;
@@ -22,7 +22,7 @@ export class StrategicAIPlanner{
   }
 
   _owned(){return [...this.entitiesProvider()].filter(e=>e.alive&&e.playerId===this.playerId);}
-  _enemies(){return [...this.entitiesProvider()].filter(e=>e.alive&&e.playerId&&e.playerId!==this.playerId);}
+  _enemies(){return [...this.entitiesProvider()].filter(e=>e.alive&&this.relations?.isEnemy(this.playerId,e.playerId));}
   _player(){return this.players.get(this.playerId)??null;}
   _wealthState(){const credits=this._player()?.credits??0,w=this.cfg.wealth??{};if(credits<finite(w.poorBelow,1200))return 'POOR';if(credits>finite(w.wealthyAbove,5000))return 'WEALTHY';return 'NORMAL';}
   _enemyCategories(){const counts={};for(const e of this._enemies())for(const c of aiTargetCategories(this.registry,e))counts[c]=(counts[c]??0)+1;return counts;}
