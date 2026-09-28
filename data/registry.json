@@ -54,5 +54,12 @@
     "data/commandsets/aegis_vehicle_factory.json",
     "data/commandsets/aegis_harvester.json",
     "data/commandsets/aegis_combat_unit.json"
+  ],
+  "teamPrototypes": [
+    "data/teams/crimson_base_guard.json",
+    "data/teams/crimson_assault.json"
+  ],
+  "aiProfiles": [
+    "data/ai/crimson_skirmish_basic.json"
   ]
 }

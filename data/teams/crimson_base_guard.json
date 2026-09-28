@@ -1,0 +1,19 @@
+{
+  "id": "crimson_base_guard",
+  "name": "Crimson Base Guard",
+  "role": "BASE_DEFENSE",
+  "maxInstances": 1,
+  "recruitRadius": 180,
+  "recruitTimeoutTicks": 300,
+  "rallyRadius": 16,
+  "rallyTimeoutTicks": 180,
+  "initialStance": "GUARD",
+  "attackCommonTarget": false,
+  "formation": {
+    "type": "LOOSE",
+    "spacing": 4
+  },
+  "composition": [
+    { "definition": "rifleman", "min": 1, "max": 1 }
+  ]
+}

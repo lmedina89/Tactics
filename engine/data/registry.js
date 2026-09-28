@@ -10,6 +10,8 @@ export class DataRegistry {
     this.armors = new Map();
     this.weapons = new Map();
     this.commandSets = new Map();
+    this.teamPrototypes = new Map();
+    this.aiProfiles = new Map();
   }
 
   async load(base = '.') {
@@ -35,6 +37,8 @@ export class DataRegistry {
     }
     for(const [value,p] of defs)this._validateLateDefinitionRefs(value,p);
     for(const [id,set] of this.commandSets)this._validateCommandSet(set,`commandSet:${id}`);
+    for (const p of registry.teamPrototypes || []) { const value=await get(p); this._validateTeamPrototype(value,p); this._insertUnique(this.teamPrototypes,value,p); }
+    for (const p of registry.aiProfiles || []) { const value=await get(p); this._validateAIProfile(value,p); this._insertUnique(this.aiProfiles,value,p); }
     return this;
   }
 
@@ -71,6 +75,35 @@ export class DataRegistry {
     const construction=moduleConfig(def,'Construction');for(const id of construction?.prerequisites||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown prerequisite ${id}`);
   }
 
+
+  _validateTeamPrototype(value,source){
+    if(!value?.id)throw new Error(`${source}: TeamPrototype missing id`);
+    if(!value.role||typeof value.role!=='string')throw new Error(`${source}: TeamPrototype missing role`);
+    if(value.maxInstances!=null&&(!Number.isInteger(value.maxInstances)||value.maxInstances<1))throw new Error(`${source}: maxInstances must be >= 1`);
+    for(const key of ['recruitRadius','recruitTimeoutTicks','rallyRadius','rallyTimeoutTicks'])if(value[key]!=null&&!(value[key]>=0))throw new Error(`${source}: ${key} must be >= 0`);
+    if(value.initialStance&&!['GUARD','AGGRESSIVE','HOLD_POSITION'].includes(value.initialStance))throw new Error(`${source}: invalid initialStance ${value.initialStance}`);
+    if(value.formation?.spacing!=null&&!(value.formation.spacing>=0))throw new Error(`${source}: formation spacing must be >= 0`);
+    if(!Array.isArray(value.composition)||!value.composition.length)throw new Error(`${source}: TeamPrototype composition must not be empty`);
+    for(const entry of value.composition){
+      const def=this.definitions.get(entry.definition);if(!def)throw new Error(`${source}: unknown team definition ${entry.definition}`);
+      if(!moduleConfig(def,'Locomotor')||['building','resource'].includes(def.kind))throw new Error(`${source}: team member ${entry.definition} must be a mobile unit`);
+      const min=entry.min??0,max=entry.max??min;if(!Number.isInteger(min)||!Number.isInteger(max)||min<0||max<1||min>max)throw new Error(`${source}: invalid composition bounds for ${entry.definition}`);
+    }
+  }
+
+  _validateAIProfile(value,source){
+    if(!value?.id)throw new Error(`${source}: AI profile missing id`);
+    for(const key of ['thinkIntervalTicks','enemyAcquireIntervalTicks','orderRefreshTicks'])if(value[key]!=null&&(!Number.isInteger(value[key])||value[key]<1))throw new Error(`${source}: ${key} must be a positive integer`);
+    for(const key of ['initialDelayTicks','baseThreatRadius'])if(value[key]!=null&&!(value[key]>=0))throw new Error(`${source}: ${key} must be >= 0`);
+    const ids=new Set();
+    for(const plan of value.teamPlans||[]){
+      if(!plan.id||ids.has(plan.id))throw new Error(`${source}: duplicate/missing team plan id ${plan.id||''}`);ids.add(plan.id);
+      if(!this.teamPrototypes.has(plan.prototype))throw new Error(`${source}: unknown TeamPrototype ${plan.prototype}`);
+      if(plan.maxConcurrent!=null&&(!Number.isInteger(plan.maxConcurrent)||plan.maxConcurrent<1))throw new Error(`${source}: maxConcurrent must be >= 1`);
+      for(const key of ['startDelayTicks','retryTicks'])if(plan[key]!=null&&(!Number.isInteger(plan[key])||plan[key]<0))throw new Error(`${source}: ${key} must be a nonnegative integer`);
+    }
+  }
+
   _validateCommandSet(set,source){
     for(const c of set.commands||[]){
       if((c.type==='BUILD_STRUCTURE'||c.type==='PRODUCE')&&!this.definitions.has(c.definition))throw new Error(`${source}: unknown command definition ${c.definition}`);
@@ -85,6 +118,8 @@ export class DataRegistry {
   armor(id) { return this.armors.get(id); }
   weapon(id) { return this.weapons.get(id); }
   commandSet(id){return this.commandSets.get(id);}
+  teamPrototype(id){return this.teamPrototypes.get(id);}
+  aiProfile(id){return this.aiProfiles.get(id);}
   module(definitionOrId,type){
     const def=typeof definitionOrId==='string'?this.definition(definitionOrId):definitionOrId;
     return def?moduleConfig(def,type):null;

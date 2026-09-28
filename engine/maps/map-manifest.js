@@ -38,6 +38,19 @@ export function validateMapManifest(raw) {
     if (playerIds.has(p.id)) throw new Error(`Duplicate player id ${p.id}`);
     playerIds.add(p.id);
   }
+  const waypointIds=new Set();
+  for(const w of map.waypoints){if(!w.id)throw new Error('Each waypoint needs id');if(waypointIds.has(w.id))throw new Error(`Duplicate waypoint id ${w.id}`);waypointIds.add(w.id);}
+  const anchorIds=new Set();
+  for(const a of map.aiAnchors){if(!a.id)throw new Error('Each AI anchor needs id');if(anchorIds.has(a.id))throw new Error(`Duplicate AI anchor id ${a.id}`);anchorIds.add(a.id);}
+  for(const p of map.players){
+    if(p.startWaypoint&&!waypointIds.has(p.startWaypoint))throw new Error(`Player ${p.id} has unknown startWaypoint ${p.startWaypoint}`);
+    if(p.ai){
+      if(!p.ai.profile)throw new Error(`Player ${p.id} AI config missing profile`);
+      if(p.ai.homeWaypoint&&!waypointIds.has(p.ai.homeWaypoint))throw new Error(`Player ${p.id} AI has unknown homeWaypoint ${p.ai.homeWaypoint}`);
+      if(p.ai.rallyWaypoint&&!waypointIds.has(p.ai.rallyWaypoint))throw new Error(`Player ${p.id} AI has unknown rallyWaypoint ${p.ai.rallyWaypoint}`);
+      if(p.ai.defenseAnchor&&!anchorIds.has(p.ai.defenseAnchor))throw new Error(`Player ${p.id} AI has unknown defenseAnchor ${p.ai.defenseAnchor}`);
+    }
+  }
   const objectIds = new Set();
   for (const o of map.objects) {
     if (!o.id || !o.definition) throw new Error('Each map object needs id and definition');

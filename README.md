@@ -1,10 +1,22 @@
-# ForgeRTS v0.5.4 — Dynamic Collision + Local Avoidance Foundation
+# ForgeRTS v0.6.0 — Teams + Skirmish AI Foundation
 
 ForgeRTS is a separate browser-native RTS engine. WorldForge / Skirmish remains untouched and serves only as the older asset/reference project.
 
-v0.5.4 builds on the validated v0.5.3 client-animation foundation. It does **not** add strategic enemy AI yet. This pass replaces the old post-movement friendly-circle shove with data-driven physical footprints, predictive local avoidance, and deterministic hard-overlap resolution so vehicle groups can cross, convoy, and maneuver without merging through one another.
+v0.6.0 builds on the validated v0.5.x player-side foundation and starts the first real computer-player layer. The release adds invariant TeamPrototype data, runtime Team instances, and a timer-driven SkirmishAI controller that recruits existing units into base-defense and assault teams and issues ordinary authoritative commands through the same CommandBus used by the human player. No AI-only movement or combat path is introduced.
 
 ## What changed
+
+### Teams + Skirmish AI foundation
+
+- Added data-driven `TeamPrototype` definitions with role, composition minima/maxima, recruitment radius/timeouts, rally policy, stance, instance limits, formation metadata, and common-target policy scaffolding.
+- Added deterministic runtime `TeamManager` state with stable team IDs and explicit `RECRUITING → RALLYING → ACTIVE` lifecycle plus destroyed/disbanded states.
+- Added one `SkirmishAIPlayer` controller per map-configured nonhuman player. Strategic AI runs on data-defined think/acquisition timers instead of executing expensive strategic scans every simulation tick.
+- AI recruits only eligible unassigned mobile units that match TeamPrototype composition; the validation Crimson base guard recruits a Rifleman while the assault team recruits one Aegis-X plus one HMMWV-50. The Harvester is not stolen into a combat team.
+- Base-defense teams guard a data-defined anchor and react to nearby hostile incursions. Assault teams rally, activate, choose an enemy objective, and issue normal `ATTACK_MOVE` commands.
+- AI commands carry `FROM_AI`, the AI player ID, and pass through the same authoritative `CommandBus`/Simulation ownership checks as player commands.
+- Player HUD command-result feedback is isolated from background AI command results.
+- Team membership and AI strategic timers are deterministic snapshot state. Snapshot format advances to v10 while retaining v8/v9 restore compatibility.
+- v0.6.0 deliberately recruits the enemy forces already authored on the validation map. AI harvesting, construction, production, rebuilding, reinforcement, diplomacy, difficulty/personality, and full formation routing remain the next v0.6.x layers rather than hidden shortcuts in this foundation.
 
 ### Dynamic collision + local avoidance
 
@@ -77,7 +89,7 @@ The v0.5.1 construction/economy validation remains intact:
 
 `Command Post → Power Node → Refinery → harvest minerals → Barracks → Rifleman → Vehicle Factory → produced vehicle → Guardian Turret`
 
-After building the base, use the same map to test group selection, Attack Move, Guard, queued orders, stances, and combat auto-acquisition.
+After building the base, use the same map to test group selection, Attack Move, Guard, queued orders, stances, and combat auto-acquisition. The Crimson computer player now forms a small base-defense team first and, after its data-defined delay, rallies the authored tank + HMMWV into an assault team and attacks through the normal tactical command system.
 
 ## Mobile controls
 
@@ -99,6 +111,8 @@ Build/production/Harvester contextual controls remain data-driven through their 
 ## Architecture preserved
 
 - `CommandBus` — serializable commands with issuer/source metadata
+- `TeamManager` — deterministic runtime teams instantiated from invariant TeamPrototype data
+- `SkirmishAISystem` / `SkirmishAIPlayer` — timer-driven strategic coordination that issues ordinary commands
 - `UnitAIUpdate` — persistent MOVE / ATTACK / ATTACK_MOVE / GUARD state and queued orders
 - `CommandSet` — data-defined contextual actions
 - `TechTreeSystem` — build permission, prerequisites, limits, affordability
@@ -115,13 +129,13 @@ Build/production/Harvester contextual controls remain data-driven through their 
 
 ## C&C reference boundary
 
-The tactical command shape follows the released Generals / Zero Hour separation between high-level AI commands such as move, attack-move, guard, appended paths, and command origin. Red Alert remains the reference for explicit interaction handshakes; RA3 schemas remain the reference for data-driven GameObject/module composition. ForgeRTS implements those concepts in original JavaScript rather than directly translating EA source in this release.
+The tactical command shape follows the released Generals / Zero Hour separation between high-level AI commands such as move, attack-move, guard, appended paths, and command origin. v0.6.0 additionally follows the released `TeamTemplateInfo` / `TeamPrototype` / runtime `Team` and `AISkirmishPlayer` pattern: invariant team composition data is separate from team instances, AI recruits existing units into inactive teams, teams rally/activate explicitly, and strategic work is timer-bounded. Red Alert remains the reference for explicit interaction handshakes; RA3 schemas remain the reference for data-driven GameObject/module composition. ForgeRTS implements these concepts in original JavaScript rather than directly translating EA source in this release.
 
 If a future subsystem is genuinely better served by a direct GPL-covered source translation, it must be an explicit decision with provenance instead of silently mixing copied code into original modules.
 
 ## Snapshot format
 
-Snapshot format is **v9**. It includes the expanded UnitAI/order-queue/stance state and player resource-harvest accounting while still accepting v8 snapshots.
+Snapshot format is **v10**. It adds runtime Team membership/state and SkirmishAI controller timers/target state while preserving the v9 tactical state. Restore accepts v8, v9, and v10 snapshots.
 
 ## Validation
 
@@ -131,8 +145,17 @@ Run:
 npm test
 ```
 
-The release suite covers construction, economy, production, combat, movement, oriented dynamic collision, predictive local avoidance, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, resource-field visual configuration, client-animation GLB binding validation, map identity, snapshot determinism, and the original mobile construction vertical slice. Current result: **72/72 tests passing**.
+The release suite covers construction, economy, production, combat, movement, oriented dynamic collision, predictive local avoidance, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, TeamPrototype/AI-profile loading, exact team recruitment, authoritative `FROM_AI` command flow, base-defense reactions, deterministic Team/AI snapshot restore, resource-field visual configuration, client-animation GLB binding validation, map identity, and the original mobile construction vertical slice. Current result: **79/79 tests passing**.
 
 ## Run
 
 Serve the folder with any static HTTP server or deploy it directly to GitHub Pages. `index.html` is at the ZIP root.
+
+### v0.6.0 field-test focus
+
+1. Confirm the enemy Rifleman forms the base-defense Team and remains around the enemy defense anchor until reacting to a threat.
+2. After the configured delay, confirm the enemy Aegis-X + HMMWV-50 rally and then attack through ordinary Attack Move behavior.
+3. Confirm the enemy Harvester is not recruited into either combat Team.
+4. Keep issuing player commands while the AI acts and confirm player HUD command feedback is not replaced by background AI results.
+5. Save/restore during team rally or combat if using the snapshot harness and confirm membership/objective behavior remains deterministic.
+6. Recheck v0.5.4 vehicle collision/local avoidance under the new group traffic load.

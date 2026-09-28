@@ -41,7 +41,7 @@ test('snapshot/restore preserves deterministic world state and pending AI intent
 });
 
 
-test('snapshot v9 preserves active wheeled turn-around maneuver state',()=>{
+test('snapshot v10 preserves active wheeled turn-around maneuver state',()=>{
   const bus=new CommandBus(),sim=new Simulation({registry:new TestRegistry(defs,locos),map:baseMap(),commandBus:bus});
   const e=sim.entities.get('u1');e.yaw=0;e.x=0;e.z=0;
   sim.issueMove(['u1'],{x:0,z:-55});for(let i=0;i<18;i++)sim.step(FIXED_DT);
@@ -64,7 +64,7 @@ test('water cells are non-walkable for ground profiles',async()=>{
 });
 
 test('data registry manifest includes all current content families',async()=>{
-  const r=await read('data/registry.json');assert.ok(r.factions.length>=2);assert.ok(r.locomotors.length>=4);assert.ok(r.definitions.some(p=>p.includes('harvester')));assert.ok(r.definitions.some(p=>p.includes('talon')));assert.ok(r.definitions.some(p=>p.includes('mineral_dense')));
+  const r=await read('data/registry.json');assert.ok(r.factions.length>=2);assert.ok(r.locomotors.length>=4);assert.ok(r.definitions.some(p=>p.includes('harvester')));assert.ok(r.definitions.some(p=>p.includes('talon')));assert.ok(r.definitions.some(p=>p.includes('mineral_dense')));assert.ok(r.teamPrototypes?.length>=2);assert.ok(r.aiProfiles?.length>=1);
 });
 
 test('asset catalog paths and new terrain textures exist',async()=>{

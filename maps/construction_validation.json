@@ -2,7 +2,7 @@
   "manifestVersion": 2,
   "id": "construction_validation",
   "name": "Construction Validation Range",
-  "version": 7,
+  "version": 8,
   "seed": 731904,
   "region": {
     "id": "construction_validation_region",
@@ -284,7 +284,13 @@
       "faction": "crimson",
       "isHuman": false,
       "startWaypoint": "Player_2_Start",
-      "startingCredits": 3000
+      "startingCredits": 3000,
+      "ai": {
+        "profile": "crimson_skirmish_basic",
+        "homeWaypoint": "Player_2_Start",
+        "rallyWaypoint": "Player_2_Rally",
+        "defenseAnchor": "enemy_defense_anchor"
+      }
     }
   ],
   "waypoints": [

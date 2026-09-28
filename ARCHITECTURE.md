@@ -50,6 +50,12 @@
 48. **Collision is ownership-independent.** Ground movers are physically solid based on layer/geometry, not player allegiance.
 49. **Avoidance tuning is data.** Personal space, look-ahead, braking/yield response, collision mass, padding, and avoidance steering limits live in locomotor definitions rather than concrete unit branches.
 50. **Transient avoidance is derived state.** Local traffic constraints are recomputed deterministically each simulation tick and are not serialized into snapshots.
+51. **Team prototypes are invariant data.** Composition, role, instance limits, recruitment/rally policy, stance, and later scripted hooks belong to reusable TeamPrototype definitions; runtime Team instances reference them by stable ID.
+52. **Team membership is simulation state.** Runtime teams own stable IDs and member entity IDs. Membership is authoritative, deterministic, and serialized rather than inferred from proximity or client selection.
+53. **Strategic AI uses normal commands.** AIPlayer/Team logic may decide intent, but it must issue the same CommandBus commands as player/scripts; it cannot directly move, target, damage, or teleport units.
+54. **Strategic thinking is timer-bounded.** Expensive enemy acquisition, recruitment, build planning, and later threat/strategy work use data-defined intervals rather than scanning the whole world every simulation tick.
+55. **Team lifecycle is explicit.** Recruitment, rally/staging, activation, destruction, and disbanding are deterministic states; a team is not considered active merely because some matching units happen to be nearby.
+56. **Strategy and tactics remain separate.** AIPlayer chooses enemies, plans, teams and objectives; Team coordinates shared intent; UnitAI/Combat/Pathfinding/Locomotor execute ordinary tactical behavior.
 
 
 ## v0.5.1 validation-layer rule
@@ -99,3 +105,12 @@ Rules:
 - Vehicle locomotor semantics remain authoritative: avoidance must not replace tracked pivots, wheeled steering, bounded reversing, or three-point turns with sideways sliding.
 - Air/bridge/layer collision should be added only when the corresponding altitude/path-layer semantics exist. Do not fake those systems with a 2D ground collision shortcut.
 - No transient pair/constraint state is saved; identical authoritative state and inputs must regenerate the same avoidance result.
+
+
+## v0.6.0 teams / skirmish-AI rule
+
+ForgeRTS models the first computer player layer after the released Generals / Zero Hour distinction between invariant team-template/prototype information, runtime Team instances, and an AIPlayer controller. Team composition and policy live in JSON; `TeamManager` owns deterministic membership/lifecycle; `SkirmishAIPlayer` performs timer-bounded strategic decisions and expresses them exclusively as ordinary authoritative CommandBus orders.
+
+The current vertical slice intentionally recruits already-authored enemy combat units so the team/strategy/control architecture can be proven before introducing an autonomous AI economy. AI harvesting, construction, production, reinforcement, rebuild logic, diplomacy, personality/difficulty, common-target coordination, and full formation routing are later v0.6.x layers and must build on this same separation rather than bypass it.
+
+No EA AI/Team C++ implementation was directly translated for v0.6.0. The released source is the architectural/behavioral reference; the runtime is original ForgeRTS JavaScript designed around the existing browser simulation.

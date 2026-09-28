@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.5.4 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.0 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
@@ -29,7 +29,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Rivers/water | map cells/water logic | terrain/water systems | water as independent feature data | map `water` + renderer | Foundation implemented |
 | Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | Owner/threat/resources/activity/discovery implemented |
 | Stable starts/waypoints | cell/waypoint mission logic | player start/rally waypoints | named anchors | map `waypoints[]` | Data implemented |
-| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v9 adds queued tactical orders/stances and resource-harvest accounting; v8 restore accepted** |
+| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v10 adds Team + SkirmishAI strategic state; v8/v9 restore accepted** |
 | Player economy/power | house/resources | `Player` | player/faction data | `FactionEconomySystem` / player state | **Credits + power + low-power policy implemented** |
 | Production | factory queues/service | production update modules | Production behavior | `engine/production/production-system.js` | **Generic queues, costs, build time, cancellation, dynamic spawn, rollout/rally implemented** |
 | Command sets / contextual UI | sidebar/build lists | `CommandButton` / control bar / GUI command staging | `CommandSet` on `GameObject` | `data/commandsets/*` + HUD renderer | **BUILD / PRODUCE / RETURN / CANCEL + tactical ATTACK_MOVE / GUARD / QUEUE / STANCE presentation** |
@@ -42,8 +42,8 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Client animation / draw-state motion | unit/building visual anim | GameClient / Draw modules | Draws / ClientUpdates / ClientBehaviors / model animation states | `ClientAnimation` data + `renderer/client-animation-system.js` | **Embedded GLB clips + procedural authored pivots; presentation-only, simulation remains authoritative** |
 | Command authority/source | house/player ownership | player/script/AI command-origin distinction | commands are data, owner checks in gameplay | `CommandBus` + `Simulation._apply` | **Issuer/source metadata + authoritative ownership validation** |
 | Group/queued tactical orders | grouped orders | attack-move / guard / appended user paths | generic behavior command data | InputController + UnitAIUpdate | **Multi-select, box/add, ATTACK_MOVE, GUARD, serialized appended order queue** |
-| Teams/attack groups | teams/groups | `Team` / `AIGroup` | team data | `TeamManager` | Planned |
-| Strategic AI | house AI | `AIPlayer` | AI modules/data | `AIController` | Planned |
+| Teams/attack groups | teams/groups | `TeamTemplateInfo` / `TeamPrototype` / runtime `Team` | invariant team data + runtime instances | `engine/teams/team-manager.js` | **TeamPrototype composition, stable runtime membership, recruit/rally/active lifecycle + snapshot implemented** |
+| Strategic AI | house AI | `AIPlayer` / `AISkirmishPlayer` | AI policy/profile data | `engine/ai/skirmish-ai-player.js` | **Timer-bounded enemy acquisition, base-defense + assault team coordination through normal CommandBus; economy/build planning next** |
 | Mission conditions/actions | triggers/actions | Scripts / Conditions / Actions | script data | `MissionSystem` | Planned; never owns world lifetime |
 | Fog/shroud/radar | map visibility | shroud/radar systems | client/game visibility split | `VisibilitySystem` | Planned |
 | Veterancy/upgrades/sciences | veteran/unit upgrades | experience / upgrades | upgrade modules | data modules | Planned |
@@ -93,3 +93,12 @@ The C&C family keeps visual presentation separate from authoritative GameLogic, 
 The released Generals / Zero Hour architecture is used here for the **separation of concerns** rather than a line-for-line port: physical object geometry/collision/partition concepts live with the GameObject, while locomotor definitions own movement-specific behavior and tuning. ForgeRTS maps that shape to a compact browser-native `Geometry` module plus data-driven locomotor avoidance fields and a deterministic `LocalAvoidanceSystem`.
 
 No EA collision or locomotor implementation was copied into v0.5.4. The local avoidance, OBB/circle overlap solver, spatial hash, yielding policy, and browser-facing integration are original ForgeRTS JavaScript. If a later system (for example layered bridges, crushability, formation routing, or aircraft altitude collision) would materially benefit from a direct GPL-covered translation, that will remain an explicit provenance/licensing decision rather than an implicit copy.
+
+
+## v0.6.0 Team / Skirmish AI reference boundary
+
+The primary references for v0.6.0 are the released Generals / Zero Hour `Team.h`, `AIPlayer.h`, and `AISkirmishPlayer.cpp`. The important boundary carried into ForgeRTS is structural: TeamPrototype data is invariant and reusable, runtime Team instances own membership/lifecycle, and AIPlayer performs strategic coordination above ordinary unit AI. Recruitment creates/uses inactive teams, gathers matching units around a team home/rally area, and only then activates coordinated tactical behavior. Strategic acquisition/recruitment work is timer-bounded instead of running expensive full-world logic every tick.
+
+ForgeRTS maps that architecture to JSON TeamPrototype/AI-profile data, deterministic `TeamManager` runtime state, and one `SkirmishAIPlayer` per map-configured computer player. AI orders use `FROM_AI` through the same `CommandBus` and simulation authority as player/script commands; Team/AI state is included in v10 snapshots.
+
+No EA Team/AI C++ implementation was copied line-for-line in v0.6.0. The browser-native JavaScript is original and intentionally narrower: the first release recruits existing combat units into base-defense and assault teams. Autonomous AI economy, construction, production, reinforcement/rebuild logic, diplomacy/relationships, personality/difficulty, common-target coordination, and full formation routing remain later v0.6.x work on the same foundation.

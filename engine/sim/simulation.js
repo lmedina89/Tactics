@@ -13,13 +13,15 @@ import {FactionEconomySystem} from '../economy/faction-economy.js';
 import {ResourceSystem} from '../economy/resource-system.js';
 import {ProductionSystem} from '../production/production-system.js';
 import {ConstructionSystem} from '../construction/construction-system.js';
+import {TeamManager} from '../teams/team-manager.js';
+import {SkirmishAISystem} from '../ai/skirmish-ai-player.js';
 
 export const FIXED_DT=1/30;
 
 export class Simulation{
   constructor({registry,map,commandBus}){
     this.registry=registry;this.map=map;this.commandBus=commandBus;
-    this.tick=0;this.entities=new Map();this.players=new Map();this.rng=new SeededRng(map.seed??1);this.lastCommandResult=null;this.defaultIssuerPlayerId=map.players?.find(p=>p.isHuman)?.id??map.players?.[0]?.id??null;
+    this.tick=0;this.entities=new Map();this.players=new Map();this.rng=new SeededRng(map.seed??1);this.lastCommandResult=null;this.lastPlayerCommandResult=null;this.defaultIssuerPlayerId=map.players?.find(p=>p.isHuman)?.id??map.players?.[0]?.id??null;
     for(const p of map.players||[])this.players.set(p.id,{id:p.id,factionId:p.faction,isHuman:!!p.isHuman,credits:p.startingCredits??0,powerProduced:0,powerUsed:0,lowPower:false,resourcesHarvested:{}});
     this.regionStates=new Map();
     const region=map.region||{id:map.id};
@@ -29,6 +31,7 @@ export class Simulation{
     this.pathfinder=new GridPathfinder(this.navigationMap,this.terrain,map.navigation?.cellSize??4);
     this.localAvoidance=new LocalAvoidanceSystem({registry:this.registry,pathfinder:this.pathfinder,terrain:this.terrain});
     this._spawnMap();
+    this.teams=new TeamManager({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values()});
     this.interactions=new InteractionManager({registry:this.registry,entityLookup:id=>this.entities.get(id)});
     this.projectiles=new ProjectileSystem();
     this.combat=new CombatSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),projectiles:this.projectiles}).bindEntitiesProvider(()=>this.entities.values());
@@ -36,6 +39,7 @@ export class Simulation{
     this.resources=new ResourceSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),interactions:this.interactions,economy:this.economy,pathfinder:this.pathfinder});
     this.production=new ProductionSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),economy:this.economy,interactions:this.interactions,pathfinder:this.pathfinder,spawnEntity:o=>this._spawnEntity(o)});
     this.construction=new ConstructionSystem({registry:this.registry,map:this.map,terrain:this.terrain,economy:this.economy,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),pathfinder:this.pathfinder,spawnEntity:o=>this._spawnEntity(o),removeEntity:id=>this._removeEntity(id)});
+    this.skirmishAI=new SkirmishAISystem({registry:this.registry,map:this.map,players:this.players,teamManager:this.teams,entitiesProvider:()=>this.entities.values(),commandBus:this.commandBus});
   }
 
   _buildNavigationMap(map){const nav=structuredClone(map);nav.staticObstacles=[...(map.staticObstacles||[])];return nav;}
@@ -81,6 +85,8 @@ export class Simulation{
     this.economy.recalculatePower();
     this.resources.step(dt,this.tick);
     this.production.step(this.tick);
+    this.teams.step(this.tick);
+    this.skirmishAI.update(this.tick);
     const movers=[...this.entities.values()].filter(e=>e.alive&&e.locomotorId);
     for(const e of movers){
       const cfg=this.registry.locomotor(e.locomotorId);
@@ -102,9 +108,9 @@ export class Simulation{
   }
 
   _finishCommand(c,{applied=0,rejected=[],reason=null,...extra}={}){
-    const ok=applied>0||extra.ok===true;const result={serial:c.serial,type:c.type,ok,applied,rejected,...extra};
+    const ok=applied>0||extra.ok===true;const result={serial:c.serial,type:c.type,issuerPlayerId:c.issuerPlayerId??null,commandSource:c.commandSource??null,ok,applied,rejected,...extra};
     if(reason)result.reason=reason;else if(!ok)result.reason=rejected[0]?.reason||'NO_VALID_TARGETS';else result.reason=rejected.length?'PARTIAL':'OK';
-    this.lastCommandResult=result;return result;
+    this.lastCommandResult=result;if(result.commandSource===CommandSource.PLAYER)this.lastPlayerCommandResult=result;return result;
   }
 
   _applyUnitGroup(c,predicate,apply){
@@ -137,10 +143,10 @@ export class Simulation{
 
   snapshot(){
     return {
-      version:9,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),constructionSystem:this.construction.snapshot(),
+      version:10,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),constructionSystem:this.construction.snapshot(),teams:this.teams.snapshot(),skirmishAI:this.skirmishAI.snapshot(),
       players:[...this.players.values()].map(p=>structuredClone(p)),regionStates:[...this.regionStates.values()].map(r=>structuredClone(r)),
       entities:[...this.entities.values()].map(e=>({
-        id:e.id,definitionId:e.definitionId,playerId:e.playerId,factionId:e.factionId,kind:e.kind,
+        id:e.id,definitionId:e.definitionId,playerId:e.playerId,teamId:e.teamId??null,factionId:e.factionId,kind:e.kind,
         x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,angularSpeed:e.angularSpeed??0,steeringAngle:e.steeringAngle??0,movingBackward:!!e.movingBackward,locomotionState:structuredClone(e.locomotionState||null),
         health:e.health,maxHealth:e.maxHealth,alive:e.alive,operational:e.operational!==false,construction:structuredClone(e.construction),damageState:e.damageState,destroyedTick:e.destroyedTick,lastDamagedBy:e.lastDamagedBy,lastDamagedTick:e.lastDamagedTick,
         armorId:e.armorId,weaponSlots:structuredClone(e.weaponSlots),turretYaw:e.turretYaw,turretAngularSpeed:e.turretAngularSpeed??0,combat:structuredClone(e.combat),
@@ -150,13 +156,13 @@ export class Simulation{
   }
 
   restore(snapshot){
-    if(![8,9].includes(snapshot?.version??0))throw new Error('Unsupported ForgeRTS snapshot version');
+    if(![8,9,10].includes(snapshot?.version??0))throw new Error('Unsupported ForgeRTS snapshot version');
     this.tick=snapshot.tick??0;this.rng.restore(snapshot.rngState??1);this.commandBus.restore(snapshot.commandBus??{});
-    this.players=new Map((snapshot.players||[]).map(p=>[p.id,{...structuredClone(p),resourcesHarvested:structuredClone(p.resourcesHarvested||{})}]));this.economy.players=this.players;this.construction.techTree.economy=this.economy;
+    this.players=new Map((snapshot.players||[]).map(p=>[p.id,{...structuredClone(p),resourcesHarvested:structuredClone(p.resourcesHarvested||{})}]));this.economy.players=this.players;this.construction.techTree.economy=this.economy;for(const c of this.skirmishAI.controllers.values())c.players=this.players;
     this.regionStates=new Map((snapshot.regionStates||[]).map(r=>[r.id,structuredClone(r)]));
     const snapshotIds=new Set((snapshot.entities||[]).map(e=>e.id));for(const id of [...this.entities.keys()])if(!snapshotIds.has(id))this.entities.delete(id);
     for(const s of snapshot.entities||[]){let e=this.entities.get(s.id);if(!e){const def=this.registry.definition(s.definitionId);const player=s.playerId?this.players.get(s.playerId):null;e=createGameObjectRuntime({definition:def,spawn:{id:s.id,definition:s.definitionId,owner:s.playerId,x:s.x,z:s.z,yaw:s.yaw,construction:s.construction},player,registry:this.registry,terrain:this.terrain});this.entities.set(s.id,e);}Object.assign(e,structuredClone(s));}
     this._rebuildDynamicObstacles();
-    this.interactions.restore(snapshot.interactions??{});this.projectiles.restore(snapshot.projectiles??{});this.combat.restore(snapshot.combat??{});this.resources.restore(snapshot.resources??{});this.production.restore(snapshot.productionSystem??{});this.construction.restore(snapshot.constructionSystem??{});this.economy.recalculatePower();
+    this.interactions.restore(snapshot.interactions??{});this.projectiles.restore(snapshot.projectiles??{});this.combat.restore(snapshot.combat??{});this.resources.restore(snapshot.resources??{});this.production.restore(snapshot.productionSystem??{});this.construction.restore(snapshot.constructionSystem??{});this.teams.restore(snapshot.teams??{});this.skirmishAI.restore(snapshot.skirmishAI??{});this.economy.recalculatePower();
   }
 }

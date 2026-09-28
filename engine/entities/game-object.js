@@ -55,6 +55,7 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
     id:spawn.id,
     definitionId:definition.id,
     playerId:spawn.owner??null,
+    teamId:spawn.teamId??null,
     factionId:player?.factionId??null,
     kind:definition.kind,
     x:spawn.x,z:spawn.z,y,yaw:spawn.yaw||0,speed:0,angularSpeed:0,steeringAngle:0,movingBackward:false,

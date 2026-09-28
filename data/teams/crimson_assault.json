@@ -1,0 +1,20 @@
+{
+  "id": "crimson_assault",
+  "name": "Crimson Assault Team",
+  "role": "ASSAULT",
+  "maxInstances": 1,
+  "recruitRadius": 220,
+  "recruitTimeoutTicks": 420,
+  "rallyRadius": 18,
+  "rallyTimeoutTicks": 300,
+  "initialStance": "AGGRESSIVE",
+  "attackCommonTarget": true,
+  "formation": {
+    "type": "LOOSE",
+    "spacing": 7
+  },
+  "composition": [
+    { "definition": "aegis_x", "min": 1, "max": 1 },
+    { "definition": "hmmwv50", "min": 1, "max": 1 }
+  ]
+}

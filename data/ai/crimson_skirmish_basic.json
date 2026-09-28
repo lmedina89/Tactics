@@ -1,0 +1,25 @@
+{
+  "id": "crimson_skirmish_basic",
+  "name": "Crimson Basic Skirmish AI",
+  "thinkIntervalTicks": 15,
+  "enemyAcquireIntervalTicks": 150,
+  "initialDelayTicks": 90,
+  "baseThreatRadius": 115,
+  "orderRefreshTicks": 360,
+  "teamPlans": [
+    {
+      "id": "base_guard",
+      "prototype": "crimson_base_guard",
+      "startDelayTicks": 0,
+      "maxConcurrent": 1,
+      "retryTicks": 90
+    },
+    {
+      "id": "first_assault",
+      "prototype": "crimson_assault",
+      "startDelayTicks": 540,
+      "maxConcurrent": 1,
+      "retryTicks": 150
+    }
+  ]
+}

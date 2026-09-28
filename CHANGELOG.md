@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.6.0 — Teams + Skirmish AI Foundation
+
+- Added data-driven `TeamPrototype` content for Crimson base-defense and assault roles, including composition minima/maxima, recruitment/rally policy, stance, formation metadata, common-target policy scaffolding, and instance limits.
+- Added deterministic runtime `TeamManager` with stable Team IDs, explicit RECRUITING/RALLYING/ACTIVE/DESTROYED/DISBANDED lifecycle, authoritative member IDs, exact-definition recruitment, rally checks, disbanding, and snapshot/restore.
+- Added map/profile-configured `SkirmishAIPlayer` controllers for nonhuman players. AI strategic work runs on data-defined think and enemy-acquisition timers rather than every simulation tick.
+- Added basic enemy acquisition, base-defense threat response, assault-team rally/activation, and target selection.
+- AI issues ordinary `FROM_AI` MOVE / GUARD / ATTACK_MOVE / SET_STANCE commands through the same CommandBus and simulation ownership checks used by the human player. No AI-only movement/combat mutation path was introduced.
+- The construction-validation enemy now uses `crimson_skirmish_basic`: one Rifleman becomes the base guard and the existing Aegis-X + HMMWV form the first assault team after a data-defined delay; the Harvester is not recruited into combat teams.
+- Added AI command-result isolation so background computer commands do not overwrite player-facing command feedback.
+- Snapshot format advanced to **v10** with Team membership/lifecycle and SkirmishAI target/timer state; v8/v9 restore remains accepted.
+- Updated map-manifest validation for AI profile waypoint/anchor references and DataRegistry validation for TeamPrototype/AI-profile references.
+- Added deterministic regression coverage for exact team recruitment, AI command provenance, base-defense reaction, v10 Team/AI restore, and identical-simulation AI determinism.
+- Added deterministic cleanup for terminal Team records so reinforcement retries cannot grow Team history indefinitely.
+- Full automated suite now passes **79/79** tests.
+- No production GLBs or terrain assets were modified.
+- Autonomous AI economy, harvesting/building/production, reinforcement/rebuild logic, diplomacy, difficulty/personality, and full formation routing remain the next v0.6.x layers.
+
 ## v0.5.4 — Dynamic Collision + Local Avoidance Foundation
 
 - Replaced the old friendly-only post-movement circle shove with a deterministic `LocalAvoidanceSystem` that operates before and after locomotion.
