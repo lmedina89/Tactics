@@ -129,7 +129,8 @@
       "type": "AITargetable",
       "categories": [
         "COMBAT",
-        "VEHICLE"
+        "VEHICLE",
+        "HEAVY_ARMOR"
       ],
       "significant": true
     }

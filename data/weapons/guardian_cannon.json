@@ -6,18 +6,29 @@
   "range": 74,
   "minimumRange": 3,
   "delayBetweenShots": 1.55,
-  "prefireDelay": 0.20,
+  "prefireDelay": 0.2,
   "clipSize": 2,
   "clipReloadTime": 1.55,
   "delivery": "PROJECTILE",
   "aimTolerance": 0.08,
-  "targetDomains": ["GROUND"],
-  "targetKinds": ["infantry", "vehicle", "building"],
+  "targetDomains": [
+    "GROUND"
+  ],
+  "targetKinds": [
+    "infantry",
+    "vehicle",
+    "building"
+  ],
   "projectile": {
-    "speed": 118,
-    "hitRadius": 2.2,
-    "radius": 0.20,
-    "color": "#ffb76d"
+    "speed": 210,
+    "radius": 0.2,
+    "color": "#ffb76d",
+    "behavior": "DUMB_PROJECTILE",
+    "leadTarget": true,
+    "maxLeadSeconds": 1.25,
+    "designatedTargetCollision": true,
+    "impactPadding": 0.08,
+    "targetHeightFactor": 0.5
   },
   "muzzleHeight": 4.0,
   "muzzleForwardOffset": 2.8

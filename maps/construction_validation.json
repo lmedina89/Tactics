@@ -2,7 +2,7 @@
   "manifestVersion": 2,
   "id": "construction_validation",
   "name": "Construction Validation Range",
-  "version": 10,
+  "version": 11,
   "seed": 731904,
   "region": {
     "id": "construction_validation_region",
@@ -289,7 +289,9 @@
         "profile": "crimson_skirmish_basic",
         "homeWaypoint": "Player_2_Start",
         "rallyWaypoint": "Player_2_Rally",
-        "defenseAnchor": "enemy_defense_anchor"
+        "defenseAnchor": "enemy_defense_anchor",
+        "difficulty": "NORMAL",
+        "personality": "BALANCED"
       }
     }
   ],

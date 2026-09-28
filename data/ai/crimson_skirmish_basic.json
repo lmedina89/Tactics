@@ -1,6 +1,6 @@
 {
   "id": "crimson_skirmish_basic",
-  "name": "Crimson Basic Skirmish AI",
+  "name": "Crimson Adaptive Skirmish AI",
   "thinkIntervalTicks": 15,
   "enemyAcquireIntervalTicks": 150,
   "initialDelayTicks": 90,
@@ -104,11 +104,56 @@
     },
     {
       "id": "first_assault",
-      "prototype": "crimson_assault",
       "startDelayTicks": 540,
       "maxConcurrent": 1,
       "retryTicks": 150,
-      "productionPriority": 700
+      "productionPriority": 700,
+      "variants": [
+        {
+          "prototype": "crimson_assault",
+          "basePriority": 100,
+          "counterWeights": {
+            "STRUCTURE": 1.5,
+            "ECONOMY": 1.0
+          },
+          "personalityBias": {
+            "BALANCED": 2,
+            "AGGRESSIVE": 4,
+            "DEFENSIVE": 2,
+            "ECONOMIST": 0
+          }
+        },
+        {
+          "prototype": "crimson_assault_armor",
+          "basePriority": 82,
+          "minWealth": "NORMAL",
+          "counterWeights": {
+            "HEAVY_ARMOR": 12,
+            "DEFENSE": 5,
+            "STRUCTURE": 1
+          },
+          "personalityBias": {
+            "BALANCED": 0,
+            "AGGRESSIVE": 10,
+            "DEFENSIVE": 3,
+            "ECONOMIST": -4
+          }
+        },
+        {
+          "prototype": "crimson_assault_mobile",
+          "basePriority": 84,
+          "counterWeights": {
+            "INFANTRY": 10,
+            "HARVESTER": 2
+          },
+          "personalityBias": {
+            "BALANCED": 1,
+            "AGGRESSIVE": 8,
+            "DEFENSIVE": 0,
+            "ECONOMIST": -2
+          }
+        }
+      ]
     }
   ],
   "tactical": {
@@ -121,5 +166,86 @@
       "ECONOMY",
       "BUILDER"
     ]
+  },
+  "defaultDifficulty": "NORMAL",
+  "strategy": {
+    "assessmentIntervalTicks": 150,
+    "wealth": {
+      "poorBelow": 500,
+      "wealthyAbove": 5000,
+      "states": {
+        "POOR": {
+          "constructionIntervalScale": 1.15,
+          "productionIntervalScale": 1.2,
+          "teamIntervalScale": 1.15
+        },
+        "NORMAL": {
+          "constructionIntervalScale": 1.0,
+          "productionIntervalScale": 1.0,
+          "teamIntervalScale": 1.0
+        },
+        "WEALTHY": {
+          "constructionIntervalScale": 0.78,
+          "productionIntervalScale": 0.75,
+          "teamIntervalScale": 0.8
+        }
+      }
+    },
+    "difficulties": {
+      "EASY": {
+        "constructionIntervalScale": 1.2,
+        "productionIntervalScale": 1.2,
+        "teamIntervalScale": 1.25,
+        "desiredHarvesterDelta": -1
+      },
+      "NORMAL": {
+        "constructionIntervalScale": 1.0,
+        "productionIntervalScale": 1.0,
+        "teamIntervalScale": 1.0,
+        "desiredHarvesterDelta": 0
+      },
+      "HARD": {
+        "constructionIntervalScale": 0.85,
+        "productionIntervalScale": 0.85,
+        "teamIntervalScale": 0.85,
+        "desiredHarvesterDelta": 1
+      }
+    },
+    "expansion": {
+      "enabled": true,
+      "refineryDefinition": "refinery",
+      "maxRefineries": 2,
+      "localResourceRadius": 95,
+      "triggerLocalRemainingFraction": 0.22,
+      "minRemoteRemaining": 1000,
+      "minDistanceFromRefinery": 85,
+      "allowedWealthStates": [
+        "NORMAL",
+        "WEALTHY"
+      ]
+    },
+    "defaultPersonality": "BALANCED",
+    "personalities": {
+      "BALANCED": {
+        "aggression": 1.0,
+        "economy": 1.0,
+        "defense": 1.0
+      },
+      "AGGRESSIVE": {
+        "aggression": 1.28,
+        "economy": 0.92,
+        "defense": 0.9
+      },
+      "DEFENSIVE": {
+        "aggression": 0.82,
+        "economy": 0.95,
+        "defense": 1.32
+      },
+      "ECONOMIST": {
+        "aggression": 0.78,
+        "economy": 1.3,
+        "defense": 1.02
+      }
+    }
   }
 }

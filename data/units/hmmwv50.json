@@ -121,7 +121,8 @@
       "type": "AITargetable",
       "categories": [
         "COMBAT",
-        "VEHICLE"
+        "VEHICLE",
+        "LIGHT_ARMOR"
       ],
       "significant": true
     }

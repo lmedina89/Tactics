@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.2 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.3 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
@@ -119,3 +119,11 @@ No Generals economy/base-building C++ was copied line-for-line. The shared Forge
 The released Generals / Zero Hour AI code is the primary reference for this layer: global AI data documents distance-weighted AttackPriority behavior and retaliation ranges; AIPlayer exposes supply-source attacked/safe, supply-center guarding and location-safety decisions; Team/runtime AI provides common-target and casualty bookkeeping concepts. ForgeRTS maps those proven boundaries to named `AttackPrioritySet` JSON, generic `AITargetable` categories, recent-damage economic defense, `REFORMING` Team state, construction safety filtering, and shared authoritative commands.
 
 No EA tactical-AI C++ was copied line-for-line. The implementation remains original JavaScript and composes with the existing CommandBus, TeamManager, ProductionSystem, ResourceSystem, UnitAI and snapshot architecture.
+
+## v0.6.3 projectile + strategic reference boundary
+
+The released Generals/Zero Hour source keeps authoritative weapon firing/object geometry in GameLogic and exposes AIPlayer difficulty, Team work orders, build-by-supplies, supply safety/guarding, timed team/base construction and factory lookup as strategic-player responsibilities. ForgeRTS v0.6.3 keeps those same responsibility boundaries while using browser-native fixed-step JavaScript rather than translating engine-specific C++ partition/module plumbing line-for-line.
+
+For projectile combat, ForgeRTS preserves the C&C distinction between physical projectile delivery and target/object geometry: designated targets remain explicit projectile state, collision uses authored simulation geometry, unguided shells and guided missiles have separate policies, and renderer state is non-authoritative. The implementation is original JS optimized for the existing 30 Hz simulation.
+
+For skirmish strategy, Team work orders remain separate from strategic policy. `StrategicAIPlanner` chooses among invariant TeamPrototype variants from generic enemy categories and data-defined wealth/difficulty/personality settings; existing TeamManager/SkirmishEconomyPlanner then satisfy those choices through normal production/construction/CommandBus paths. Resource expansion similarly changes desired build goals rather than spawning expansion structures.

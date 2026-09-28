@@ -1,6 +1,6 @@
 # NOTICE
 
-ForgeRTS v0.6.2 is an original browser-native implementation created for this project.
+ForgeRTS v0.6.3 is an original browser-native implementation created for this project.
 
 Command & Conquer: Generals / Zero Hour, Red Alert, Red Alert 3, and related names belong to their respective owners. Released C&C source and schemas are used as engineering and behavioral references unless a future ForgeRTS file is explicitly marked as a GPL-derived translation with provenance.
 
@@ -22,3 +22,5 @@ For v0.6.1, the released Generals / Zero Hour AIPlayer/AISkirmishPlayer base-bui
 For v0.6.2, the released Generals / Zero Hour AI attack-priority distance weighting, supply-source attacked/safe and supply-center guard interfaces, location-safety checks, and Team/common-target/casualty concepts are architectural and behavioral references. ForgeRTS implements its own JSON `AttackPrioritySet`/`AITargetable` data, JavaScript target evaluator, recent-damage economy-defense response, Team reform/reinforcement flow, construction safety filter, and harvest-accessibility resolver; no EA tactical-AI implementation code was copied line-for-line in this release.
 
 No EA art, audio, map artwork, or trademarks are included as ForgeRTS game assets. The included GLB models and terrain assets are the project's existing WorldForge/ForgeRTS assets.
+
+For v0.6.3, the released Generals / Zero Hour source remains an architectural and behavioral reference for authoritative weapon/object geometry separation and for AIPlayer difficulty, Team work orders, build/supply/factory responsibilities and timed strategic updates. ForgeRTS implements its own fixed-step JavaScript projectile solver, shared collision-geometry utilities, and strategic policy planner; no EA projectile or AI implementation was copied line-for-line in this release.

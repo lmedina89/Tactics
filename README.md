@@ -1,8 +1,8 @@
-# ForgeRTS v0.6.2 — Tactical Battlefield Intelligence
+# ForgeRTS v0.6.3 — Projectile Correctness + Strategic Intelligence
 
 ForgeRTS is a separate browser-native RTS engine. WorldForge / Skirmish remains untouched and serves only as the older asset/reference project.
 
-v0.6.2 builds on the autonomous v0.6.1 economy and adds the first C&C-style battlefield-intelligence layer: distance-weighted attack priorities, recent economic-asset defense, common Team targets, casualty-aware retreat/reform/reinforcement, construction-site safety checks, and authoritative harvest-accessibility validation. The AI still acts through the same CommandBus and shared gameplay systems as the player.
+v0.6.3 keeps the v0.6.2 tactical layer and closes a foundational combat gap before adding strategic intelligence. Physical shells now use launch prediction, fixed-step swept collision, real GameObject Geometry, and separate unguided/guided projectile policies. Above the existing Team/Tactical/Economy layers, a timer-bounded StrategicAIPlanner can adapt Team composition to observed enemy categories, wealth, difficulty, personality, and resource depletion while still acting through the same authoritative CommandBus and shared gameplay systems as the player.
 
 ## What changed
 
@@ -27,7 +27,7 @@ v0.6.2 builds on the autonomous v0.6.1 economy and adds the first C&C-style batt
 - AI production derives demand from desired Harvesters, missing RECRUITING-Team composition, and data-defined free-unit reserves, then uses compatible operational factories and their real queues.
 - RECRUITING Teams may intentionally remain empty while factories fill their composition; RALLYING Teams can return to recruiting when casualties drop them below minimum strength.
 - The Crimson validation profile now expands toward two Power Nodes/two Guardian Turrets, produces a second Harvester and reserve Rifleman, rebuilds missing desired structures, and can manufacture replacement Team members after losses.
-- Snapshot format advanced to **v11** in v0.6.1; v0.6.2 advances the current schema to **v12** for tactical Team state while retaining v8-v11 restore compatibility.
+- Snapshot format is now **v13**, preserving projectile-policy and strategic-planner state while retaining restore compatibility with v8-v12.
 - See `AI_ECONOMY_AUDIT.md` for the C&C source mapping and implementation boundary.
 
 ### Teams + Skirmish AI foundation
@@ -40,7 +40,7 @@ v0.6.2 builds on the autonomous v0.6.1 economy and adds the first C&C-style batt
 - AI commands carry `FROM_AI`, the AI player ID, and pass through the same authoritative `CommandBus`/Simulation ownership checks as player commands.
 - Player HUD command-result feedback is isolated from background AI command results.
 - Team membership and AI strategic timers are deterministic snapshot state. Snapshot format advances to v10 while retaining v8/v9 restore compatibility.
-- v0.6.2 now adds richer threat response, Harvester/economy protection and retreat/reform/reinforcement. Personality/difficulty, diplomacy, expansion strategy and full formation routing remain later v0.6.x layers.
+- v0.6.2 added richer threat response, Harvester/economy protection and retreat/reform/reinforcement. v0.6.3 adds difficulty/wealth/personality policy, adaptive Team variants and resource-driven expansion. Diplomacy, full formation routing, upgrades/sciences/veterancy, fog/radar and broader faction strategy remain later layers.
 
 ### Dynamic collision + local avoidance
 
@@ -159,7 +159,7 @@ If a future subsystem is genuinely better served by a direct GPL-covered source 
 
 ## Snapshot format
 
-Snapshot format is **v12**. It preserves the v11 autonomous economy state and adds tactical Team target/reform/defense-hold state. Restore accepts v8, v9, v10, v11, and v12 snapshots.
+Snapshot format is **v13**. It preserves v12 tactical Team state and adds strategic-planner state plus the current projectile policy fields. Restore accepts v8, v9, v10, v11, v12, and v13 snapshots.
 
 ## Validation
 
@@ -169,18 +169,18 @@ Run:
 npm test
 ```
 
-The release suite covers construction, economy, production, combat, movement, oriented dynamic collision, predictive local avoidance, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, TeamPrototype/AI-profile loading, exact team recruitment, authoritative `FROM_AI` command flow, base-defense reactions, deterministic Team/AI snapshot restore, resource-field visual configuration, client-animation GLB binding validation, map identity, and the original mobile construction vertical slice. Current result: **91/91 tests passing**.
+The release suite covers construction, economy, production, combat, movement, oriented dynamic collision, predictive local avoidance, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, TeamPrototype/AI-profile loading, exact team recruitment, authoritative `FROM_AI` command flow, base-defense reactions, deterministic Team/AI snapshot restore, resource-field visual configuration, client-animation GLB binding validation, map identity, and the original mobile construction vertical slice. Current result: **101/101 tests passing**.
 
 ## Run
 
 Serve the folder with any static HTTP server or deploy it directly to GitHub Pages. `index.html` is at the ZIP root.
 
-### v0.6.2 field-test focus
+### v0.6.3 field-test focus
 
-1. Confirm all four mineral fields can now be harvested; the west Dense field should no longer strand a Harvester on the river ledge.
-2. Let Crimson run normally and verify its economy/construction/production behavior from v0.6.1 still works.
-3. Watch the assault Aegis-X + HMMWV focus the same scored target rather than wandering onto unrelated targets immediately.
-4. Damage the enemy Harvester/economy area and confirm the base-defense Team redirects to protect the threatened asset, then eventually returns to normal defense.
-5. Destroy one assault-Team vehicle and verify the survivor retreats/reforms while the Vehicle Factory produces the missing minimum member; the same Team should re-rally and reactivate.
-6. Pressure the AI base and verify new construction does not choose an otherwise-legal placement directly inside the configured hostile safety radius.
-7. Save/restore during a reform/defense response if using the snapshot harness; tactical state should continue deterministically.
+1. Put an Aegis-X against a HMMWV moving laterally at range and confirm cannon rounds visibly connect while the target is still moving; shells should lead at launch rather than curve like missiles.
+2. Watch Aegis-X and Guardian projectile impacts around vehicle hull edges; hit behavior now uses authored simulation Geometry instead of the old center-radius approximation.
+3. Let Crimson play normally and confirm v0.6.1/v0.6.2 harvesting, construction, production, common-target assault, economic defense, retreat/reform and mineral accessibility all remain intact.
+4. On the default BALANCED personality, watch the first assault composition change when the player side becomes strongly heavy-armor- or infantry-weighted.
+5. Use the map AI data to try `AGGRESSIVE`, `DEFENSIVE`, or `ECONOMIST`; only planning cadence/posture should change—not damage, credits, movement, or other simulation rules.
+6. In a long economy test, deplete the AI's local mineral field and verify expansion logic can choose a remote resource and raise the desired Refinery count instead of treating an empty/no-baseline area as depletion.
+7. Save/restore while projectiles are in flight and while strategic policy is active; v13 state should continue deterministically.

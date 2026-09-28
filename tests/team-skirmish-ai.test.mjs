@@ -37,7 +37,8 @@ test('TeamPrototype and SkirmishAI profile data load through the production Data
   assert.deepEqual(guard.composition,[{definition:'rifleman',min:1,max:1}]);
   assert.equal(assault.role,'ASSAULT');
   assert.deepEqual(assault.composition.map(x=>x.definition),['aegis_x','hmmwv50']);
-  assert.deepEqual(profile.teamPlans.map(x=>x.prototype),['crimson_base_guard','crimson_assault']);
+  assert.equal(profile.teamPlans[0].prototype,'crimson_base_guard');
+  assert.deepEqual(profile.teamPlans[1].variants.map(x=>x.prototype),['crimson_assault','crimson_assault_armor','crimson_assault_mobile']);
 });
 
 test('map-configured AIPlayer recruits exact data-defined teams without stealing the Harvester',async()=>{
@@ -74,8 +75,8 @@ test('base-defense Team reacts to a hostile incursion through normal ATTACK_MOVE
   const rifle=sim.entities.get('e_rifle');assert.equal(rifle.ai.order?.type,'ATTACK_MOVE');
 });
 
-test('v12 snapshot preserves Team membership and SkirmishAI controller state deterministically',async()=>{
-  const a=await makeSim();run(a,720);const snap=a.snapshot();assert.equal(snap.version,12);assert.ok(snap.teams.teams.length>=2);assert.equal(snap.skirmishAI.controllers.length,1);
+test('v13 snapshot preserves Team membership and SkirmishAI controller state deterministically',async()=>{
+  const a=await makeSim();run(a,720);const snap=a.snapshot();assert.equal(snap.version,13);assert.ok(snap.teams.teams.length>=2);assert.equal(snap.skirmishAI.controllers.length,1);
   const b=await makeSim();b.restore(snap);assert.deepEqual(b.snapshot(),snap);
   run(a,180);run(b,180);assert.deepEqual(b.snapshot(),a.snapshot());
 });

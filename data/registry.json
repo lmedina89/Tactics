@@ -57,7 +57,9 @@
   ],
   "teamPrototypes": [
     "data/teams/crimson_base_guard.json",
-    "data/teams/crimson_assault.json"
+    "data/teams/crimson_assault.json",
+    "data/teams/crimson_assault_armor.json",
+    "data/teams/crimson_assault_mobile.json"
   ],
   "aiProfiles": [
     "data/ai/crimson_skirmish_basic.json"

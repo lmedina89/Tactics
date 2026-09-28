@@ -1,68 +1,55 @@
-# ForgeRTS v0.6.2 Test Report
+# ForgeRTS v0.6.3 Test Report
 
-## Release target
+## Release
 
-**ForgeRTS v0.6.2 — Tactical Battlefield Intelligence**
+**ForgeRTS v0.6.3 — Projectile Correctness + Strategic Intelligence**
 
-This release builds on the v0.6.1 autonomous AI economy. It adds C&C-style distance-weighted target priority, economic-defense response, common Team targeting, casualty-driven reform/reinforcement, construction safety filtering, and generic harvest-accessibility validation.
+This release was built from the validated v0.6.2 tree. Projectile/combat correctness was treated as a gating foundation task before strategic-AI expansion.
 
-## Automated suite
+## Automated validation
 
-Command: `npm test`
+- **101 / 101 automated tests pass** (`npm test`).
+- **53 / 53 JS/MJS files** pass `node --check`.
+- **54 / 54 JSON files** parse successfully.
+- **21 / 21 production asset hashes** match `ASSET_HASHES.sha256`.
+- Production GLBs and terrain textures are unchanged.
+- Release-version consistency is tested across `package.json`, the HUD/title/startup label and `asset-catalog.json`.
 
-Result: **91/91 tests passing**.
+## New projectile/combat coverage
 
-New v0.6.2 coverage verifies:
+- Aegis-X 120 mm physical shell impacts a laterally moving HMMWV while the target is still moving.
+- Swept projectile collision uses authored BOX Geometry rather than the legacy movement-center radius.
+- `DUMB_PROJECTILE` receives launch lead but does not alter velocity to home after firing.
+- `GUIDED_PROJECTILE` can turn only through its data-defined bounded guidance rate.
+- Active projectile state survives snapshot/restore deterministically.
+- Projectile data validation rejects invalid behavior names / invalid numeric policy values.
 
-- named AttackPrioritySet data loads and distance weighting can make a nearby combat threat outrank a distant higher-value structure
-- assault Teams consume `attackCommonTarget` and use ordinary authoritative `ATTACK` orders against their shared objective
-- recent damage to an AI Harvester/economy asset redirects the base-defense Team through normal `GUARD_OBJECT`
-- an understrength assault Team enters `REFORMING`, retreats, generates ordinary factory work-order demand, recruits a replacement, re-rallies and reactivates
-- all authored validation-map mineral fields expose a valid harvest approach for both player and enemy Harvesters
-- the old steep west Dense Mineral position has no legal harvesting terminal and is authoritatively rejected as `RESOURCE_UNREACHABLE`
-- AI construction safety rejects otherwise-legal locations within the configured hostile combat-threat radius
+## New strategic-AI coverage
 
-All prior construction, autonomous economy, production, Team/Skirmish-AI, combat, pathfinding, collision/local avoidance, locomotion, interaction, command authority, tactical command, resource rendering, animation and mobile vertical-slice regressions remain passing.
+- Team plan variant selection changes from generic enemy `AITargetable` category counts rather than concrete object IDs.
+- Difficulty and real current wealth affect planning cadence/gatherer demand without changing gameplay rules.
+- BALANCED / AGGRESSIVE / DEFENSIVE / ECONOMIST personality selection changes strategic pacing/posture from data.
+- Expansion requires a real local-resource depletion baseline before selecting a remote field / increasing desired Refinery count.
+- Strategic planner state survives v13 snapshot/restore deterministically.
+- Existing v0.6.0-v0.6.2 tests continue to cover authoritative `FROM_AI` command flow, harvesting, construction, production, Team recruitment, tactical target valuation, economic defense and retreat/reform/reinforcement.
 
-## Static validation
+## Snapshot compatibility
 
-- **49** JavaScript / MJS files pass `node --check`.
-- **52** JSON files parse successfully.
-- `ASSET_HASHES.sha256` passes for all **21** listed production GLBs and terrain textures.
-- Production GLBs and terrain textures were not modified.
-- Snapshot schema is **v12**; restore accepts v8, v9, v10, v11 and v12.
+Current snapshot schema: **v13**.
 
-## Long-run engineering sanity pass
+Restore accepts **v8, v9, v10, v11, v12 and v13**.
 
-A 300-tick warmup followed by a measured **3,000-tick** construction-map simulation completed at about **0.153 ms/tick** in this container. This is an engineering sanity measurement, not an iPhone benchmark.
+## Long-run engineering sanity
 
-At tick 3,300 the strategic layer remained bounded:
+A construction-validation simulation was warmed for 300 fixed ticks and then measured for 3,000 additional ticks in the container:
 
-- **2** retained Team records
-- Team registry states: **1 ACTIVE**, **1 RECRUITING**
-- AI still owned the planned core base: Command Post, Vehicle Factory, two Guardian Turrets, two Power Nodes, Refinery and Barracks
-- AI had **2 Harvesters**, **2 Riflemen** and **1 Aegis-X** alive at the sample point
-- **2,282** minerals had been credited through real harvesting
-- west/east mineral accessibility remained functional; the east Rich field had been depleted through normal harvesting
+- measured average: **~0.178 ms / simulation tick**
+- final tick: **3300**
+- Team registry: **2 records**
+- AI remained bounded while harvesting, building, producing and running strategic/tactical planning
 
-Combat losses can naturally change exact force counts in a long simulation, so this sanity pass is used for bounded-state/performance checking rather than a fixed army-composition assertion.
+This is an engineering sanity measurement, **not an iPhone performance benchmark**.
 
-## Resource authoring check
+## Browser / device validation
 
-- old west Dense position `(-58, 102)`: sampled slope about **44.1°** — intentionally confirmed unreachable for the heavy wheeled Harvester
-- new west Dense position `(-58, 82)`: sampled slope about **13.0°** — reachable
-
-The engine regression test additionally verifies accessibility, so future authoring errors are not dependent on visual inspection alone.
-
-## Browser smoke-test limitation
-
-The page imports Three.js from jsDelivr and this execution environment cannot resolve external DNS, so a rendered headless-browser pass is not claimed. Simulation/source/static tests are complete; normal iPhone/GitHub Pages visual/feel validation remains required.
-
-## Manual iPhone focus
-
-1. Harvest each field, especially the relocated west Dense field near the river.
-2. Observe the assault tank + HMMWV and confirm they focus a common strategic target.
-3. Attack the enemy Harvester/economy and watch the base guard redirect to protect it.
-4. Destroy one assault-Team member and watch the survivor retreat while the real factory builds a replacement; the Team should later return to combat.
-5. Pressure the enemy base while it needs a structure and confirm it does not deliberately place a new building inside the configured hostile safety radius.
-6. Recheck vehicle traffic/collision while retreating/reinforcing Teams cross the expanding base.
+The container cannot perform the final real Three.js visual smoke test because the project imports Three.js from jsDelivr and external DNS is unavailable in this environment. The release therefore still requires real iPhone / GitHub Pages validation for visual projectile trajectories, hit feel and strategic behavior.

@@ -11,13 +11,24 @@
   "clipReloadTime": 2.8,
   "delivery": "PROJECTILE",
   "aimTolerance": 0.07,
-  "targetDomains": ["GROUND"],
-  "targetKinds": ["infantry", "vehicle", "building"],
+  "targetDomains": [
+    "GROUND"
+  ],
+  "targetKinds": [
+    "infantry",
+    "vehicle",
+    "building"
+  ],
   "projectile": {
-    "speed": 95,
-    "hitRadius": 2.4,
+    "speed": 190,
     "radius": 0.22,
-    "color": "#ffd985"
+    "color": "#ffd985",
+    "behavior": "DUMB_PROJECTILE",
+    "leadTarget": true,
+    "maxLeadSeconds": 1.5,
+    "designatedTargetCollision": true,
+    "impactPadding": 0.08,
+    "targetHeightFactor": 0.5
   },
   "muzzleHeight": 2.4,
   "muzzleForwardOffset": 4.0

@@ -111,7 +111,7 @@ Rules:
 
 ForgeRTS models the first computer player layer after the released Generals / Zero Hour distinction between invariant team-template/prototype information, runtime Team instances, and an AIPlayer controller. Team composition and policy live in JSON; `TeamManager` owns deterministic membership/lifecycle; `SkirmishAIPlayer` performs timer-bounded strategic decisions and expresses them exclusively as ordinary authoritative CommandBus orders.
 
-The current vertical slice intentionally recruits already-authored enemy combat units so the team/strategy/control architecture can be proven before introducing an autonomous AI economy. AI harvesting/construction/production arrived in v0.6.1, while common-target coordination, threat valuation and reinforcement/reform arrive in v0.6.2. Diplomacy, personality/difficulty, expansion strategy and full formation routing remain later layers and must build on this same separation rather than bypass it.
+The current vertical slice intentionally recruits already-authored enemy combat units so the team/strategy/control architecture can be proven before introducing an autonomous AI economy. AI harvesting/construction/production arrived in v0.6.1, common-target coordination/threat valuation/reinforcement-reform in v0.6.2, and strategic difficulty/wealth/personality/adaptive Team selection/resource-driven expansion in v0.6.3. Diplomacy and full formation routing remain later layers and must build on this same separation rather than bypass it.
 
 No EA AI/Team C++ implementation was directly translated for v0.6.0. The released source is the architectural/behavioral reference; the runtime is original ForgeRTS JavaScript designed around the existing browser simulation.
 
@@ -158,3 +158,15 @@ Rules:
 - A resource is harvestable only if a compatible collector has a navigation-valid terminal approach that remains inside harvest range after path-grid snapping and arrival tolerance.
 - AI resource selection must skip unreachable resource fields rather than repeatedly issuing doomed orders.
 - Tactical timers/reform/target state that can change future decisions is serialized; derived target scores and harvest-search candidates are not.
+
+## v0.6.3 projectile-correctness rule
+
+Projectile delivery is simulation state, not a renderer approximation. A projectile definition selects behavior (`DUMB_PROJECTILE` or `GUIDED_PROJECTILE`) and carries speed, radius, collision padding, target lead/guidance policy, target-height policy and lifetime. Unguided shells solve an initial intercept from authoritative target motion but retain their launch trajectory; guided projectiles may rotate velocity only through a bounded turn-rate policy. Every fixed step sweeps the projectile against the designated target's real `Geometry` while accounting for target motion over the same step. Damage is applied only after an authoritative swept impact.
+
+`collision-geometry.js` is the shared primitive library for oriented BOX/CYLINDER/SPHERE simulation geometry. Vehicle collision and projectile collision must reuse this geometry family rather than inventing independent hit circles. Presentation tracers/meshes may visualize projectile state but never decide impact.
+
+## v0.6.3 strategic-AI rule
+
+`StrategicAIPlanner` sits above `SkirmishAIPlayer`, TeamManager and SkirmishEconomyPlanner. It is timer-bounded and produces policy only: wealth state, TeamPrototype choice, difficulty/personality pacing multipliers, gatherer demand adjustment, and optional expansion goals. It cannot spawn objects, change credits, deal damage, or issue low-level movement directly. All execution remains ordinary Team/Economy planning and authoritative `FROM_AI` commands.
+
+Team composition adaptation is data-driven: enemy objects expose generic `AITargetable` categories; Team plan variants declare base priority, counter weights, wealth gates and personality bias. Difficulty/personality alter decision cadence/posture, not simulation rules. Resource expansion requires a real local-resource depletion baseline before increasing desired Refinery count and selecting a deterministic remote field.

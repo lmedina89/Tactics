@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.6.3 — Projectile Correctness + Strategic Intelligence
+
+- Rebuilt projectile flight around a data-driven behavior policy instead of the old frozen-target endpoint check. Projectile definitions now support explicit `DUMB_PROJECTILE` and `GUIDED_PROJECTILE` behaviors, launch lead, bounded guidance turn rate, designated-target collision, projectile radius/padding, target-height policy, and bounded lifetime.
+- Added shared simulation `collision-geometry.js` helpers so projectile impact tests use the same authored BOX/CYLINDER/SPHERE geometry family as dynamic unit collision rather than a legacy center-radius approximation.
+- Projectile collision is swept across each fixed simulation step and accounts for designated-target movement during that step, closing the moving-vehicle miss bug without inflating hit radii.
+- Unguided cannon shells receive an intercept lead at launch but do not magically home afterward. Guided projectiles use a separate bounded-turn policy. Aegis-X and Guardian cannon shell speeds were retuned for the ForgeRTS world scale.
+- Added projectile-definition validation in `DataRegistry` and deterministic snapshot normalization for the new projectile fields. Snapshot schema advances to **v13** while restore continues to accept v8-v12.
+- Added `StrategicAIPlanner`, keeping strategic assessment timer-bounded above the existing Team/Tactical/Economy layers.
+- Team plans can now choose among data-defined prototype variants using enemy `AITargetable` categories, wealth gates, personality bias, and counter weights. Added armored and mobile Crimson assault variants.
+- Added data-defined strategic wealth states, EASY/NORMAL/HARD cadence/gatherer tuning, and map-selectable BALANCED/AGGRESSIVE/DEFENSIVE/ECONOMIST personality presets. These alter planning policy only; they do not change combat/economy simulation rules.
+- Added resource-driven expansion policy: after a real local-resource baseline falls below a configured remaining fraction, the AI may raise the desired Refinery count and anchor the new Refinery near a deterministic remote resource field.
+- Added HEAVY_ARMOR/LIGHT_ARMOR target categories to combat vehicle data for generic counter-composition logic.
+- Added release-version consistency regression coverage so package/HUD/startup/asset-catalog versions cannot silently diverge again.
+- Added moving-target projectile, real-Geometry sweep, unguided/guided behavior, strategic adaptation, difficulty/wealth, expansion, personality, and v13 restore regression coverage. Full automated suite now passes **101/101** tests.
+- Added `COMBAT_PROJECTILE_AUDIT.md` and `STRATEGIC_AI_AUDIT.md`. No production GLBs or terrain assets were modified.
+
 ## v0.6.2 — Tactical Battlefield Intelligence
 
 - Added data-driven `AttackPrioritySet` content plus generic `AITargetable` categories. Target score uses priority minus distance/distance-modifier, matching the released Generals/Zero Hour attack-priority concept without hard-coded object IDs.

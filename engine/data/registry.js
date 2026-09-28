@@ -30,7 +30,7 @@ export class DataRegistry {
     for (const p of registry.locomotors || []) { const value=await get(p); this._validateLocomotor(value,p); this._insertUnique(this.locomotors,value,p); }
     for (const p of registry.interactions || []) this._insertUnique(this.interactions, await get(p), p);
     for (const p of registry.armors || []) this._insertUnique(this.armors, await get(p), p);
-    for (const p of registry.weapons || []) this._insertUnique(this.weapons, await get(p), p);
+    for (const p of registry.weapons || []) { const value=await get(p); this._validateWeapon(value,p); this._insertUnique(this.weapons,value,p); }
     for (const p of registry.commandSets || []) this._insertUnique(this.commandSets, await get(p), p);
     for (const p of registry.targetPrioritySets || []) { const value=await get(p); this._validateTargetPrioritySet(value,p); this._insertUnique(this.targetPrioritySets,value,p); }
     const defs=[];
@@ -57,6 +57,16 @@ export class DataRegistry {
     if(value.collisionMass!=null&&!(value.collisionMass>0))throw new Error(`${source}: collisionMass must be > 0`);
     if(value.avoidanceLookAheadSeconds!=null&&value.avoidanceLookAheadSeconds<0)throw new Error(`${source}: avoidanceLookAheadSeconds must be >= 0`);
     if(value.avoidanceBuffer!=null&&value.avoidanceBuffer<0)throw new Error(`${source}: avoidanceBuffer must be >= 0`);
+  }
+
+  _validateWeapon(value,source){
+    if(!value?.id)throw new Error(`${source}: weapon missing id`);
+    if(value.delivery==='PROJECTILE'){
+      const p=value.projectile;if(!p||!(p.speed>0))throw new Error(`${source}: projectile weapon requires projectile.speed > 0`);
+      if(p.behavior&&!['DUMB_PROJECTILE','GUIDED_PROJECTILE'].includes(p.behavior))throw new Error(`${source}: invalid projectile behavior ${p.behavior}`);
+      for(const key of ['radius','impactPadding','maxLeadSeconds','guidanceTurnRate','maxLifetimeSeconds'])if(p[key]!=null&&!(p[key]>=0))throw new Error(`${source}: projectile.${key} must be >= 0`);
+      if(p.targetHeightFactor!=null&&(p.targetHeightFactor<0||p.targetHeightFactor>1))throw new Error(`${source}: projectile.targetHeightFactor must be within 0..1`);
+    }
   }
 
   _validateDefinitionRefs(def,source){
@@ -135,10 +145,25 @@ export class DataRegistry {
     const ids=new Set();
     for(const plan of value.teamPlans||[]){
       if(!plan.id||ids.has(plan.id))throw new Error(`${source}: duplicate/missing team plan id ${plan.id||''}`);ids.add(plan.id);
-      if(!this.teamPrototypes.has(plan.prototype))throw new Error(`${source}: unknown TeamPrototype ${plan.prototype}`);
+      if(!plan.prototype&&!plan.variants?.length)throw new Error(`${source}: team plan ${plan.id} needs prototype or variants`);
+      if(plan.prototype&&!this.teamPrototypes.has(plan.prototype))throw new Error(`${source}: unknown TeamPrototype ${plan.prototype}`);
+      for(const variant of plan.variants||[]){
+        if(!this.teamPrototypes.has(variant.prototype))throw new Error(`${source}: unknown TeamPrototype ${variant.prototype}`);
+        for(const [category,weight] of Object.entries(variant.counterWeights??{}))if(!Number.isFinite(weight))throw new Error(`${source}: variant counter weight ${category} must be numeric`);
+        if(variant.basePriority!=null&&!Number.isFinite(variant.basePriority))throw new Error(`${source}: variant basePriority must be numeric`);
+        for(const key of ['minWealth','maxWealth'])if(variant[key]!=null&&!['POOR','NORMAL','WEALTHY'].includes(variant[key]))throw new Error(`${source}: invalid ${key} ${variant[key]}`);
+      }
       if(plan.maxConcurrent!=null&&(!Number.isInteger(plan.maxConcurrent)||plan.maxConcurrent<1))throw new Error(`${source}: maxConcurrent must be >= 1`);
       for(const key of ['startDelayTicks','retryTicks','productionPriority'])if(plan[key]!=null&&(!Number.isInteger(plan[key])||plan[key]<0))throw new Error(`${source}: ${key} must be a nonnegative integer`);
     }
+    const strategy=value.strategy??{};
+    if(strategy.assessmentIntervalTicks!=null&&(!Number.isInteger(strategy.assessmentIntervalTicks)||strategy.assessmentIntervalTicks<1))throw new Error(`${source}: strategy.assessmentIntervalTicks must be positive`);
+    if(strategy.personality){for(const key of ['aggression','economy','defense'])if(strategy.personality[key]!=null&&!(strategy.personality[key]>0))throw new Error(`${source}: strategy.personality.${key} must be > 0`);}
+    if(strategy.defaultPersonality!=null&&strategy.personalities&&!strategy.personalities[strategy.defaultPersonality])throw new Error(`${source}: unknown strategy.defaultPersonality ${strategy.defaultPersonality}`);
+    for(const [personality,tuning] of Object.entries(strategy.personalities??{})){for(const key of ['aggression','economy','defense'])if(tuning[key]!=null&&!(tuning[key]>0))throw new Error(`${source}: strategy.personalities.${personality}.${key} must be > 0`);}
+    if(strategy.wealth){if(strategy.wealth.poorBelow!=null&&!Number.isFinite(strategy.wealth.poorBelow))throw new Error(`${source}: strategy.wealth.poorBelow must be numeric`);if(strategy.wealth.wealthyAbove!=null&&!Number.isFinite(strategy.wealth.wealthyAbove))throw new Error(`${source}: strategy.wealth.wealthyAbove must be numeric`);}
+    for(const [difficulty,tuning] of Object.entries(strategy.difficulties??{})){if(!['EASY','NORMAL','HARD'].includes(difficulty))throw new Error(`${source}: invalid AI difficulty ${difficulty}`);for(const key of ['constructionIntervalScale','productionIntervalScale','teamIntervalScale'])if(tuning[key]!=null&&!(tuning[key]>0))throw new Error(`${source}: ${difficulty}.${key} must be > 0`);}
+    const expansion=strategy.expansion??{};if(expansion.refineryDefinition&&!this.definitions.has(expansion.refineryDefinition))throw new Error(`${source}: unknown expansion refineryDefinition ${expansion.refineryDefinition}`);
   }
 
   _validateCommandSet(set,source){

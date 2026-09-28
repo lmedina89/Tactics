@@ -56,6 +56,7 @@ export class SkirmishEconomyPlanner{
     if(kind==='DEFENSE')return context.defense??context.home;
     if(kind==='ENEMY')return context.enemyBase??context.defense??context.home;
     if(kind==='RESOURCE'){
+      if(context.expansionResource?.alive&&context.expansionResource.resourceRemaining>0)return context.expansionResource;
       const resources=[...this.entitiesProvider()].filter(e=>e.alive&&e.kind==='resource'&&e.resourceRemaining>0).sort((a,b)=>dist(context.home,a)-dist(context.home,b)||a.id.localeCompare(b.id));
       return resources[0]??context.home;
     }
@@ -90,7 +91,7 @@ export class SkirmishEconomyPlanner{
       for(const offset of offsets){
         const a=toward+offset*angleStep,x=builder.x+Math.sin(a)*radius,z=builder.z+Math.cos(a)*radius,candidate={x,z};
         const yaw=this._candidateYaw(p.yawMode??'MATCH_BUILDER',builder,candidate,target,p),check=this.construction.validatePlacement(builder.id,plan.definition,x,z,yaw,this.playerId);
-        if(check.ok&&this._locationSafe(candidate,p.safetyRadius??this.cfg.constructionSafetyRadius??0))return {x,z,yaw};
+        const safety=(p.safetyRadius??this.cfg.constructionSafetyRadius??0)*(context.strategy?.defenseRadiusScale??1);if(check.ok&&this._locationSafe(candidate,safety))return {x,z,yaw};
       }
     }
     return null;
@@ -101,11 +102,11 @@ export class SkirmishEconomyPlanner{
   }
 
   _manageConstruction(tick,context){
-    if(tick<this.nextConstructionTick)return;this.nextConstructionTick=tick+(this.cfg.constructionCheckIntervalTicks??45);
+    if(tick<this.nextConstructionTick)return;this.nextConstructionTick=tick+Math.max(1,Math.round((this.cfg.constructionCheckIntervalTicks??45)*(context.strategy?.constructionIntervalScale??1)));
     const maxActive=Math.max(1,this.cfg.maxActiveConstructionSites??1);if(this._activeConstructionSites()>=maxActive)return;
     const plans=[...(this.cfg.buildList||[])].sort((a,b)=>this._buildPriority(b)-this._buildPriority(a)||a.definition.localeCompare(b.definition));
     for(const plan of plans){
-      const desired=Math.max(0,plan.desiredCount??0);if(this._ownedDefinitionCount(plan.definition)>=desired)continue;
+      const desired=Math.max(0,context.strategy?.buildCountOverrides?.[plan.definition]??plan.desiredCount??0);if(this._ownedDefinitionCount(plan.definition)>=desired)continue;
       const builders=this._owned().filter(e=>e.operational!==false&&!!this._module(e,'Builder')&&(this._module(e,'Builder').buildable||[]).includes(plan.definition)).sort((a,b)=>a.id.localeCompare(b.id));
       for(const builder of builders){
         const eligible=this.construction.eligibility(builder.id,plan.definition,this.playerId);if(!eligible.ok)continue;
@@ -122,9 +123,9 @@ export class SkirmishEconomyPlanner{
   }
 
   _freeCount(definitionId){return this._owned().filter(e=>e.definitionId===definitionId&&e.operational!==false&&!e.teamId).length;}
-  _demandMap(){
+  _demandMap(strategy={}){
     const demand=new Map(),add=(definitionId,count,priority,reason)=>{if(count<=0)return;const cur=demand.get(definitionId);if(!cur)demand.set(definitionId,{definitionId,count,priority,reason});else {cur.count+=count;cur.priority=Math.max(cur.priority,priority);cur.reason+=`+${reason}`;}};
-    const harvester=this.cfg.harvester;if(harvester?.definition){const alive=this._ownedDefinitionCount(harvester.definition);add(harvester.definition,Math.max(0,(harvester.desiredCount??0)-alive),harvester.priority??1000,'GATHERER');}
+    const harvester=this.cfg.harvester;if(harvester?.definition){const alive=this._ownedDefinitionCount(harvester.definition),desired=Math.max(0,(harvester.desiredCount??0)+(strategy.desiredHarvesterDelta??0));add(harvester.definition,Math.max(0,desired-alive),harvester.priority??1000,'GATHERER');}
     const planPriority=new Map((this.profile.teamPlans||[]).map(p=>[p.id,p.productionPriority??500]));
     for(const team of this.teamManager.teams.values()){
       if(team.playerId!==this.playerId||![TeamState.RECRUITING,TeamState.REFORMING].includes(team.state))continue;const proto=this.teamManager.prototype(team.prototypeId);if(!proto)continue;
@@ -143,13 +144,13 @@ export class SkirmishEconomyPlanner{
     candidates.sort((a,b)=>a.queueLength-b.queueLength||a.entity.id.localeCompare(b.entity.id));return candidates[0]?.entity??null;
   }
 
-  _manageProduction(tick){
-    if(tick<this.nextProductionTick)return;this.nextProductionTick=tick+(this.cfg.productionCheckIntervalTicks??30);
-    const queued=this._queuedCounts(),demands=[...this._demandMap().values()].map(d=>({...d,count:Math.max(0,d.count-(queued.get(d.definitionId)||0))})).filter(d=>d.count>0).sort((a,b)=>b.priority-a.priority||a.definitionId.localeCompare(b.definitionId));
+  _manageProduction(tick,strategy={}){
+    if(tick<this.nextProductionTick)return;this.nextProductionTick=tick+Math.max(1,Math.round((this.cfg.productionCheckIntervalTicks??30)*(strategy.productionIntervalScale??1)));
+    const queued=this._queuedCounts(),demands=[...this._demandMap(strategy).values()].map(d=>({...d,count:Math.max(0,d.count-(queued.get(d.definitionId)||0))})).filter(d=>d.count>0).sort((a,b)=>b.priority-a.priority||a.definitionId.localeCompare(b.definitionId));
     for(const d of demands){const producer=this._findProducer(d.definitionId);if(!producer)continue;this._issue(CommandType.PRODUCE,{producerId:producer.id,definitionId:d.definitionId});return;}
   }
 
-  update(tick,context){this._manageHarvesters(tick);this._manageConstruction(tick,context);this._manageProduction(tick);}
+  update(tick,context){this._manageHarvesters(tick);this._manageConstruction(tick,context);this._manageProduction(tick,context.strategy??{});}
   snapshot(){return {nextHarvestTick:this.nextHarvestTick,nextConstructionTick:this.nextConstructionTick,nextProductionTick:this.nextProductionTick};}
   restore(state={}){if('nextHarvestTick'in state)this.nextHarvestTick=state.nextHarvestTick??0;if('nextConstructionTick'in state)this.nextConstructionTick=state.nextConstructionTick??0;if('nextProductionTick'in state)this.nextProductionTick=state.nextProductionTick??0;}
 }

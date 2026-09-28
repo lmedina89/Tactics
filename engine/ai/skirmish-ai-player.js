@@ -2,6 +2,7 @@ import {CommandSource,CommandType} from '../commands/command-bus.js';
 import {TeamState} from '../teams/team-manager.js';
 import {SkirmishEconomyPlanner} from './skirmish-economy-planner.js';
 import {TargetEvaluator,aiTargetCategories} from './target-evaluator.js';
+import {StrategicAIPlanner} from './strategic-ai-planner.js';
 
 const clone=v=>structuredClone(v);
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
@@ -11,8 +12,9 @@ export class SkirmishAIPlayer{
   constructor({playerId,profile,map,players,teamManager,entityLookup,entitiesProvider,commandBus,registry,economy,resources,construction,production}){
     this.playerId=playerId;this.profile=profile;this.entityLookup=entityLookup??(id=>[...entitiesProvider()].find(e=>e.id===id));this.tactical=profile.tactical??{};this.map=map;this.players=players;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;this.registry=registry;
     this.targetEvaluator=new TargetEvaluator({registry});
-    this.economyPlanner=new SkirmishEconomyPlanner({playerId,profile,map,registry,players,teamManager,entitiesProvider,commandBus,economy,resources,construction,production});
     const mp=map.players.find(p=>p.id===playerId)??{};this.mapConfig=mp.ai??{};
+    this.strategyPlanner=new StrategicAIPlanner({playerId,profile,mapConfig:this.mapConfig,players,registry,entitiesProvider});
+    this.economyPlanner=new SkirmishEconomyPlanner({playerId,profile,map,registry,players,teamManager,entitiesProvider,commandBus,economy,resources,construction,production});
     this.currentEnemyPlayerId=null;this.nextThinkTick=this.profile.initialDelayTicks??0;this.nextEnemyAcquireTick=0;this.planRetryTicks={};
   }
 
@@ -50,7 +52,7 @@ export class SkirmishAIPlayer{
   _prioritySet(team){return this.teamManager.prototype(team.prototypeId)?.attackPrioritySet??null;}
 
   _findBaseThreat(team){
-    const center=this._defensePoint(),radius=this.profile.baseThreatRadius??110,candidates=[...this.entitiesProvider()].filter(e=>e.alive&&e.playerId&&e.playerId!==this.playerId&&dist(center,e)<=radius);
+    const center=this._defensePoint(),radius=(this.profile.baseThreatRadius??110)*(this.strategyPlanner.state.defenseRadiusScale??1),candidates=[...this.entitiesProvider()].filter(e=>e.alive&&e.playerId&&e.playerId!==this.playerId&&dist(center,e)<=radius);
     return this.targetEvaluator.choose(candidates,{from:center,prioritySetId:this._prioritySet(team)})?.target??null;
   }
 
@@ -75,20 +77,20 @@ export class SkirmishAIPlayer{
     team.nextTargetEvalTick=tick+(this.tactical.targetReassessTicks??90);const target=choice?.target;if(!target)return null;return {playerId:id,targetId:target.id,position:{x:target.x,z:target.z}};
   }
 
-  _startOrRecruitPlan(plan,tick){
-    const proto=this.teamManager.prototype(plan.prototype);if(!proto)return null;
+  _startOrRecruitPlan(plan,tick,strategy=this.strategyPlanner.state){
     const existing=[...this.teamManager.teams.values()].find(t=>t.playerId===this.playerId&&t.planId===plan.id&&![TeamState.DESTROYED,TeamState.DISBANDED].includes(t.state));
+    const prototypeId=existing?.prototypeId??this.strategyPlanner.prototypeForPlan(plan),proto=this.teamManager.prototype(prototypeId);if(!proto)return null;
     const start=(this.profile.initialDelayTicks??0)+(plan.startDelayTicks??0);if(!existing&&tick<start)return null;
     if(tick<(this.planRetryTicks[plan.id]??0)&&(!existing||[TeamState.RECRUITING,TeamState.REFORMING].includes(existing.state)))return existing??null;
     let team=existing;
     if(!team){
-      const live=this.teamManager.instances(this.playerId,plan.prototype);if(live.length>=(plan.maxConcurrent??proto.maxInstances??1))return live[0]??null;
-      team=this.teamManager.createInactiveTeam(plan.prototype,this.playerId,{tick,home:this._baseCenter(),rally:this._rallyPoint(),planId:plan.id});if(!team)return null;
+      const live=this.teamManager.instances(this.playerId,prototypeId);if(live.length>=(plan.maxConcurrent??proto.maxInstances??1))return live[0]??null;
+      team=this.teamManager.createInactiveTeam(prototypeId,this.playerId,{tick,home:this._baseCenter(),rally:this._rallyPoint(),planId:plan.id});if(!team)return null;
     }
     if([TeamState.RECRUITING,TeamState.REFORMING].includes(team.state)){
       const wasReforming=team.state===TeamState.REFORMING,center=wasReforming?(team.rally||this._rallyPoint()):team.home;
       const result=this.teamManager.recruit(team,{center,radius:proto.recruitRadius??Infinity,tick});
-      if(!result.minimumReady){this.planRetryTicks[plan.id]=tick+(plan.retryTicks??90);if(!team.memberIds.length&&!wasReforming&&tick-team.createdTick>(proto.recruitTimeoutTicks??300))this.teamManager.disband(team,tick);return team;}
+      if(!result.minimumReady){this.planRetryTicks[plan.id]=tick+Math.max(1,Math.round((plan.retryTicks??90)*(strategy.teamIntervalScale??1)));if(!team.memberIds.length&&!wasReforming&&tick-team.createdTick>(proto.recruitTimeoutTicks??300))this.teamManager.disband(team,tick);return team;}
       this._setStance(team,proto.initialStance||'GUARD',tick);
       if(proto.role==='BASE_DEFENSE'&&!wasReforming){
         this.teamManager.activate(team,tick);const p=this._defensePoint();this.teamManager.setObjective(team,{type:'GUARD_POSITION',position:p});this._orderTeam(team,CommandType.GUARD_POSITION,{position:p},`GUARD:${p.x.toFixed(1)},${p.z.toFixed(1)}`,tick,{force:true});
@@ -107,7 +109,7 @@ export class SkirmishAIPlayer{
 
   _updateBaseDefense(team,tick){
     const economic=this._findRecentEconomicThreat(tick);
-    if(economic){team.defenseHoldUntilTick=Math.max(team.defenseHoldUntilTick??0,tick+(this.tactical.economicDefenseHoldTicks??180));this.teamManager.setObjective(team,{type:'PROTECT_ECONOMY',targetId:economic.victim.id,threatId:economic.attacker.id,position:roundedPoint(economic.victim)});this._orderTeam(team,CommandType.GUARD_OBJECT,{targetId:economic.victim.id},`PROTECT:${economic.victim.id}`,tick);return;}
+    if(economic){team.defenseHoldUntilTick=Math.max(team.defenseHoldUntilTick??0,tick+Math.max(1,Math.round((this.tactical.economicDefenseHoldTicks??180)*(this.strategyPlanner.state.economicDefenseHoldScale??1))));this.teamManager.setObjective(team,{type:'PROTECT_ECONOMY',targetId:economic.victim.id,threatId:economic.attacker.id,position:roundedPoint(economic.victim)});this._orderTeam(team,CommandType.GUARD_OBJECT,{targetId:economic.victim.id},`PROTECT:${economic.victim.id}`,tick);return;}
     if(team.objective?.type==='PROTECT_ECONOMY'&&tick<(team.defenseHoldUntilTick??0)){
       const protectedObj=this.entityLookup(team.objective.targetId);if(protectedObj?.alive){this._orderTeam(team,CommandType.GUARD_OBJECT,{targetId:protectedObj.id},`PROTECT:${protectedObj.id}`,tick);return;}
     }
@@ -138,17 +140,19 @@ export class SkirmishAIPlayer{
   _updateActive(team,tick){const proto=this.teamManager.prototype(team.prototypeId);if(!proto)return;if(proto.role==='BASE_DEFENSE')this._updateBaseDefense(team,tick);else this._updateAssault(team,tick);}
 
   update(tick){
-    if(tick<this.nextThinkTick)return;this.nextThinkTick=tick+(this.profile.thinkIntervalTicks??15);this._acquireEnemy(tick);
-    for(const plan of this.profile.teamPlans||[])this._startOrRecruitPlan(plan,tick);
+    const strategy=this.strategyPlanner.update(tick);
+    if(tick<this.nextThinkTick)return;this.nextThinkTick=tick+Math.max(1,Math.round((this.profile.thinkIntervalTicks??15)*(strategy.teamIntervalScale??1)));this._acquireEnemy(tick);
+    for(const plan of this.profile.teamPlans||[])this._startOrRecruitPlan(plan,tick,strategy);
     const enemyBase=this.currentEnemyPlayerId?this._baseCenter(this.currentEnemyPlayerId):null;
-    this.economyPlanner.update(tick,{home:this._baseCenter(),defense:this._defensePoint(),enemyBase});
+    const expansionResource=strategy.expansionResourceId?this.entityLookup(strategy.expansionResourceId):null;
+    this.economyPlanner.update(tick,{home:this._baseCenter(),defense:this._defensePoint(),enemyBase,strategy,expansionResource});
     for(const team of this.teamManager.teams.values()){
       if(team.playerId!==this.playerId)continue;if(team.state===TeamState.RALLYING)this._updateRallying(team,tick);else if(team.state===TeamState.REFORMING)this._updateReforming(team,tick);else if(team.state===TeamState.ACTIVE)this._updateActive(team,tick);
     }
   }
 
-  snapshot(){return {playerId:this.playerId,currentEnemyPlayerId:this.currentEnemyPlayerId,nextThinkTick:this.nextThinkTick,nextEnemyAcquireTick:this.nextEnemyAcquireTick,planRetryTicks:clone(this.planRetryTicks),economyPlanner:this.economyPlanner.snapshot()};}
-  restore(state={}){if('currentEnemyPlayerId' in state)this.currentEnemyPlayerId=state.currentEnemyPlayerId??null;if('nextThinkTick' in state)this.nextThinkTick=state.nextThinkTick??0;if('nextEnemyAcquireTick' in state)this.nextEnemyAcquireTick=state.nextEnemyAcquireTick??0;if('planRetryTicks' in state)this.planRetryTicks=clone(state.planRetryTicks??{});this.economyPlanner.restore(state.economyPlanner??{});}
+  snapshot(){return {playerId:this.playerId,currentEnemyPlayerId:this.currentEnemyPlayerId,nextThinkTick:this.nextThinkTick,nextEnemyAcquireTick:this.nextEnemyAcquireTick,planRetryTicks:clone(this.planRetryTicks),strategyPlanner:this.strategyPlanner.snapshot(),economyPlanner:this.economyPlanner.snapshot()};}
+  restore(state={}){if('currentEnemyPlayerId' in state)this.currentEnemyPlayerId=state.currentEnemyPlayerId??null;if('nextThinkTick' in state)this.nextThinkTick=state.nextThinkTick??0;if('nextEnemyAcquireTick' in state)this.nextEnemyAcquireTick=state.nextEnemyAcquireTick??0;if('planRetryTicks' in state)this.planRetryTicks=clone(state.planRetryTicks??{});this.strategyPlanner.restore(state.strategyPlanner??{});this.economyPlanner.restore(state.economyPlanner??{});}
 }
 
 export class SkirmishAISystem{

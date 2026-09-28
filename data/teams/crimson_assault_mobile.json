@@ -1,0 +1,20 @@
+{
+  "id": "crimson_assault_mobile",
+  "name": "Crimson Mobile Assault Team",
+  "role": "ASSAULT",
+  "maxInstances": 1,
+  "recruitRadius": 220,
+  "recruitTimeoutTicks": 540,
+  "rallyRadius": 20,
+  "rallyTimeoutTicks": 330,
+  "initialStance": "AGGRESSIVE",
+  "attackCommonTarget": true,
+  "formation": {"type":"LOOSE","spacing":7},
+  "composition": [
+    {"definition":"aegis_x","min":1,"max":1},
+    {"definition":"hmmwv50","min":2,"max":2},
+    {"definition":"rifleman","min":1,"max":1}
+  ],
+  "attackPrioritySet": "crimson_assault_targets",
+  "reinforcement": {"enabled":true,"retreatBelowStrength":0.6,"reformTimeoutTicks":1050}
+}

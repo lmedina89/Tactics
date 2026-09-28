@@ -1,3 +1,5 @@
+import {collisionShape,overlapMTV} from '../geometry/collision-geometry.js';
+export {collisionShape,overlapMTV} from '../geometry/collision-geometry.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const dot=(ax,az,bx,bz)=>ax*bx+az*bz;
 const EPS=1e-6;
@@ -15,66 +17,11 @@ function axes(yaw){
   };
 }
 
-export function collisionShape(entity){
-  const g=entity.modules?.Geometry;
-  if(g?.shape==='BOX'){
-    const halfLength=Math.max(0.05,g.majorRadius??g.halfLength??entity.radius??0.5);
-    const halfWidth=Math.max(0.05,g.minorRadius??g.halfWidth??entity.radius??0.5);
-    return {type:'BOX',halfLength,halfWidth,boundingRadius:Math.hypot(halfLength,halfWidth)};
-  }
-  const radius=Math.max(0.05,g?.majorRadius??g?.radius??entity.radius??0.5);
-  return {type:'CIRCLE',radius,boundingRadius:radius};
-}
-
 function supportRadius(shape,yaw,nx,nz){
-  if(shape.type==='CIRCLE')return shape.radius;
+  if(shape.type==='CIRCLE'||shape.type==='SPHERE')return shape.radius;
   const a=axes(yaw);
   return Math.abs(dot(nx,nz,a.forward.x,a.forward.z))*shape.halfLength+
          Math.abs(dot(nx,nz,a.right.x,a.right.z))*shape.halfWidth;
-}
-
-function boxBoxOverlap(a,sa,b,sb){
-  const aa=axes(a.yaw||0),ba=axes(b.yaw||0),dx=b.x-a.x,dz=b.z-a.z;
-  const candidates=[aa.forward,aa.right,ba.forward,ba.right];
-  let bestDepth=Infinity,best=null;
-  for(const axis of candidates){
-    const ar=Math.abs(dot(axis.x,axis.z,aa.forward.x,aa.forward.z))*sa.halfLength+Math.abs(dot(axis.x,axis.z,aa.right.x,aa.right.z))*sa.halfWidth;
-    const br=Math.abs(dot(axis.x,axis.z,ba.forward.x,ba.forward.z))*sb.halfLength+Math.abs(dot(axis.x,axis.z,ba.right.x,ba.right.z))*sb.halfWidth;
-    const signed=dot(dx,dz,axis.x,axis.z),depth=ar+br-Math.abs(signed);
-    if(depth<=0)return null;
-    if(depth<bestDepth){bestDepth=depth;const sign=Math.abs(signed)>EPS?Math.sign(signed):stableSign(a.id,b.id);best={nx:axis.x*sign,nz:axis.z*sign,depth};}
-  }
-  return best;
-}
-
-function circleCircleOverlap(a,sa,b,sb){
-  const dx=b.x-a.x,dz=b.z-a.z,d=Math.hypot(dx,dz),sum=sa.radius+sb.radius;if(d>=sum)return null;
-  if(d<EPS){const sign=stableSign(a.id,b.id);return {nx:sign,nz:0,depth:sum};}
-  return {nx:dx/d,nz:dz/d,depth:sum-d};
-}
-
-function circleBoxOverlap(circle,sc,box,sb,flip=false){
-  const ax=axes(box.yaw||0),dx=circle.x-box.x,dz=circle.z-box.z;
-  const lx=dot(dx,dz,ax.right.x,ax.right.z),lz=dot(dx,dz,ax.forward.x,ax.forward.z);
-  const qx=clamp(lx,-sb.halfWidth,sb.halfWidth),qz=clamp(lz,-sb.halfLength,sb.halfLength);
-  let ox=lx-qx,oz=lz-qz,d=Math.hypot(ox,oz),nx,nz,depth;
-  if(d>EPS){
-    if(d>=sc.radius)return null;
-    nx=(ax.right.x*(ox/d)+ax.forward.x*(oz/d));nz=(ax.right.z*(ox/d)+ax.forward.z*(oz/d));depth=sc.radius-d;
-  }else{
-    const toSide=sb.halfWidth-Math.abs(lx),toEnd=sb.halfLength-Math.abs(lz);
-    if(toSide<toEnd){const sign=Math.abs(lx)>EPS?Math.sign(lx):stableSign(box.id,circle.id);nx=ax.right.x*sign;nz=ax.right.z*sign;depth=sc.radius+toSide;}
-    else{const sign=Math.abs(lz)>EPS?Math.sign(lz):stableSign(box.id,circle.id);nx=ax.forward.x*sign;nz=ax.forward.z*sign;depth=sc.radius+toEnd;}
-  }
-  // Current normal points from box toward circle. Return from first argument toward second.
-  return flip?{nx,nz,depth}:{nx:-nx,nz:-nz,depth};
-}
-
-export function overlapMTV(a,sa,b,sb){
-  if(sa.type==='BOX'&&sb.type==='BOX')return boxBoxOverlap(a,sa,b,sb);
-  if(sa.type==='CIRCLE'&&sb.type==='CIRCLE')return circleCircleOverlap(a,sa,b,sb);
-  if(sa.type==='CIRCLE')return circleBoxOverlap(a,sa,b,sb,false);
-  return circleBoxOverlap(b,sb,a,sa,true);
 }
 
 class SpatialHash{
