@@ -1,0 +1,1 @@
+{"id":"aircraft","contractVersion":1,"kind":"aircraft","affiliation":"FACTION","categories":["MILITARY","UNIT","AIRCRAFT"],"requiredModules":["ContentMeta","Body","Geometry","Locomotor"],"recommendedModules":["ArmorSet","Render","Selectable","UnitAIUpdate","Vision","AITargetable","ClientAnimation"]}

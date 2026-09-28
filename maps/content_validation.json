@@ -1,0 +1,36 @@
+{
+  "manifestVersion": 2,
+  "contentContractVersion": 1,
+  "id": "content_validation",
+  "version": 1,
+  "name": "Content Foundation Validation Yard",
+  "size": {"width": 220, "depth": 180},
+  "seed": 6501,
+  "terrain": {
+    "heightfield": {"baseHeight": 2, "noise": {"scale": 90, "amplitude": 0.4, "octaves": 2, "persistence": 0.45}},
+    "materials": [
+      {"id":"grass","albedo":"assets/terrain/temperate_grass.png","tileMeters":18,"roughness":0.95},
+      {"id":"dirt","albedo":"assets/terrain/temperate_dirt.png","tileMeters":14,"roughness":0.98},
+      {"id":"rock","albedo":"assets/terrain/temperate_rock.png","tileMeters":12,"roughness":0.88}
+    ],
+    "splat": {"mode":"generated","drivers":["slope","seeded-noise"]},
+    "cliffs": {"slopeStartDeg":24,"slopeFullDeg":38}
+  },
+  "players": [],
+  "objects": [
+    {"id":"civ_house_a","definition":"civilian_structure_shell","x":-34,"z":0,"yaw":0},
+    {"id":"wall_a","definition":"neutral_wall_segment","x":0,"z":-16,"yaw":0},
+    {"id":"wall_b","definition":"neutral_wall_segment","x":0,"z":-8,"yaw":0},
+    {"id":"gate_a","definition":"neutral_gate_segment","x":0,"z":4,"yaw":0},
+    {"id":"wall_c","definition":"neutral_wall_segment","x":0,"z":14,"yaw":0}
+  ],
+  "resourceFields": [],
+  "roads": [],
+  "water": {"rivers":[],"lakes":[]},
+  "waypoints": [],
+  "triggerAreas": [],
+  "aiAnchors": [],
+  "staticObstacles": [],
+  "navigation": {"cellSize":4,"defaultMaxSlopeDeg":32,"waterIsBlocked":true},
+  "environment": {"skyColor":"#87958a","fogColor":"#87958a","fogNear":300,"fogFar":900}
+}

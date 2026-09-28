@@ -1,0 +1,8 @@
+{
+  "id": "civilian",
+  "name": "Civilian",
+  "color": "#8d8a7a",
+  "accent": "#c8c09e",
+  "isPlayerSelectable": false,
+  "contentAffiliation": "CIVILIAN"
+}

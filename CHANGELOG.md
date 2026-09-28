@@ -1,5 +1,19 @@
 # ForgeRTS Changelog
 
+## v0.6.5 — Content Expansion + World Composition Foundation
+
+- Added versioned ForgeRTS content contract v1 and explicit `ContentMeta` classification to all registered production definitions.
+- Added FACTION/CIVILIAN/NEUTRAL/WORLD content affiliations and stable category indexing without pretending that content affiliation is already full diplomacy.
+- Added eight authoring templates plus batch content-pack loading so future content families can be registered without engine-source edits.
+- Added generic wall/gate `WallConnection` groups, sockets, roles and deterministic snap helper.
+- Added ownerless civilian/neutral runtime validation prototypes and dedicated `content_validation` map.
+- Added GLB asset-ingestion audit tooling and machine-readable reports for bounds, clips, materials/meshes and pivot hints; visual bounds remain non-authoritative suggestions.
+- Added content/map validation tooling for asset/definition/map references, required Geometry/Footprint, animation bindings, factory exits and other authoring hazards.
+- Added `WORLD_FORGE_EXPORT_SPEC.md` and `CONTENT_PIPELINE_AUDIT.md` to lock the WorldForge→ForgeRTS data boundary before mass asset production.
+- Runtime GameObjects now carry definition-derived content affiliation/categories. Snapshot format advances to **v15** with v8-v14 restore support retained.
+- Existing v0.6.4 combat, AI, economy, collision and animation behavior remains unchanged by the content layer.
+
+
 ## v0.6.4 — Skirmish Defense + Combat Completion
 
 - Added timer-bounded, data-driven `EconomicDefenseManager` modeled on the Generals supply-source attacked/safe + guard-supply-center responsibility boundary.

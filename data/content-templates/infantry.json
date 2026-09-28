@@ -1,0 +1,1 @@
+{"id":"infantry","contractVersion":1,"kind":"infantry","affiliation":"FACTION","categories":["MILITARY","UNIT","INFANTRY"],"requiredModules":["ContentMeta","Body","Geometry","Locomotor"],"recommendedModules":["ArmorSet","Render","Selectable","UnitAIUpdate","Vision","AITargetable","ClientAnimation"]}

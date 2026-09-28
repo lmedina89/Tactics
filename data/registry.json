@@ -1,7 +1,9 @@
 {
   "factions": [
     "data/factions/aegis.json",
-    "data/factions/crimson.json"
+    "data/factions/crimson.json",
+    "data/factions/civilian.json",
+    "data/factions/neutral.json"
   ],
   "locomotors": [
     "data/locomotors/infantry.json",
@@ -70,5 +72,22 @@
   "targetPrioritySets": [
     "data/ai/target_priorities/crimson_assault.json",
     "data/ai/target_priorities/crimson_defense.json"
+  ],
+  "assetCatalogs": [
+    "data/asset-catalog.json"
+  ],
+  "contentContract": "data/content-contract.json",
+  "contentTemplates": [
+    "data/content-templates/civilian_building.json",
+    "data/content-templates/military_building.json",
+    "data/content-templates/ground_vehicle.json",
+    "data/content-templates/infantry.json",
+    "data/content-templates/aircraft.json",
+    "data/content-templates/wall_segment.json",
+    "data/content-templates/gate.json",
+    "data/content-templates/prop.json"
+  ],
+  "contentPacks": [
+    "data/content-packs/foundation_validation.json"
   ]
 }

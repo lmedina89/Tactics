@@ -1,6 +1,6 @@
 # NOTICE
 
-ForgeRTS v0.6.4 is an original browser-native implementation created for this project.
+ForgeRTS v0.6.5 is an original browser-native implementation created for this project.
 
 Command & Conquer: Generals / Zero Hour, Red Alert, Red Alert 3, and related names belong to their respective owners. Released C&C source and schemas are used as engineering and behavioral references unless a future ForgeRTS file is explicitly marked as a GPL-derived translation with provenance.
 
@@ -29,3 +29,7 @@ For v0.6.3, the released Generals / Zero Hour source remains an architectural an
 For v0.6.4, official Generals / Zero Hour public source remains a behavioral/architectural reference for AI supply-defense responsibilities and projectile collision policy. ForgeRTS uses its own JavaScript EconomicDefenseManager, Team work-order integration, swept Geometry collision and terrain solver. No EA implementation code was copied line-for-line for these systems.
 
 For v0.6.4, ForgeRTS also uses the Generals Team-level supply-defense responsibility (`guardSupplyCenter(Team*, ...)`) as a behavioral reference for temporary whole-Team emergency recall. The implementation is original JavaScript: Team membership is preserved, ordinary AI commands are used, and dedicated response production continues through ForgeRTS's own Team/economy systems.
+
+For v0.6.5, the official Red Alert 3 GameObject schemas are used as the main reference for mature data-driven content/module separation, while official Generals/Zero Hour `Object` structure is used as the reference for keeping authoritative geometry/control/module state independent of visual meshes. EA FinalSun/FinalAlert2 and modern open-source RTS data/editor patterns are cross-checks for future authoring workflows. ForgeRTS implements its own `ContentMeta`, content-pack registry, validation, GLB audit and wall-connection tooling; no external content-pipeline implementation was copied line-for-line.
+
+WorldForge remains a separate project/tool. `WORLD_FORGE_EXPORT_SPEC.md` defines a data interchange contract only; ForgeRTS has no WorldForge runtime dependency.

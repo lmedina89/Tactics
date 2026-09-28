@@ -1,0 +1,13 @@
+{
+  "id": "civilian_structure_shell",
+  "name": "Civilian Structure Shell",
+  "kind": "building",
+  "modules": [
+    {"type":"ContentMeta","contractVersion":1,"affiliation":"CIVILIAN","categories":["CIVILIAN","BUILDING","RESIDENTIAL"],"editorGroup":"CIVILIAN","renderRequired":false,"validationOnly":true},
+    {"type":"Body","maxHealth":500},
+    {"type":"ArmorSet","armor":"structure"},
+    {"type":"Footprint","width":10,"depth":8},
+    {"type":"Geometry","shape":"BOX","majorRadius":4,"minorRadius":5,"height":7},
+    {"type":"Selectable","enabled":false}
+  ]
+}

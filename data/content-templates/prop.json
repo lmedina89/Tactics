@@ -1,0 +1,1 @@
+{"id":"prop","contractVersion":1,"kind":"prop","affiliation":"WORLD","categories":["WORLD","PROP","DECORATION"],"requiredModules":["ContentMeta"],"recommendedModules":["Render","Geometry"],"notes":"Props may be render-only or physical depending on modules; gameplay collision is never inferred from the GLB."}

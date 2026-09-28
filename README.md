@@ -1,5 +1,42 @@
-# ForgeRTS v0.6.4 — Skirmish Defense + Combat Completion
+# ForgeRTS v0.6.5 — Content Expansion + World Composition Foundation
 
+## v0.6.5 — Content Expansion + World Composition Foundation
+
+v0.6.5 establishes the stable content/runtime contract needed before ForgeRTS expands into a large library of buildings, walls, units, towns, civilian objects and props. Existing v0.6.4 combat/skirmish behavior remains intact; this release makes content ingestion, classification, batch registration, validation and future WorldForge export substantially more data-driven. Snapshot format is **v15** with restore support retained for v8-v14.
+
+### Content pipeline
+
+- Added versioned `data/content-contract.json` and explicit `ContentMeta` on every registered production definition.
+- Added FACTION / CIVILIAN / NEUTRAL / WORLD affiliations plus stable content categories. These are content classifications; full ALLY/NEUTRAL/ENEMY diplomacy is still planned for v0.7.0.
+- Added eight authoring templates covering civilian/military buildings, vehicles, infantry, aircraft, walls, gates and props. Templates validate structure but do not become runtime inheritance.
+- Added batch `contentPacks` so future asset families can register definitions/catalogs without adding engine-source branches or bloating the root definition list.
+- Added generic `WallConnection` groups/sockets and deterministic snap math for future wall/gate authoring. Advanced drag-build/gate pathing remains deferred.
+- Added ownerless civilian/neutral validation prototypes and `maps/content_validation.json` to prove those objects exist as authoritative GameObjects before final art is available.
+- Runtime GameObjects now expose definition-derived `affiliation` and `contentCategories`; snapshot v15 serializes them while old snapshots derive them during restore.
+
+### Asset ingestion and validation
+
+- Added `npm run audit:assets`, which inspects every registered GLB for transformed visual bounds, clips, mesh/material names and likely mechanical/animation pivots.
+- Added `npm run validate:content`, which validates content packs, definitions, assets, animation bindings, maps, placement references and selected production/content hazards.
+- Current content validation result: **0 errors / 0 warnings** across **18 definitions, 16 GLB assets, 8 templates, 1 content pack and 3 maps**.
+- GLB measurements are deliberately advisory. Gameplay `Geometry`, `Footprint`, armor, health, locomotion and balance remain explicit definition data.
+- Added `ASSET_INGESTION_AUDIT.md`, `CONTENT_PIPELINE_AUDIT.md`, and `WORLD_FORGE_EXPORT_SPEC.md`.
+
+### WorldForge boundary
+
+WorldForge remains an authoring/generation tool, not a ForgeRTS runtime dependency. The intended pipeline is:
+
+```text
+WorldForge author/generate/inspect
+        ↓
+GLB + asset catalog + definitions + content pack + placements
+        ↓
+ForgeRTS DataRegistry / validator
+        ↓
+authoritative GameObjects + renderer
+```
+
+Towns should be exported as individual authoritative buildings/walls/gates/props whenever gameplay may later target, protect, destroy, capture or count them. See `WORLD_FORGE_EXPORT_SPEC.md` for the contract new assets should target.
 
 ## v0.6.4 — Skirmish Defense + Combat Completion
 
@@ -7,7 +44,7 @@ v0.6.4 closes the remaining known skirmish-defense and ordinary cannon-collision
 
 See `SKIRMISH_DEFENSE_COMBAT_AUDIT.md` for the source comparison, data model and deferred combat layers.
 
-ForgeRTS is a separate browser-native RTS engine. WorldForge / Skirmish remains untouched and serves only as the older asset/reference project.
+ForgeRTS is a separate browser-native RTS engine. WorldForge remains a separate authoring/reference project; v0.6.5 establishes a shared export contract without creating a runtime dependency.
 
 v0.6.3 keeps the v0.6.2 tactical layer and closes a foundational combat gap before adding strategic intelligence. Physical shells now use launch prediction, fixed-step swept collision, real GameObject Geometry, and separate unguided/guided projectile policies. Above the existing Team/Tactical/Economy layers, a timer-bounded StrategicAIPlanner can adapt Team composition to observed enemy categories, wealth, difficulty, personality, and resource depletion while still acting through the same authoritative CommandBus and shared gameplay systems as the player.
 

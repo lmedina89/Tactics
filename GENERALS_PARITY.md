@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.4 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.5 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
@@ -138,3 +138,13 @@ Generals weapon data distinguishes the designated target from other objects that
 ### v0.6.4 economic-defense recall refinement
 
 Severe supply/economy threats can now temporarily recall a nearby ACTIVE Team selected through profile data. The borrowed Team remains structurally intact and uses normal `FROM_AI` commands while a dedicated ECONOMIC_DEFENSE Team remains a normal recruiting/production work order. When dedicated defenders are ready or the threat clears, strategic control returns to the original Team plan. This is intentionally closer to Generals' Team-oriented supply-guard responsibility than moving individual units between ad-hoc groups.
+
+## v0.6.5 content/data pipeline reference boundary
+
+The official RA3 GameObject schemas are the primary reference for the mature separation of identity/side/category data from Body, Geometry, Draw/client behavior, AI and composable behaviors. ForgeRTS v0.6.5 maps that lesson to explicit `ContentMeta` + ordinary GameObject modules rather than making visual assets or concrete classes authoritative.
+
+The official Generals/ZH `Object` architecture remains the runtime reference for keeping physical geometry, control/ownership and module state in GameLogic independently from renderer meshes. Consequently the new GLB ingestion audit reports visual bounds only as suggestions; gameplay `Geometry`/`Footprint` stay definition-owned.
+
+EA's released FinalSun/FinalAlert2 editor source and modern OpenRA-style data tooling are cross-checks for future editor/content authoring. ForgeRTS establishes stable content-pack, category, wall-socket and map-placement formats now so a future WorldForge exporter/editor can generate runtime data without requiring a new engine format.
+
+No EA/OpenRA content-pipeline implementation was copied line-for-line. v0.6.5 is original JavaScript/data built around the existing ForgeRTS DataRegistry/GameObject architecture.

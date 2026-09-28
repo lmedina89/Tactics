@@ -1,4 +1,5 @@
 import {moduleConfig,moduleBindings} from '../entities/game-object.js';
+import {CONTENT_CONTRACT_VERSION,validateContentPack,validateContentTemplate,validateDefinitionContent} from '../content/content-contract.js';
 
 export class DataRegistry {
   constructor() {
@@ -13,6 +14,11 @@ export class DataRegistry {
     this.targetPrioritySets = new Map();
     this.teamPrototypes = new Map();
     this.aiProfiles = new Map();
+    this.contentTemplates = new Map();
+    this.contentPacks = new Map();
+    this.contentContract = null;
+    this.contentCategoryIndex = new Map();
+    this.contentAffiliationIndex = new Map();
   }
 
   async load(base = '.') {
@@ -21,27 +27,46 @@ export class DataRegistry {
       if (!r.ok) throw new Error(`Failed to load ${p}: ${r.status}`);
       return r.json();
     };
-
-    const catalog = await get('data/asset-catalog.json');
-    for (const [id, value] of Object.entries(catalog.assets)) this.assets.set(id, { id, ...value });
-
     const registry = await get('data/registry.json');
-    for (const p of registry.factions || []) this._insertUnique(this.factions, await get(p), p);
-    for (const p of registry.locomotors || []) { const value=await get(p); this._validateLocomotor(value,p); this._insertUnique(this.locomotors,value,p); }
-    for (const p of registry.interactions || []) this._insertUnique(this.interactions, await get(p), p);
-    for (const p of registry.armors || []) this._insertUnique(this.armors, await get(p), p);
-    for (const p of registry.weapons || []) { const value=await get(p); this._validateWeapon(value,p); this._insertUnique(this.weapons,value,p); }
-    for (const p of registry.commandSets || []) this._insertUnique(this.commandSets, await get(p), p);
-    for (const p of registry.targetPrioritySets || []) { const value=await get(p); this._validateTargetPrioritySet(value,p); this._insertUnique(this.targetPrioritySets,value,p); }
+    if(registry.contentContract){
+      this.contentContract=await get(registry.contentContract);
+      if((this.contentContract?.version??0)!==CONTENT_CONTRACT_VERSION)throw new Error(`${registry.contentContract}: unsupported content contract version ${this.contentContract?.version}`);
+    }
+
+    const packs=[];
+    for(const p of registry.contentPacks||[]){const value=await get(p);validateContentPack(value,p);this._insertUnique(this.contentPacks,value,p);packs.push(value);}
+    const paths=(key)=>{
+      const list=[...(registry[key]||[])];for(const pack of packs)list.push(...(pack[key]||[]));
+      return [...new Set(list)];
+    };
+
+    const catalogPaths=paths('assetCatalogs');if(!catalogPaths.length)catalogPaths.push('data/asset-catalog.json');
+    for(const p of catalogPaths){const catalog=await get(p);for(const [id,value] of Object.entries(catalog.assets||{})){if(this.assets.has(id))throw new Error(`Duplicate asset id ${id}: ${p}`);this.assets.set(id,{id,...value});}}
+    for(const p of registry.contentTemplates||[]){const value=await get(p);validateContentTemplate(value,p);this._insertUnique(this.contentTemplates,value,p);}
+
+    for (const p of paths('factions')) this._insertUnique(this.factions, await get(p), p);
+    for (const p of paths('locomotors')) { const value=await get(p); this._validateLocomotor(value,p); this._insertUnique(this.locomotors,value,p); }
+    for (const p of paths('interactions')) this._insertUnique(this.interactions, await get(p), p);
+    for (const p of paths('armors')) this._insertUnique(this.armors, await get(p), p);
+    for (const p of paths('weapons')) { const value=await get(p); this._validateWeapon(value,p); this._insertUnique(this.weapons,value,p); }
+    for (const p of paths('commandSets')) this._insertUnique(this.commandSets, await get(p), p);
+    for (const p of paths('targetPrioritySets')) { const value=await get(p); this._validateTargetPrioritySet(value,p); this._insertUnique(this.targetPrioritySets,value,p); }
     const defs=[];
-    for (const p of registry.definitions || []) {
-      const value=await get(p);moduleBindings(value);this._validateDefinitionRefs(value,p);this._insertUnique(this.definitions,value,p);defs.push([value,p]);
+    for (const p of paths('definitions')) {
+      const value=await get(p);moduleBindings(value);validateDefinitionContent(value,p);this._validateDefinitionRefs(value,p);this._insertUnique(this.definitions,value,p);this._indexContentDefinition(value);defs.push([value,p]);
     }
     for(const [value,p] of defs)this._validateLateDefinitionRefs(value,p);
     for(const [id,set] of this.commandSets)this._validateCommandSet(set,`commandSet:${id}`);
-    for (const p of registry.teamPrototypes || []) { const value=await get(p); this._validateTeamPrototype(value,p); this._insertUnique(this.teamPrototypes,value,p); }
-    for (const p of registry.aiProfiles || []) { const value=await get(p); this._validateAIProfile(value,p); this._insertUnique(this.aiProfiles,value,p); }
+    for (const p of paths('teamPrototypes')) { const value=await get(p); this._validateTeamPrototype(value,p); this._insertUnique(this.teamPrototypes,value,p); }
+    for (const p of paths('aiProfiles')) { const value=await get(p); this._validateAIProfile(value,p); this._insertUnique(this.aiProfiles,value,p); }
     return this;
+  }
+
+
+  _indexContentDefinition(def){
+    const meta=moduleConfig(def,'ContentMeta');if(!meta)return;
+    for(const category of meta.categories||[]){if(!this.contentCategoryIndex.has(category))this.contentCategoryIndex.set(category,[]);this.contentCategoryIndex.get(category).push(def.id);}
+    const affiliation=meta.affiliation||'WORLD';if(!this.contentAffiliationIndex.has(affiliation))this.contentAffiliationIndex.set(affiliation,[]);this.contentAffiliationIndex.get(affiliation).push(def.id);
   }
 
   _insertUnique(map, value, source) {
@@ -76,7 +101,6 @@ export class DataRegistry {
     const weapons=moduleConfig(def,'WeaponSet');for(const s of weapons?.slots||[])if(!this.weapons.has(s.weapon))throw new Error(`${source}: unknown weapon ${s.weapon}`);
     const render=moduleConfig(def,'Render');if(render&&!this.assets.has(render.asset))throw new Error(`${source}: unknown asset ${render.asset}`);
     const prod=moduleConfig(def,'Production');if(prod?.rolloutProtocol&&!this.interactions.has(prod.rolloutProtocol))throw new Error(`${source}: unknown rollout protocol ${prod.rolloutProtocol}`);
-    for(const id of prod?.buildable||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown buildable definition ${id}`);
     const cost=moduleConfig(def,'ProductionCost');if(cost&&!cost.queueType)throw new Error(`${source}: ProductionCost missing queueType`);
     const dock=moduleConfig(def,'DockingProvider');if(dock?.protocol&&!this.interactions.has(dock.protocol))throw new Error(`${source}: unknown docking protocol ${dock.protocol}`);
     const commandSet=moduleConfig(def,'CommandSet');if(commandSet&&!this.commandSets.has(commandSet.id))throw new Error(`${source}: unknown CommandSet ${commandSet.id}`);
@@ -85,6 +109,7 @@ export class DataRegistry {
   }
 
   _validateLateDefinitionRefs(def,source){
+    const prod=moduleConfig(def,'Production');for(const id of prod?.buildable||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown buildable definition ${id}`);
     const builder=moduleConfig(def,'Builder');for(const id of builder?.buildable||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown Builder target ${id}`);
     const construction=moduleConfig(def,'Construction');for(const id of construction?.prerequisites||[])if(!this.definitions.has(id))throw new Error(`${source}: unknown prerequisite ${id}`);
   }
@@ -186,6 +211,10 @@ export class DataRegistry {
   targetPrioritySet(id){return this.targetPrioritySets.get(id);}
   teamPrototype(id){return this.teamPrototypes.get(id);}
   aiProfile(id){return this.aiProfiles.get(id);}
+  contentTemplate(id){return this.contentTemplates.get(id);}
+  contentPack(id){return this.contentPacks.get(id);}
+  definitionsForCategory(category){return (this.contentCategoryIndex.get(category)||[]).map(id=>this.definitions.get(id));}
+  definitionsForAffiliation(affiliation){return (this.contentAffiliationIndex.get(affiliation)||[]).map(id=>this.definitions.get(id));}
   module(definitionOrId,type){
     const def=typeof definitionOrId==='string'?this.definition(definitionOrId):definitionOrId;
     return def?moduleConfig(def,type):null;

@@ -1,5 +1,6 @@
 {
   "manifestVersion": 2,
+  "contentContractVersion": 1,
   "id": "training_ground",
   "name": "Training Ground 02",
   "version": 5,

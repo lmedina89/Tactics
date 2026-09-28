@@ -1,0 +1,8 @@
+{
+  "id": "neutral",
+  "name": "Neutral World",
+  "color": "#6f756e",
+  "accent": "#aeb5a7",
+  "isPlayerSelectable": false,
+  "contentAffiliation": "NEUTRAL"
+}

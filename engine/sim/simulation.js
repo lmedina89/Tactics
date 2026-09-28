@@ -5,7 +5,7 @@ import {LocalAvoidanceSystem} from '../locomotion/local-avoidance-system.js';
 import {SeededRng} from './rng.js';
 import {TerrainSampler} from '../maps/terrain-sampler.js';
 import {assignMoveOrder,assignAttackOrder,assignAttackMoveOrder,assignGuardPositionOrder,assignGuardObjectOrder,setUnitStance,clearOrders,stepUnitAI} from '../ai/unit-ai-update.js';
-import {createGameObjectRuntime,footprintOf} from '../entities/game-object.js';
+import {createGameObjectRuntime,footprintOf,moduleConfig} from '../entities/game-object.js';
 import {InteractionManager} from '../interactions/interaction-protocol.js';
 import {ProjectileSystem} from '../combat/projectile-system.js';
 import {CombatSystem} from '../combat/weapon-system.js';
@@ -15,12 +15,14 @@ import {ProductionSystem} from '../production/production-system.js';
 import {ConstructionSystem} from '../construction/construction-system.js';
 import {TeamManager} from '../teams/team-manager.js';
 import {SkirmishAISystem} from '../ai/skirmish-ai-player.js';
+import {validateMapContent} from '../content/content-validator.js';
 
 export const FIXED_DT=1/30;
 
 export class Simulation{
   constructor({registry,map,commandBus}){
     this.registry=registry;this.map=map;this.commandBus=commandBus;
+    this.contentValidation=validateMapContent(map,registry,{strict:!!registry.contentContract});
     this.tick=0;this.entities=new Map();this.players=new Map();this.rng=new SeededRng(map.seed??1);this.lastCommandResult=null;this.lastPlayerCommandResult=null;this.defaultIssuerPlayerId=map.players?.find(p=>p.isHuman)?.id??map.players?.[0]?.id??null;
     for(const p of map.players||[])this.players.set(p.id,{id:p.id,factionId:p.faction,isHuman:!!p.isHuman,credits:p.startingCredits??0,powerProduced:0,powerUsed:0,lowPower:false,resourcesHarvested:{}});
     this.regionStates=new Map();
@@ -148,10 +150,10 @@ export class Simulation{
 
   snapshot(){
     return {
-      version:14,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),constructionSystem:this.construction.snapshot(),teams:this.teams.snapshot(),skirmishAI:this.skirmishAI.snapshot(),
+      version:15,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),constructionSystem:this.construction.snapshot(),teams:this.teams.snapshot(),skirmishAI:this.skirmishAI.snapshot(),
       players:[...this.players.values()].map(p=>structuredClone(p)),regionStates:[...this.regionStates.values()].map(r=>structuredClone(r)),
       entities:[...this.entities.values()].map(e=>({
-        id:e.id,definitionId:e.definitionId,playerId:e.playerId,teamId:e.teamId??null,factionId:e.factionId,kind:e.kind,
+        id:e.id,definitionId:e.definitionId,playerId:e.playerId,teamId:e.teamId??null,factionId:e.factionId,affiliation:e.affiliation??null,contentCategories:[...(e.contentCategories||[])],kind:e.kind,
         x:e.x,y:e.y,z:e.z,yaw:e.yaw,speed:e.speed,angularSpeed:e.angularSpeed??0,steeringAngle:e.steeringAngle??0,movingBackward:!!e.movingBackward,locomotionState:structuredClone(e.locomotionState||null),
         health:e.health,maxHealth:e.maxHealth,alive:e.alive,operational:e.operational!==false,construction:structuredClone(e.construction),damageState:e.damageState,destroyedTick:e.destroyedTick,lastDamagedBy:e.lastDamagedBy,lastDamagedTick:e.lastDamagedTick,
         armorId:e.armorId,weaponSlots:structuredClone(e.weaponSlots),turretYaw:e.turretYaw,turretAngularSpeed:e.turretAngularSpeed??0,combat:structuredClone(e.combat),
@@ -161,12 +163,12 @@ export class Simulation{
   }
 
   restore(snapshot){
-    if(![8,9,10,11,12,13,14].includes(snapshot?.version??0))throw new Error('Unsupported ForgeRTS snapshot version');
+    if(![8,9,10,11,12,13,14,15].includes(snapshot?.version??0))throw new Error('Unsupported ForgeRTS snapshot version');
     this.tick=snapshot.tick??0;this.rng.restore(snapshot.rngState??1);this.commandBus.restore(snapshot.commandBus??{});
     this.players=new Map((snapshot.players||[]).map(p=>[p.id,{...structuredClone(p),resourcesHarvested:structuredClone(p.resourcesHarvested||{})}]));this.economy.players=this.players;this.construction.techTree.economy=this.economy;for(const c of this.skirmishAI.controllers.values()){c.players=this.players;if(c.economyPlanner)c.economyPlanner.players=this.players;if(c.strategyPlanner)c.strategyPlanner.players=this.players;}
     this.regionStates=new Map((snapshot.regionStates||[]).map(r=>[r.id,structuredClone(r)]));
     const snapshotIds=new Set((snapshot.entities||[]).map(e=>e.id));for(const id of [...this.entities.keys()])if(!snapshotIds.has(id))this.entities.delete(id);
-    for(const s of snapshot.entities||[]){let e=this.entities.get(s.id);if(!e){const def=this.registry.definition(s.definitionId);const player=s.playerId?this.players.get(s.playerId):null;e=createGameObjectRuntime({definition:def,spawn:{id:s.id,definition:s.definitionId,owner:s.playerId,x:s.x,z:s.z,yaw:s.yaw,construction:s.construction},player,registry:this.registry,terrain:this.terrain});this.entities.set(s.id,e);}Object.assign(e,structuredClone(s));}
+    for(const s of snapshot.entities||[]){let e=this.entities.get(s.id);const def=this.registry.definition(s.definitionId);if(!e){const player=s.playerId?this.players.get(s.playerId):null;e=createGameObjectRuntime({definition:def,spawn:{id:s.id,definition:s.definitionId,owner:s.playerId,x:s.x,z:s.z,yaw:s.yaw,construction:s.construction},player,registry:this.registry,terrain:this.terrain});this.entities.set(s.id,e);}Object.assign(e,structuredClone(s));const meta=def?moduleConfig(def,'ContentMeta'):null;e.affiliation=s.affiliation??meta?.affiliation??(e.playerId?'FACTION':'WORLD');e.contentCategories=[...(s.contentCategories??meta?.categories??[])];}
     this._rebuildDynamicObstacles();
     this.interactions.restore(snapshot.interactions??{});this.projectiles.restore(snapshot.projectiles??{});this.combat.restore(snapshot.combat??{});this.resources.restore(snapshot.resources??{});this.production.restore(snapshot.productionSystem??{});this.construction.restore(snapshot.constructionSystem??{});this.teams.restore(snapshot.teams??{});this.skirmishAI.restore(snapshot.skirmishAI??{});this.economy.recalculatePower();
   }

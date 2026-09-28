@@ -1,0 +1,1 @@
+{"id":"gate","contractVersion":1,"kind":"building","affiliation":"NEUTRAL","categories":["NEUTRAL","BUILDING","WALL","GATE"],"requiredModules":["ContentMeta","Body","Footprint","Geometry","WallConnection"],"recommendedModules":["ArmorSet","Render","ClientAnimation"],"notes":"Gate role metadata exists now; authoritative open/close pathing behavior is future work."}

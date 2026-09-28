@@ -48,6 +48,12 @@
 46. **Physical footprint is object data.** `Geometry` describes collision extent independently from render meshes and locomotor behavior; long vehicles must not collapse to width-sized circles.
 47. **Dynamic traffic is layered.** Pathfinder supplies the route, local avoidance supplies transient speed/heading constraints, locomotor applies vehicle-specific motion, and hard overlap resolution is only the final safety net.
 48. **Collision is ownership-independent.** Ground movers are physically solid based on layer/geometry, not player allegiance.
+49. **Visual assets never define gameplay implicitly.** GLB bounds, nodes and animations are inspection/presentation data; authoritative `Geometry`, `Footprint`, health, armor, locomotion and balance remain explicit content data.
+50. **Content packs are runtime-neutral registration.** New asset families should enter through validated manifests/definitions, not concrete runtime branches.
+51. **Civilian/neutral content classification is not diplomacy.** `ContentMeta.affiliation` organizes authoring/runtime content; authoritative ALLY/NEUTRAL/ENEMY relations belong to the future PlayerRelationMap.
+52. **WorldForge is an exporter, never a runtime dependency.** ForgeRTS consumes stable GLB/JSON/content-pack/map data and must run without WorldForge code.
+53. **Playable towns remain object-addressable.** Buildings, gates, walls and relevant props are separate authoritative objects whenever later gameplay/mission logic may reference them.
+54. **Content is validated before play.** Missing assets/references, invalid modules, impossible authoring bindings and known reachability/placement hazards should be caught headlessly whenever practical.
 49. **Avoidance tuning is data.** Personal space, look-ahead, braking/yield response, collision mass, padding, and avoidance steering limits live in locomotor definitions rather than concrete unit branches.
 50. **Transient avoidance is derived state.** Local traffic constraints are recomputed deterministically each simulation tick and are not serialized into snapshots.
 51. **Team prototypes are invariant data.** Composition, role, instance limits, recruitment/rally policy, stance, and later scripted hooks belong to reusable TeamPrototype definitions; runtime Team instances reference them by stable ID.
@@ -181,3 +187,27 @@ Projectile collision remains simulation-authoritative. Each physical projectile 
 ### v0.6.4 emergency Team recall rule
 
 Economic defense may temporarily borrow control of a whole ACTIVE Team selected by data-defined role/threat/distance policy. It does not transfer individual members out of the source Team. While borrowed, normal SkirmishAI orders for that Team are suspended; dedicated response production continues through the ordinary economy planner. Release restores the Team to its normal strategic controller on the next AI update.
+
+## v0.6.5 content expansion + WorldForge boundary
+
+ForgeRTS now consumes a versioned content contract rather than assuming all production objects are hand-wired into a single registry list. `ContentMeta` classifies an object for authoring/runtime queries, while behavior continues to come from ordinary GameObject modules. Content packs may add definitions and asset catalogs without concrete simulation branches.
+
+```text
+WorldForge / external authoring
+        ↓
+GLB + definitions + content pack + placements
+        ↓
+DataRegistry
+        ↓
+content/map validation
+        ↓
+GameObject factory
+        ├── authoritative simulation modules
+        └── disposable Render/ClientAnimation presentation
+```
+
+`CIVILIAN`, `NEUTRAL` and `WORLD` affiliations are valid ownerless content classes in v0.6.5, but they do not implement diplomacy. Until PlayerRelationMap lands, do not infer ALLY/NEUTRAL/ENEMY gameplay relationships from ContentMeta.
+
+Walls/gates use generic `WallConnection` metadata (`connectionGroup`, role, sockets, snapDistance) so future editors can compose them without runtime knowledge of concrete wall IDs. The current release establishes data and deterministic snapping only; drag-build, corner selection and gate pathing remain later behavior layers.
+
+Asset ingestion is intentionally one-way: the auditor may suggest visual bounds/pivots, but no tool may silently write those suggestions into authoritative balance/collision data.

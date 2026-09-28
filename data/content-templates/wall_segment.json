@@ -1,0 +1,1 @@
+{"id":"wall_segment","contractVersion":1,"kind":"building","affiliation":"NEUTRAL","categories":["NEUTRAL","BUILDING","WALL"],"requiredModules":["ContentMeta","Body","Footprint","Geometry","WallConnection"],"recommendedModules":["ArmorSet","Render"],"notes":"WallConnection sockets are editor/runtime metadata; advanced drag-build/autoconnection is deferred."}

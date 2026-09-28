@@ -1,5 +1,6 @@
 {
   "manifestVersion": 2,
+  "contentContractVersion": 1,
   "id": "construction_validation",
   "name": "Construction Validation Range",
   "version": 11,

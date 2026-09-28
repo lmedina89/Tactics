@@ -75,8 +75,8 @@ test('base-defense Team reacts to a hostile incursion through normal ATTACK_MOVE
   const rifle=sim.entities.get('e_rifle');assert.equal(rifle.ai.order?.type,'ATTACK_MOVE');
 });
 
-test('v14 snapshot preserves Team membership and SkirmishAI controller state deterministically',async()=>{
-  const a=await makeSim();run(a,720);const snap=a.snapshot();assert.equal(snap.version,14);assert.ok(snap.teams.teams.length>=2);assert.equal(snap.skirmishAI.controllers.length,1);
+test('v15 snapshot preserves Team membership and SkirmishAI controller state deterministically',async()=>{
+  const a=await makeSim();run(a,720);const snap=a.snapshot();assert.equal(snap.version,15);assert.ok(snap.teams.teams.length>=2);assert.equal(snap.skirmishAI.controllers.length,1);
   const b=await makeSim();b.restore(snap);assert.deepEqual(b.snapshot(),snap);
   run(a,180);run(b,180);assert.deepEqual(b.snapshot(),a.snapshot());
 });

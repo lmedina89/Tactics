@@ -1,59 +1,68 @@
-# ForgeRTS v0.6.4 Test Report
+# ForgeRTS v0.6.5 Test Report
 
-## Release
+**Release:** ForgeRTS v0.6.5 — Content Expansion + World Composition Foundation  
+**Content contract:** v1  
+**Snapshot schema:** v15 (restore accepts v8-v15)
 
-**ForgeRTS v0.6.4 — Skirmish Defense + Combat Completion**
+## Automated regression suite
 
-This release was built from the validated v0.6.3 tree. Economic/supply defense and ordinary projectile world obstruction were treated as the final known skirmish/combat foundation gaps before the v0.7 mission/trigger phase.
+- **116 / 116 tests pass**.
+- Existing construction, economy, production, harvesting, AI, Team, movement/collision, client-animation and projectile/combat regressions remain green.
+- New content-foundation coverage verifies:
+  - content-contract/template validation
+  - explicit `ContentMeta` on registered production definitions
+  - batch content-pack registration without engine/root-definition edits
+  - category/affiliation indexing
+  - generic wall/gate socket metadata
+  - deterministic wall snapping without concrete wall IDs
+  - ownerless CIVILIAN/NEUTRAL authoritative GameObjects
+  - GLB audit coverage and non-authoritative visual-bound suggestions
+  - v15 snapshot compatibility through the existing snapshot regression suite
+  - release version metadata consistency
 
-## Automated validation
+## Static validation
 
-- **109 / 109 automated tests pass** (`npm test`).
-- **54 / 54 JS/MJS files** pass `node --check`.
-- **57 / 57 JSON files** parse successfully.
+- **60 / 60 JS/MJS files** pass `node --check`.
+- **75 / 75 JSON files** parse successfully (including generated machine-readable reports).
+- `npm run validate:content`: **0 errors / 0 warnings** across:
+  - 18 GameObject definitions
+  - 16 registered GLB assets
+  - 8 content templates
+  - 1 content pack
+  - 3 maps
 - **21 / 21 production asset hashes** match `ASSET_HASHES.sha256`.
-- Production GLBs and terrain textures are unchanged.
-- Release-version consistency remains tested across `package.json`, HUD/title/startup label and `asset-catalog.json`.
+- No production GLB or terrain asset bytes changed in v0.6.5.
 
-## New economic-defense coverage
+## Asset-ingestion audit
 
-- Recent authoritative damage to a protected Harvester/economy/builder asset creates a data-driven threat picture.
-- Light / medium / heavy response TeamPrototype selection follows generic threat-category weights rather than concrete attacker IDs.
-- Existing free defenders can be recruited into the temporary response Team.
-- Missing defenders become ordinary high-priority Barracks / Vehicle Factory production demand; no emergency unit-spawn shortcut exists.
-- Severe raids can temporarily recall a nearby ACTIVE Team selected by data-defined role/threat/distance policy while the dedicated response Team is produced.
-- Whole-Team recall preserves membership/lifecycle; the recalled Team is released back to its normal strategic assignment when dedicated defenders are ready or the threat window clears.
-- Repeated incidents can extend a bounded escort window.
-- Active economic-defense state, including temporary Team recall, survives v14 snapshot/restore deterministically.
+`npm run audit:assets` successfully inventories all 16 registered GLBs and emits:
 
-## New projectile/world-collision coverage
+- transformed visual bounds
+- embedded animation clips
+- mesh/material names
+- likely mechanical/animation pivot hints
+- advisory Geometry envelope suggestions
 
-- Physical cannon shells choose the earliest collision among the designated target, eligible intervening world entities and terrain.
-- Intervening units/buildings use authoritative BOX/CYLINDER/SPHERE Geometry.
-- Moving intervening objects use a swept broadphase plus moving-target narrowphase so crossing the shell path within one fixed tick is not missed.
-- Terrain collision uses deterministic bounded segment sampling plus binary refinement.
-- All production buildings with placement footprints expose authoritative BOX Geometry for combat collision.
-- Existing v0.6.3 moving-target launch lead and non-homing DUMB_PROJECTILE behavior remain covered.
+The audit is deliberately non-authoritative: it never writes gameplay collision/balance from the GLB.
 
-## Snapshot compatibility
+## Engineering sanity run
 
-Current snapshot schema: **v14**.
+Using the production `construction_validation` map after a 300-tick warmup:
 
-Restore accepts **v8, v9, v10, v11, v12, v13 and v14**.
+- measured simulation ticks: 3,000
+- final tick: 3,300
+- measured time: 988.874 ms total
+- average: **~0.3296 ms/tick** in this container
+- alive entities: 24
+- runtime Team records: 2
+- snapshot version: 15
 
-## Long-run engineering sanity
+This is an engineering sanity measurement, **not an iPhone benchmark**. v0.6.5 intentionally adds very little per-tick work; most new work happens during registry/content/map load and validation.
 
-A construction-validation simulation was warmed for 300 fixed ticks, a Harvester attack incident was injected, and then 3,000 additional ticks were measured in the container:
+## Browser / phone validation
 
-- measured average: **~0.561 ms / simulation tick**
-- final tick: **3300**
-- Team registry: **2 records**
-- economic-defense manager finished bounded/inactive with no borrowed Team retained
-- alive entities: **22**
-- enemy harvested minerals: **2214**
+Container headless rendering remains unsuitable for the project's external jsDelivr Three.js import because external DNS is unavailable in that environment. Real GitHub Pages/iPhone validation is still recommended, although v0.6.5 intentionally leaves existing production assets/render/gameplay behavior unchanged.
 
-This is an engineering sanity measurement, **not an iPhone performance benchmark**. The measured simulation cost remains far below the 33.3 ms budget of the fixed 30 Hz simulation tick in this container.
+## Release criteria
 
-## Browser / device validation
-
-The container cannot perform the final real Three.js visual smoke test because the project imports Three.js from jsDelivr and external DNS is unavailable in this environment. The release therefore still requires real iPhone / GitHub Pages validation for emergency defense behavior, Team recall/return-to-duty, shell obstruction impacts and terrain-hit visuals.
+PASS. The content contract, content-pack registry, neutral/civilian object foundation, wall/gate metadata, GLB audit, content validator and validation map are ready for field use and for the next asset-authoring batch.

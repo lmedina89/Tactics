@@ -1,0 +1,28 @@
+{
+  "id": "forgerts_content_contract",
+  "version": 1,
+  "description": "Stable authoring/export contract consumed by ForgeRTS and targeted by future WorldForge exporters.",
+  "gameObject": {
+    "requiredTopLevel": ["id", "name", "kind", "modules"],
+    "supportedKinds": ["building", "vehicle", "infantry", "aircraft", "resource", "prop"],
+    "requiredContentModule": "ContentMeta",
+    "buildingRequiredModules": ["ContentMeta", "Body", "Footprint", "Geometry"],
+    "mobileRequiredModules": ["ContentMeta", "Body", "Geometry", "Locomotor"],
+    "visualGameplaySeparation": "GLB visuals never define authoritative balance/collision; Geometry, Footprint and gameplay modules do."
+  },
+  "affiliations": ["FACTION", "CIVILIAN", "NEUTRAL", "WORLD"],
+  "categories": [
+    "MILITARY", "CIVILIAN", "NEUTRAL", "WORLD", "BUILDING", "UNIT", "INFANTRY", "VEHICLE", "AIRCRAFT", "RESOURCE", "PROP", "DECORATION",
+    "COMMAND", "PRODUCTION", "ECONOMY", "POWER", "DEFENSE", "SUPPORT", "INDUSTRIAL", "RESIDENTIAL", "COMMERCIAL", "WALL", "GATE", "ROAD", "FOLIAGE", "RUIN", "LANDMARK"
+  ],
+  "contentPack": {
+    "formatVersion": 1,
+    "purpose": "Batch-register definitions and optional asset catalogs without editing engine source.",
+    "supportedLists": ["assetCatalogs", "factions", "locomotors", "definitions", "interactions", "armors", "weapons", "commandSets", "targetPrioritySets", "teamPrototypes", "aiProfiles"]
+  },
+  "worldForgeExport": {
+    "runtimeDependency": false,
+    "expectedOutputs": ["GLB assets", "asset catalogs", "content-pack manifests", "GameObject definitions", "map object placements"],
+    "placementFields": ["id", "definition", "owner", "x", "z", "yaw"]
+  }
+}

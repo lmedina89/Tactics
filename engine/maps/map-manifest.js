@@ -8,6 +8,8 @@ export function validateMapManifest(raw) {
   if (!raw.terrain?.heightfield) throw new Error('Map manifest missing terrain.heightfield');
 
   const map = clone(raw);
+  map.contentContractVersion ??= 1;
+  if(map.contentContractVersion!==1)throw new Error(`Unsupported contentContractVersion ${map.contentContractVersion}`);
   map.region ??= { id: map.id, streamable: false, neighbors: [] };
   map.region.strategic ??= {};
   map.region.strategic.owner ??= null;

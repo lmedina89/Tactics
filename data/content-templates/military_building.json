@@ -1,0 +1,1 @@
+{"id":"military_building","contractVersion":1,"kind":"building","affiliation":"FACTION","categories":["MILITARY","BUILDING"],"requiredModules":["ContentMeta","Body","Footprint","Geometry"],"recommendedModules":["ArmorSet","Render","Selectable","Vision","AITargetable"]}

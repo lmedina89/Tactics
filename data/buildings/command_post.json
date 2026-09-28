@@ -4,6 +4,18 @@
   "kind": "building",
   "modules": [
     {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "FACTION",
+      "categories": [
+        "MILITARY",
+        "BUILDING",
+        "COMMAND",
+        "POWER"
+      ],
+      "editorGroup": "BUILDING"
+    },
+    {
       "type": "Body",
       "maxHealth": 3500
     },

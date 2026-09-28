@@ -1,0 +1,1 @@
+{"id":"civilian_building","contractVersion":1,"kind":"building","affiliation":"CIVILIAN","categories":["CIVILIAN","BUILDING"],"requiredModules":["ContentMeta","Body","Footprint","Geometry"],"recommendedModules":["ArmorSet","Render","Selectable","Vision"],"notes":"Individual authoritative town structure; do not combine whole settlements into one runtime object."}

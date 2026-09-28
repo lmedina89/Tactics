@@ -4,6 +4,16 @@
   "kind": "resource",
   "modules": [
     {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "WORLD",
+      "categories": [
+        "WORLD",
+        "RESOURCE"
+      ],
+      "editorGroup": "RESOURCE"
+    },
+    {
       "type": "Resource",
       "capacity": 1250,
       "resourceType": "mineral"

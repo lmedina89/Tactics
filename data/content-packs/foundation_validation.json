@@ -1,0 +1,11 @@
+{
+  "id": "foundation_validation",
+  "name": "ForgeRTS Content Foundation Validation Pack",
+  "formatVersion": 1,
+  "contractVersion": 1,
+  "definitions": [
+    "data/prototypes/civilian_structure_shell.json",
+    "data/prototypes/neutral_wall_segment.json",
+    "data/prototypes/neutral_gate_segment.json"
+  ]
+}

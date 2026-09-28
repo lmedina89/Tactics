@@ -1,0 +1,1 @@
+{"id":"ground_vehicle","contractVersion":1,"kind":"vehicle","affiliation":"FACTION","categories":["MILITARY","UNIT","VEHICLE"],"requiredModules":["ContentMeta","Body","Geometry","Locomotor"],"recommendedModules":["ArmorSet","Render","Selectable","UnitAIUpdate","Vision","AITargetable","ClientAnimation"]}

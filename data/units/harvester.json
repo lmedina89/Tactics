@@ -4,6 +4,19 @@
   "kind": "vehicle",
   "modules": [
     {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "FACTION",
+      "categories": [
+        "MILITARY",
+        "UNIT",
+        "VEHICLE",
+        "ECONOMY",
+        "INDUSTRIAL"
+      ],
+      "editorGroup": "VEHICLE"
+    },
+    {
       "type": "Body",
       "maxHealth": 950
     },

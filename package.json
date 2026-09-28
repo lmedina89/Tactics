@@ -1,10 +1,12 @@
 {
   "name": "forge-rts",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "private": false,
   "type": "module",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "audit:assets": "node tools/audit-assets.mjs",
+    "validate:content": "node tools/validate-content.mjs"
   }
 }

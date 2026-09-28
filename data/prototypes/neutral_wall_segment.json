@@ -1,0 +1,14 @@
+{
+  "id": "neutral_wall_segment",
+  "name": "Neutral Wall Segment",
+  "kind": "building",
+  "modules": [
+    {"type":"ContentMeta","contractVersion":1,"affiliation":"NEUTRAL","categories":["NEUTRAL","BUILDING","WALL"],"editorGroup":"WALLS","renderRequired":false,"validationOnly":true},
+    {"type":"Body","maxHealth":650},
+    {"type":"ArmorSet","armor":"fortified"},
+    {"type":"Footprint","width":1.4,"depth":8},
+    {"type":"Geometry","shape":"BOX","majorRadius":4,"minorRadius":0.7,"height":2.8},
+    {"type":"WallConnection","connectionGroup":"neutral_perimeter","role":"SEGMENT","snapDistance":1.25,"sockets":[{"id":"A","x":0,"z":-4,"facing":3.141592653589793},{"id":"B","x":0,"z":4,"facing":0}]},
+    {"type":"Selectable","enabled":false}
+  ]
+}

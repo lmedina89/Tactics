@@ -36,6 +36,7 @@ export function renderConfigOf(definition){return moduleConfig(definition,'Rende
 
 export function createGameObjectRuntime({definition,spawn,player,registry,terrain}){
   const modules=moduleBindings(definition);
+  const contentMeta=modules.get('ContentMeta');
   const body=modules.get('Body');
   const selectable=modules.get('Selectable');
   const locoBinding=modules.get('Locomotor');
@@ -57,6 +58,8 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
     playerId:spawn.owner??null,
     teamId:spawn.teamId??null,
     factionId:player?.factionId??null,
+    affiliation:spawn.affiliation??contentMeta?.affiliation??(spawn.owner?'FACTION':'WORLD'),
+    contentCategories:[...(contentMeta?.categories||[])],
     kind:definition.kind,
     x:spawn.x,z:spawn.z,y,yaw:spawn.yaw||0,speed:0,angularSpeed:0,steeringAngle:0,movingBackward:false,
     locomotionState:{mode:'FORWARD',modeTime:0,cooldown:0,reverseStartX:spawn.x,reverseStartZ:spawn.z,turnSign:1},
