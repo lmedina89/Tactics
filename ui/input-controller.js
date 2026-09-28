@@ -1,90 +1,70 @@
 import * as THREE from 'three';
 import {GestureResolver,GestureType} from './gesture-resolver.js';
 
-const REASON_LABEL={
-  OUT_OF_BUILD_RADIUS:'OUTSIDE BUILD RADIUS',OUT_OF_BOUNDS:'OUT OF BOUNDS',WATER:'CANNOT BUILD IN WATER',TOO_STEEP:'TERRAIN TOO STEEP',HEIGHT_VARIATION:'TERRAIN TOO UNEVEN',BLOCKED_TERRAIN:'BLOCKED TERRAIN',OBJECT_OVERLAP:'OBJECT IN THE WAY',RESOURCE_OVERLAP:'RESOURCE FIELD IN THE WAY',MISSING_PREREQUISITE:'MISSING PREREQUISITE',BUILD_LIMIT:'BUILD LIMIT REACHED',INSUFFICIENT_CREDITS:'INSUFFICIENT CREDITS',INVALID_BUILDER:'INVALID BUILDER',BUILDER_NOT_OPERATIONAL:'BUILDER NOT OPERATIONAL'
-};
+const REASON_LABEL={OUT_OF_BUILD_RADIUS:'OUTSIDE BUILD RADIUS',OUT_OF_BOUNDS:'OUT OF BOUNDS',WATER:'CANNOT BUILD IN WATER',TOO_STEEP:'TERRAIN TOO STEEP',HEIGHT_VARIATION:'TERRAIN TOO UNEVEN',BLOCKED_TERRAIN:'BLOCKED TERRAIN',OBJECT_OVERLAP:'OBJECT IN THE WAY',RESOURCE_OVERLAP:'RESOURCE FIELD IN THE WAY',MISSING_PREREQUISITE:'MISSING PREREQUISITE',BUILD_LIMIT:'BUILD LIMIT REACHED',INSUFFICIENT_CREDITS:'INSUFFICIENT CREDITS',INVALID_BUILDER:'INVALID BUILDER',BUILDER_NOT_OPERATIONAL:'BUILDER NOT OPERATIONAL'};
+const STANCES=['GUARD','AGGRESSIVE','HOLD_POSITION'];
 
 export class InputController{
-  constructor({canvas,renderer,sim,onSelection,onStatus,onPlacementChanged=()=>{}}){
-    this.canvas=canvas;this.renderer=renderer;this.sim=sim;this.onSelection=onSelection;this.onStatus=onStatus;this.onPlacementChanged=onPlacementChanged;this.selectedId=null;this.placement=null;
-    this.raycaster=new THREE.Raycaster();this.ndc=new THREE.Vector2();
-    this.gestures=new GestureResolver({tapMovePx:30,panStartPx:34,longPressMs:520,tapMaxMs:720});
-    this._bind();
+  constructor({canvas,renderer,sim,playerId=null,onSelection,onStatus,onPlacementChanged=()=>{},onSelectionBox=()=>{},onModeChanged=()=>{}}){
+    this.canvas=canvas;this.renderer=renderer;this.sim=sim;this.playerId=playerId??sim.defaultIssuerPlayerId;this.onSelection=onSelection;this.onStatus=onStatus;this.onPlacementChanged=onPlacementChanged;this.onSelectionBox=onSelectionBox;this.onModeChanged=onModeChanged;
+    this.selectedIds=[];this.placement=null;this.commandMode=null;this.boxSelectArmed=false;this.additiveSelection=false;this.queueOrders=false;this.boxDrag=null;this.shiftDown=false;
+    this.raycaster=new THREE.Raycaster();this.ndc=new THREE.Vector2();this.gestures=new GestureResolver({tapMovePx:30,panStartPx:34,longPressMs:520,tapMaxMs:720});this._bind();
   }
-  selected(){const e=this.selectedId?this.sim.entities.get(this.selectedId):null;if(!e?.alive){this.selectedId=null;return null;}return e;}
-  selectById(id){const e=id?this.sim.entities.get(id):null;if(!e?.alive||!e.selectable||e.playerId!=='player')return false;this.selectedId=e.id;this.onSelection(e);return true;}
-  clear(){this.cancelPlacement();this.selectedId=null;this.onSelection(null);}
+  selection(){const live=[];for(const id of this.selectedIds){const e=this.sim.entities.get(id);if(e?.alive&&e.selectable&&e.playerId===this.playerId)live.push(e);}if(live.length!==this.selectedIds.length)this.selectedIds=live.map(e=>e.id);return live;}
+  selected(){return this.selection()[0]||null;}
+  _emitSelection(){const list=this.selection();this.onSelection(list,list[0]||null);}
+  selectById(id,{additive=false,toggle=false}={}){const e=id?this.sim.entities.get(id):null;if(!e?.alive||!e.selectable||e.playerId!==this.playerId)return false;let ids=additive?[...this.selectedIds]:[];if(toggle&&ids.includes(e.id))ids=ids.filter(x=>x!==e.id);else if(!ids.includes(e.id))ids.push(e.id);this.selectedIds=ids;this._emitSelection();return true;}
+  selectIds(ids,{additive=false,toggle=false}={}){let next=additive?[...this.selectedIds]:[];for(const id of ids){const e=this.sim.entities.get(id);if(!e?.alive||!e.selectable||e.playerId!==this.playerId)continue;if(toggle&&next.includes(id))next=next.filter(x=>x!==id);else if(!next.includes(id))next.push(id);}this.selectedIds=next;this._emitSelection();}
+  clear(){this.cancelPlacement();this.cancelCommandMode();this.selectedIds=[];this._emitSelection();}
   isPlacing(){return !!this.placement;}
-  _bind(){
-    const c=this.canvas;c.style.touchAction='none';
-    c.addEventListener('pointerdown',e=>{c.setPointerCapture?.(e.pointerId);if(this.placement)this._updatePlacementPreview(e.clientX,e.clientY);this._consume(this.gestures.down(e.pointerId,e.clientX,e.clientY,performance.now()));});
-    c.addEventListener('pointermove',e=>{if(this.placement)this._updatePlacementPreview(e.clientX,e.clientY);this._consume(this.gestures.move(e.pointerId,e.clientX,e.clientY,performance.now()));});
-    c.addEventListener('pointerup',e=>this._consume(this.gestures.up(e.pointerId,e.clientX,e.clientY,performance.now())));
-    c.addEventListener('pointercancel',e=>this._consume(this.gestures.cancel(e.pointerId)));
-    c.addEventListener('wheel',e=>{e.preventDefault();this._zoom(Math.sign(e.deltaY)*12);},{passive:false});
-  }
-  _consume(events){for(const g of events||[]){
-    if(g.type===GestureType.TAP)this._tap(g.x,g.y);
-    else if(g.type===GestureType.LONG_PRESS)this.onStatus(this.placement?'BUILD PLACEMENT · TAP TO CONFIRM':'LONG PRESS · RESERVED FOR CONTEXT COMMANDS');
-    else if(g.type===GestureType.PAN)this._pan(g.dx,g.dy);
-    else if(g.type===GestureType.PINCH)this._zoom(g.delta*.2);
-  }}
+  _bind(){const c=this.canvas;c.style.touchAction='none';c.addEventListener('pointerdown',e=>{c.setPointerCapture?.(e.pointerId);this.shiftDown=!!e.shiftKey;if(this.placement)this._updatePlacementPreview(e.clientX,e.clientY);this._consume(this.gestures.down(e.pointerId,e.clientX,e.clientY,performance.now()));});c.addEventListener('pointermove',e=>{if(this.placement)this._updatePlacementPreview(e.clientX,e.clientY);this._consume(this.gestures.move(e.pointerId,e.clientX,e.clientY,performance.now()));});c.addEventListener('pointerup',e=>this._consume(this.gestures.up(e.pointerId,e.clientX,e.clientY,performance.now())));c.addEventListener('pointercancel',e=>this._consume(this.gestures.cancel(e.pointerId)));c.addEventListener('wheel',e=>{e.preventDefault();this._zoom(Math.sign(e.deltaY)*12);},{passive:false});addEventListener('keydown',e=>{if(e.key==='Shift')this.shiftDown=true;});addEventListener('keyup',e=>{if(e.key==='Shift')this.shiftDown=false;});}
+  _consume(events){for(const g of events||[]){if(g.type===GestureType.TAP)this._tap(g.x,g.y);else if(g.type===GestureType.LONG_PRESS)this.onStatus(this.placement?'BUILD PLACEMENT · TAP TO CONFIRM':'LONG PRESS · CONTEXT READY');else if(g.type===GestureType.PAN_START)this._panStart(g);else if(g.type===GestureType.PAN)this._panGesture(g);else if(g.type===GestureType.PAN_END)this._panEnd(g);else if(g.type===GestureType.PINCH){if(this.boxDrag)this._cancelBoxDrag();this._zoom(g.delta*.2);}}}
   _mouseNdc(x,y){const r=this.canvas.getBoundingClientRect();this.ndc.x=((x-r.left)/r.width)*2-1;this.ndc.y=-((y-r.top)/r.height)*2+1;}
   _groundPoint(x,y){this._mouseNdc(x,y);this.raycaster.setFromCamera(this.ndc,this.renderer.camera);const hit=this.renderer.ground?this.raycaster.intersectObject(this.renderer.ground,false)[0]:null;return hit?{x:hit.point.x,z:hit.point.z}:null;}
   _entityFromHitObject(object){let n=object,id=null;while(n&&!id){id=n.userData?.entityId;n=n.parent;}return id?this.sim.entities.get(id):null;}
-  _screenDistance(entity,x,y){const v=this.renderer.entityViews.get(entity.id);if(!v)return Infinity;const p=new THREE.Vector3();v.getWorldPosition(p);p.project(this.renderer.camera);const r=this.canvas.getBoundingClientRect(),sx=r.left+(p.x*.5+.5)*r.width,sy=r.top+(-p.y*.5+.5)*r.height;return Math.hypot(x-sx,y-sy);}
-  _rayEntity(x,y,predicate){
-    this._mouseNdc(x,y);this.raycaster.setFromCamera(this.ndc,this.renderer.camera);
-    const hits=this.raycaster.intersectObjects([...this.renderer.entityViews.values()],true);
-    for(const h of hits){const e=this._entityFromHitObject(h.object);if(e&&predicate(e))return e;}return null;
-  }
-  _pickFriendly(x,y,wide){
-    const direct=this._rayEntity(x,y,e=>e.alive&&e.selectable&&e.playerId==='player');if(direct)return direct;
-    let best=null,bestD=Infinity;
-    for(const e of this.sim.entities.values()){if(!e.alive||!e.selectable||e.playerId!=='player')continue;const d=this._screenDistance(e,x,y),limit=wide?(e.kind==='infantry'?46:38):(e.kind==='infantry'?18:20);if(d<=limit&&d<bestD){best=e;bestD=d;}}
-    return best;
-  }
-  _pickResource(x,y){
-    const direct=this._rayEntity(x,y,e=>e.alive&&e.kind==='resource'&&(e.resourceRemaining??0)>0);if(direct)return direct;
-    let best=null,bestD=Infinity;for(const e of this.sim.entities.values()){if(!e.alive||e.kind!=='resource'||(e.resourceRemaining??0)<=0)continue;const d=this._screenDistance(e,x,y);if(d<=34&&d<bestD){best=e;bestD=d;}}return best;
-  }
-  _pickHostile(x,y){
-    const direct=this._rayEntity(x,y,e=>e.alive&&e.playerId&&e.playerId!=='player');if(direct)return direct;
-    let best=null,bestD=Infinity;
-    for(const e of this.sim.entities.values()){if(!e.alive||!e.playerId||e.playerId==='player')continue;const d=this._screenDistance(e,x,y),limit=e.kind==='infantry'?26:30;if(d<=limit&&d<bestD){best=e;bestD=d;}}
-    return best;
-  }
+  _screenPoint(entity){const v=this.renderer.entityViews.get(entity.id);if(!v)return null;const p=new THREE.Vector3();v.getWorldPosition(p);p.project(this.renderer.camera);const r=this.canvas.getBoundingClientRect();return {x:r.left+(p.x*.5+.5)*r.width,y:r.top+(-p.y*.5+.5)*r.height};}
+  _screenDistance(entity,x,y){const p=this._screenPoint(entity);return p?Math.hypot(x-p.x,y-p.y):Infinity;}
+  _rayEntity(x,y,predicate){this._mouseNdc(x,y);this.raycaster.setFromCamera(this.ndc,this.renderer.camera);const hits=this.raycaster.intersectObjects([...this.renderer.entityViews.values()],true);for(const h of hits){const e=this._entityFromHitObject(h.object);if(e&&predicate(e))return e;}return null;}
+  _pickFriendly(x,y,wide){const direct=this._rayEntity(x,y,e=>e.alive&&e.selectable&&e.playerId===this.playerId);if(direct)return direct;let best=null,bestD=Infinity;for(const e of this.sim.entities.values()){if(!e.alive||!e.selectable||e.playerId!==this.playerId)continue;const d=this._screenDistance(e,x,y),limit=wide?(e.kind==='infantry'?46:38):(e.kind==='infantry'?18:20);if(d<=limit&&d<bestD){best=e;bestD=d;}}return best;}
+  _pickResource(x,y){const direct=this._rayEntity(x,y,e=>e.alive&&e.kind==='resource'&&(e.resourceRemaining??0)>0);if(direct)return direct;let best=null,bestD=Infinity;for(const e of this.sim.entities.values()){if(!e.alive||e.kind!=='resource'||(e.resourceRemaining??0)<=0)continue;const d=this._screenDistance(e,x,y);if(d<=46&&d<bestD){best=e;bestD=d;}}return best;}
+  _pickHostile(x,y){const direct=this._rayEntity(x,y,e=>e.alive&&e.playerId&&e.playerId!==this.playerId);if(direct)return direct;let best=null,bestD=Infinity;for(const e of this.sim.entities.values()){if(!e.alive||!e.playerId||e.playerId===this.playerId)continue;const d=this._screenDistance(e,x,y),limit=e.kind==='infantry'?26:30;if(d<=limit&&d<bestD){best=e;bestD=d;}}return best;}
 
-  async beginPlacement(definitionId){
-    const source=this.selected();if(!source)return false;const check=this.sim.construction.eligibility(source.id,definitionId);if(!check.ok){this.onStatus(REASON_LABEL[check.reason]||check.reason);return false;}
-    this.placement={sourceId:source.id,definitionId,yaw:0,lastPoint:null,lastResult:null};await this.renderer.beginPlacementGhost(definitionId);this.onPlacementChanged(this.placement);this.onStatus(`PLACE ${this.renderer.registry.definition(definitionId).name.toUpperCase()} · TAP TERRAIN`);return true;
-  }
+  async beginPlacement(definitionId){const source=this.selected();if(!source)return false;const check=this.sim.construction.eligibility(source.id,definitionId);if(!check.ok){this.onStatus(REASON_LABEL[check.reason]||check.reason);return false;}this.cancelCommandMode();this.placement={sourceId:source.id,definitionId,yaw:0,lastPoint:null,lastResult:null};await this.renderer.beginPlacementGhost(definitionId);this.onPlacementChanged(this.placement);this.onStatus(`PLACE ${this.renderer.registry.definition(definitionId).name.toUpperCase()} · TAP TERRAIN`);return true;}
   cancelPlacement(){if(!this.placement)return;this.placement=null;this.renderer.endPlacementGhost();this.onPlacementChanged(null);}
   rotatePlacement(){if(!this.placement)return;this.placement.yaw=(this.placement.yaw+Math.PI/2)%(Math.PI*2);if(this.placement.lastPoint)this._updatePlacementAt(this.placement.lastPoint);this.onStatus('BUILD ROTATED 90°');}
   _updatePlacementPreview(x,y){if(!this.placement)return;const p=this._groundPoint(x,y);if(p)this._updatePlacementAt(p);}
   _updatePlacementAt(p){if(!this.placement)return;const result=this.sim.previewBuild(this.placement.sourceId,this.placement.definitionId,{...p,yaw:this.placement.yaw});this.placement.lastPoint=p;this.placement.lastResult=result;this.renderer.updatePlacementGhost(p,this.placement.yaw,result.ok);this.onPlacementChanged(this.placement);}
-  _confirmPlacement(x,y){
-    const p=this._groundPoint(x,y);if(!p){this.onStatus('NO TERRAIN TARGET');return;}this._updatePlacementAt(p);const pl=this.placement;if(!pl?.lastResult?.ok){this.onStatus(REASON_LABEL[pl?.lastResult?.reason]||`INVALID PLACEMENT · ${pl?.lastResult?.reason||'UNKNOWN'}`);return;}
-    const name=this.renderer.registry.definition(pl.definitionId).name.toUpperCase();this.sim.issueBuildStructure(pl.sourceId,pl.definitionId,{...p,yaw:pl.yaw});this.onStatus(`CONSTRUCT ${name}`);this.cancelPlacement();
-  }
+  _confirmPlacement(x,y){const p=this._groundPoint(x,y);if(!p){this.onStatus('NO TERRAIN TARGET');return;}this._updatePlacementAt(p);const pl=this.placement;if(!pl?.lastResult?.ok){this.onStatus(REASON_LABEL[pl?.lastResult?.reason]||`INVALID PLACEMENT · ${pl?.lastResult?.reason||'UNKNOWN'}`);return;}const name=this.renderer.registry.definition(pl.definitionId).name.toUpperCase();this.sim.issueBuildStructure(pl.sourceId,pl.definitionId,{...p,yaw:pl.yaw,issuerPlayerId:this.playerId});this.onStatus(`CONSTRUCT ${name} · ORDER SENT`);this.cancelPlacement();}
+
+  _mobileCombatIds(){return this.selection().filter(e=>e.locomotorId&&e.weaponSlots?.slots?.length).map(e=>e.id);}
+  _mobileIds(){return this.selection().filter(e=>e.locomotorId).map(e=>e.id);}
+  _orderOptions(){return {issuerPlayerId:this.playerId,append:this.queueOrders||this.shiftDown};}
+  beginCommandMode(mode){if(!this._mobileCombatIds().length){this.onStatus('NO COMBAT UNITS SELECTED');return false;}this.cancelPlacement();this.commandMode=mode;this.onModeChanged();this.onStatus(mode==='ATTACK_MOVE'?'ATTACK MOVE · TAP DESTINATION':'GUARD · TAP FRIENDLY OBJECT OR TERRAIN');return true;}
+  cancelCommandMode(){if(!this.commandMode)return;this.commandMode=null;this.onModeChanged();}
+  toggleQueueOrders(){this.queueOrders=!this.queueOrders;this.onModeChanged();this.onStatus(`QUEUE ORDERS ${this.queueOrders?'ON':'OFF'}`);return this.queueOrders;}
+  toggleAdditiveSelection(){this.additiveSelection=!this.additiveSelection;this.onModeChanged();this.onStatus(`ADD SELECT ${this.additiveSelection?'ON':'OFF'}`);return this.additiveSelection;}
+  armBoxSelection(){this.cancelPlacement();this.cancelCommandMode();this.boxSelectArmed=true;this.onModeChanged();this.onStatus('BOX SELECT · DRAG ACROSS UNITS');}
+  cycleStance(){const units=this.selection().filter(e=>e.locomotorId&&e.weaponSlots?.slots?.length&&e.ai);if(!units.length){this.onStatus('NO COMBAT UNITS SELECTED');return;}const current=units[0].ai?.stance||'GUARD',next=STANCES[(STANCES.indexOf(current)+1)%STANCES.length];this.sim.issueSetStance(units.map(e=>e.id),next,{issuerPlayerId:this.playerId});this.onStatus(`STANCE · ${next.replaceAll('_',' ')}`);this.onModeChanged();}
 
   _tap(x,y){
     if(this.placement){this._confirmPlacement(x,y);return;}
-    const selected=this.selected(),candidate=this._pickFriendly(x,y,!selected);
-    if(candidate&&(!selected||candidate.id!==selected.id||this._screenDistance(candidate,x,y)<20)){
-      this.selectedId=candidate.id;this.onSelection(candidate);this.onStatus(`SELECTED ${this.renderer.registry.definition(candidate.definitionId).name.toUpperCase()}`);return;
-    }
-    if(!selected)return;
-    if(selected.collector){const resource=this._pickResource(x,y);if(resource){this.sim.issueHarvest([selected.id],resource.id);this.renderer.showDestination({x:resource.x,z:resource.z});this.onStatus(`HARVEST · ${this.renderer.registry.definition(resource.definitionId).name.toUpperCase()}`);return;}}
-    const hostile=this._pickHostile(x,y);
-    if(hostile&&selected.weaponSlots?.slots?.length){this.sim.issueAttack([selected.id],hostile.id);this.renderer.showAttackTarget(hostile);this.onStatus(`ATTACK · ${this.renderer.registry.definition(hostile.definitionId).name.toUpperCase()}`);return;}
-    if(!selected.locomotorId){this.onStatus(selected.operational===false?'CONSTRUCTION SITE SELECTED':'STRUCTURE SELECTED · USE COMMAND CONTROLS');return;}
-    const dest=this._groundPoint(x,y);if(!dest){this.onStatus('NO TERRAIN TARGET');return;}
-    this.sim.issueMove([selected.id],dest);this.renderer.showDestination(dest);this.onStatus('MOVE ORDER');
+    if(this.commandMode==='ATTACK_MOVE'){const dest=this._groundPoint(x,y);if(!dest){this.onStatus('NO TERRAIN TARGET');return;}this.sim.issueAttackMove(this._mobileCombatIds(),dest,this._orderOptions());this.renderer.showDestination(dest);this.onStatus(`ATTACK MOVE${this._orderOptions().append?' · QUEUED':''}`);this.cancelCommandMode();return;}
+    if(this.commandMode==='GUARD'){const ids=this._mobileCombatIds(),friendly=this._pickFriendly(x,y,true);if(friendly&&!ids.includes(friendly.id)){this.sim.issueGuardObject(ids,friendly.id,this._orderOptions());this.renderer.showDestination({x:friendly.x,z:friendly.z});this.onStatus(`GUARD · ${this.renderer.registry.definition(friendly.definitionId).name.toUpperCase()}`);this.cancelCommandMode();return;}const p=this._groundPoint(x,y);if(!p){this.onStatus('NO GUARD TARGET');return;}this.sim.issueGuardPosition(ids,p,this._orderOptions());this.renderer.showDestination(p);this.onStatus('GUARD POSITION');this.cancelCommandMode();return;}
+    const selected=this.selection(),candidate=this._pickFriendly(x,y,!selected.length);if(candidate){const additive=this.additiveSelection||this.shiftDown;this.selectById(candidate.id,{additive,toggle:additive});this.onStatus(`SELECTED ${this.renderer.registry.definition(candidate.definitionId).name.toUpperCase()}${additive?' · MULTI':''}`);if(this.boxSelectArmed){this.boxSelectArmed=false;this.onModeChanged();}return;}
+    if(this.boxSelectArmed){this.onStatus('BOX SELECT · DRAG ACROSS UNITS');return;}
+    if(!selected.length)return;
+    const collectors=selected.filter(e=>e.collector);if(collectors.length){const resource=this._pickResource(x,y);if(resource){this.sim.issueHarvest(collectors.map(e=>e.id),resource.id,{issuerPlayerId:this.playerId});this.renderer.showResourceTarget(resource);this.onStatus(`HARVEST · ${this.renderer.registry.definition(resource.definitionId).name.toUpperCase()}`);return;}}
+    const hostile=this._pickHostile(x,y),combat=selected.filter(e=>e.locomotorId&&e.weaponSlots?.slots?.length);if(hostile&&combat.length){this.sim.issueAttack(combat.map(e=>e.id),hostile.id,this._orderOptions());this.renderer.showAttackTarget(hostile);this.onStatus(`ATTACK · ${this.renderer.registry.definition(hostile.definitionId).name.toUpperCase()}${this._orderOptions().append?' · QUEUED':''}`);return;}
+    const movers=selected.filter(e=>e.locomotorId);if(!movers.length){this.onStatus(selected[0]?.operational===false?'CONSTRUCTION SITE SELECTED':'STRUCTURE SELECTED · USE COMMAND CONTROLS');return;}const dest=this._groundPoint(x,y);if(!dest){this.onStatus('NO TERRAIN TARGET');return;}this.sim.issueMove(movers.map(e=>e.id),dest,this._orderOptions());this.renderer.showDestination(dest);this.onStatus(`MOVE ORDER${this._orderOptions().append?' · QUEUED':''}`);
   }
-  stop(){if(this.placement){this.cancelPlacement();this.onStatus('BUILD PLACEMENT CANCELLED');return;}const s=this.selected();if(!s)return;this.sim.issueStop([s.id]);this.onStatus('STOP');}
-  _pan(dx,dy){const cam=this.renderer.camera,scale=cam.position.y/620;const fwd=new THREE.Vector3();cam.getWorldDirection(fwd);fwd.y=0;fwd.normalize();const right=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize();cam.position.addScaledVector(right,-dx*scale);cam.position.addScaledVector(fwd,dy*scale);this._clampCamera();}
-  _zoom(delta){const cam=this.renderer.camera,target=new THREE.Vector3(0,0,0),dir=cam.position.clone().sub(target),next=THREE.MathUtils.clamp(dir.length()+delta,95,430);dir.setLength(next);cam.position.copy(target).add(dir);this._clampCamera();}
-  _clampCamera(){const c=this.renderer.camera,hw=this.sim.map.size.width/2-40,hd=this.sim.map.size.depth/2-40;c.position.x=THREE.MathUtils.clamp(c.position.x,-hw,hw);c.position.z=THREE.MathUtils.clamp(c.position.z,-hd,hd);c.position.y=THREE.MathUtils.clamp(c.position.y,75,330);}
+  stop(){if(this.placement){this.cancelPlacement();this.onStatus('BUILD PLACEMENT CANCELLED');return;}if(this.commandMode){this.cancelCommandMode();this.onStatus('COMMAND MODE CANCELLED');return;}const ids=this._mobileIds();if(!ids.length)return;this.sim.issueStop(ids,{issuerPlayerId:this.playerId});this.onStatus('STOP');}
+
+  _panStart(g){if(!this.boxSelectArmed)return;this.boxDrag={x1:g.sx,y1:g.sy,x2:g.x,y2:g.y};this.onSelectionBox({active:true,...this.boxDrag});}
+  _panGesture(g){if(this.boxDrag){this.boxDrag.x2=g.x;this.boxDrag.y2=g.y;this.onSelectionBox({active:true,...this.boxDrag});return;}this._pan(g.dx,g.dy);}
+  _panEnd(g){if(!this.boxDrag)return;this.boxDrag.x2=g.x;this.boxDrag.y2=g.y;this._finishBoxSelection();}
+  _cancelBoxDrag(){this.boxDrag=null;this.onSelectionBox({active:false});}
+  _finishBoxSelection(){const b=this.boxDrag;if(!b)return;const minX=Math.min(b.x1,b.x2),maxX=Math.max(b.x1,b.x2),minY=Math.min(b.y1,b.y2),maxY=Math.max(b.y1,b.y2),ids=[];for(const e of this.sim.entities.values()){if(!e.alive||!e.selectable||e.playerId!==this.playerId||!e.locomotorId)continue;const p=this._screenPoint(e);if(p&&p.x>=minX&&p.x<=maxX&&p.y>=minY&&p.y<=maxY)ids.push(e.id);}const additive=this.additiveSelection||this.shiftDown;if(ids.length)this.selectIds(ids,{additive});else if(!additive){this.selectedIds=[];this._emitSelection();}this._cancelBoxDrag();this.boxSelectArmed=false;this.onModeChanged();this.onStatus(ids.length?`BOX SELECT · ${ids.length} UNIT${ids.length===1?'':'S'}`:'BOX SELECT · NONE');}
+  _pan(dx,dy){const cam=this.renderer.camera,target=this.renderer.cameraTarget,scale=cam.position.y/620,fwd=new THREE.Vector3();cam.getWorldDirection(fwd);fwd.y=0;fwd.normalize();const right=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize(),delta=new THREE.Vector3().addScaledVector(right,-dx*scale).addScaledVector(fwd,dy*scale),before=target.clone();target.add(delta);this._clampCameraTarget();cam.position.add(target.clone().sub(before));cam.lookAt(target);}
+  _zoom(delta){const cam=this.renderer.camera,target=this.renderer.cameraTarget,dir=cam.position.clone().sub(target),next=THREE.MathUtils.clamp(dir.length()+delta,95,430);dir.setLength(next);cam.position.copy(target).add(dir);cam.lookAt(target);}
+  _clampCameraTarget(){const t=this.renderer.cameraTarget,hw=this.sim.map.size.width/2-25,hd=this.sim.map.size.depth/2-25;t.x=THREE.MathUtils.clamp(t.x,-hw,hw);t.z=THREE.MathUtils.clamp(t.z,-hd,hd);}
 }

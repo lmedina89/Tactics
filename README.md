@@ -1,88 +1,112 @@
-# ForgeRTS v0.5.1 — Construction Validation + Mobile Command UI
+# ForgeRTS v0.5.2 — Tactical Commands + Resource Readability
 
 ForgeRTS is a separate browser-native RTS engine. WorldForge / Skirmish remains untouched and serves only as the older asset/reference project.
 
-v0.5.1 is deliberately a **validation build**, not another large engine layer. v0.5.0 already added the C&C-style CommandSet, tech-tree, placement, construction, economy, production, combat, and locomotion foundations. This update makes those systems easy to prove end-to-end on a phone before enemy AI is added.
+v0.5.2 builds on the validated v0.5.1 construction/economy slice. It does **not** add strategic enemy AI yet. The goal is to finish the player-side C&C-style command vocabulary and make the existing mineral economy readable from an RTS camera before Teams/AIPlayer work begins.
 
 ## What changed
 
-The browser now loads a dedicated `construction_validation.json` scenario instead of the fully prebuilt regression map.
+### Resource fields
 
-The player starts with only:
+The simulation still treats each mineral deposit as **one authoritative resource GameObject**. Rendering is now data-driven through `ResourceFieldVisual`:
 
-- Tactical Command Post
-- Aegis-X
-- HMMWV-50
-- Field Harvester
-- **$8,500**
+- one logical deposit renders several deterministic copies of the existing mineral-cluster GLB
+- cluster count, field radius, scale range, crystal-material matching, emissive strength, glow color, and ground glow are resource-definition data
+- rich and dense fields use different visual footprints without changing harvesting logic
+- outer visual clusters disappear progressively as the authoritative `resourceRemaining` value drops
+- tapping a mineral field for HARVEST produces a short target-confirmation ring
+- the production GLBs themselves are unchanged
 
-There is **no prebuilt Power Node, Refinery, Barracks, Vehicle Factory, Guardian Turret, or Rifleman** on the player side. The enemy side remains populated as a combat target/reference.
+This keeps pathfinding/save/economy complexity at one resource object while making fields readable on a phone.
 
-The intended playable chain is therefore real:
+### C&C-style tactical command layer
 
-`Command Post → Power Node → Refinery → harvest crystals → Barracks → Rifleman → Vehicle Factory → produced vehicle → Guardian Turret`
+Combat units now expose their tactical controls through the data-defined `aegis_combat_unit` CommandSet:
 
-## Mobile command / placement UI
+- multi-unit selection
+- drag/box selection
+- additive selection
+- `ATTACK MOVE`
+- `GUARD`
+- queued/appended orders for waypoint-like command chains
+- data-defined combat stance foundation (`GUARD`, `AGGRESSIVE`, `HOLD POSITION`)
+- idle hostile auto-acquisition for combat units according to `UnitAIUpdate` data
 
-- The Command Post is selected and centered automatically on load.
-- A persistent **FIELD TEST** objective walks through the build/economy/production chain.
-- The selected object's contextual actions now live in an explicit bottom **command dock**.
-- Selecting the Command Post shows the full build list immediately.
-- Locked structures stay visible and show the exact prerequisite / affordability reason rather than disappearing.
-- Placement mode has a dedicated banner showing:
-  - structure being placed
-  - `VALID · TAP TERRAIN TO CONFIRM`
-  - or the specific rejection reason, such as outside build radius, object overlap, resource field, water, or terrain slope.
-- `ROTATE 90°` and `CANCEL BUILD` remain available during placement.
-- Selecting a construction site shows construction progress and the cancellation refund.
-- Completed Barracks / Vehicle Factory immediately expose their existing production CommandSets.
-- Harvester selection explains the crystal-field interaction and refinery requirement.
+Attack Move and Guard are persistent UnitAI orders rather than UI shortcuts. Attack Move may acquire/engage a hostile and then resume its terminal destination. Guard may hold a world position or friendly object and return to the protected area after engagement.
 
-## Field-test sequence
+### Command authority / robustness
 
-1. The Command Post should already be selected. Tap **POWER NODE**.
-2. Move the translucent ghost around. Confirm that valid areas read **VALID** and blocked/illegal areas show a reason.
-3. Place and finish the Power Node.
-4. Return to the Command Post and build a **REFINERY**.
-5. Select the Harvester and tap a crystal field. Cargo should begin increasing; with a working Refinery it can return/unload into faction credits.
-6. Build a **BARRACKS**, select it after completion, and train a Rifleman.
-7. Build a **VEHICLE FACTORY**, select it, and produce HMMWV / Harvester / Aegis-X.
-8. Build a **GUARDIAN TURRET**.
-9. The FIELD TEST banner should report the construction/economy/production chain complete.
+- Commands now carry issuing-player and source metadata (`FROM_PLAYER`, `FROM_SCRIPT`, `FROM_AI`, `FROM_SYSTEM`).
+- Simulation authority rejects player commands against objects the issuer does not own.
+- The client consumes authoritative `lastCommandResult` instead of assuming an enqueued command succeeded.
+- Friendly separation revalidates candidate positions through navigation so crowd resolution cannot knowingly push a unit into blocked terrain/structures.
+- Completed interaction history is bounded while active sessions are retained.
+- Dock providers honor their data-defined capacity instead of treating any one active session as globally full.
+- Production holds a completed queue entry at `WAITING_EXIT` while that producer already has an active rollout.
+- `construction_validation` now has its own stable map ID.
+- Camera pan/zoom uses a maintained camera focus instead of zooming toward world origin.
+- Player resource-harvest totals are explicit simulation state, so validation/objectives do not depend on any resource being depleted by somebody else.
 
-Useful negative tests:
+## Current playable chain
 
-- try placing beyond the Command Post build radius
-- try placing over another structure
-- try placing on/near a crystal field
-- try steep/water/blocked terrain
-- rotate before placement
-- cancel a half-built structure and confirm the refund / footprint removal
-- select a locked structure command before its prerequisite exists and confirm its requirement remains visible
+The v0.5.1 construction/economy validation remains intact:
+
+`Command Post → Power Node → Refinery → harvest minerals → Barracks → Rifleman → Vehicle Factory → produced vehicle → Guardian Turret`
+
+After building the base, use the same map to test group selection, Attack Move, Guard, queued orders, stances, and combat auto-acquisition.
+
+## Mobile controls
+
+- **Tap friendly unit:** select it.
+- **ADD:** toggles additive-selection mode for the next selections.
+- **BOX:** arm box selection, then drag across friendly units.
+- **Tap terrain with selected mobile units:** MOVE.
+- **Tap hostile with selected combat units:** ATTACK.
+- **ATTACK MOVE:** arm the command, then tap terrain.
+- **GUARD:** arm Guard; tap terrain to guard a position or a friendly object to guard that object.
+- **QUEUE:** toggle command appending so subsequent movement/tactical orders form a serialized order chain.
+- **STANCE:** cycle the selected combat units' stance.
+- **STOP:** clears current and queued orders.
+- **CENTER:** centers the current selection without changing simulation state.
+- **CLEAR:** clears selection/client modes.
+
+Build/production/Harvester contextual controls remain data-driven through their existing CommandSets.
 
 ## Architecture preserved
 
-v0.5.1 does **not** replace the v0.5.0 construction architecture. It validates it.
-
+- `CommandBus` — serializable commands with issuer/source metadata
+- `UnitAIUpdate` — persistent MOVE / ATTACK / ATTACK_MOVE / GUARD state and queued orders
 - `CommandSet` — data-defined contextual actions
-- `TechTreeSystem` — builder permission, prerequisites, limits, affordability
+- `TechTreeSystem` — build permission, prerequisites, limits, affordability
 - `PlacementValidator` — authoritative placement legality
-- `ConstructionSystem` — real construction-site objects, progress, cancel/refund, module activation
+- `ConstructionSystem` — real construction-site GameObjects
 - `FactionEconomySystem` — credits / power
-- `ResourceSystem` — finite crystals + Harvester docking loop
-- `ProductionSystem` — generic Barracks / Factory queues and rollout
-- `CombatSystem` — weapons, armor, projectiles, turret behavior
-- `UnitAIUpdate` + locomotor system — persistent movement and vehicle steering
+- `ResourceSystem` — finite minerals + Harvester docking loop
+- `InteractionManager` — explicit bounded object-to-object protocols
+- `ProductionSystem` — generic queues / rollout
+- `CombatSystem` — weapons / armor / projectiles / turret behavior
+- pathfinder + locomotor — route choice separated from physical movement
+- Three.js renderer — disposable presentation; multi-cluster resource visuals never become simulation entities
 
-The old `training_ground.json` remains in the package as the complete prebuilt regression scenario used by the automated tests. The playable page uses `construction_validation.json` so the player actually has to build the base.
+## C&C reference boundary
+
+The tactical command shape follows the released Generals / Zero Hour separation between high-level AI commands such as move, attack-move, guard, appended paths, and command origin. Red Alert remains the reference for explicit interaction handshakes; RA3 schemas remain the reference for data-driven GameObject/module composition. ForgeRTS implements those concepts in original JavaScript rather than directly translating EA source in this release.
+
+If a future subsystem is genuinely better served by a direct GPL-covered source translation, it must be an explicit decision with provenance instead of silently mixing copied code into original modules.
 
 ## Snapshot format
 
-Snapshot format remains **v8** because v0.5.1 changes the playable scenario and client validation UI rather than simulation-state structure.
+Snapshot format is **v9**. It includes the expanded UnitAI/order-queue/stance state and player resource-harvest accounting while still accepting v8 snapshots.
 
 ## Validation
 
-The release test suite now covers the dedicated field-test scenario in addition to all previous regression coverage. It verifies that the map starts without player tech structures, prerequisites unlock only after real construction, and the same scenario can build Power → Refinery → Barracks, begin harvesting, and train a Rifleman end-to-end.
+Run:
+
+```bash
+npm test
+```
+
+The release suite covers construction, economy, production, combat, movement, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, resource-field visual configuration, map identity, snapshot determinism, and the original mobile construction vertical slice.
 
 ## Run
 

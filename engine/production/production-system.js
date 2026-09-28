@@ -36,6 +36,8 @@ export class ProductionSystem{
     const producer=this.entityLookup(producerId),q=producer?.production?.queue;if(!q?.length)return false;const entry=q.pop();this.economy.deposit(producer.playerId,entry.cost??0);return true;
   }
 
+  _exitReserved(producerId){for(const r of this.rollouts.values())if(r.producerId===producerId)return true;return false;}
+
   _profileForDefinition(def){const loco=moduleConfig(def,'Locomotor'),cfg=loco?this.registry.locomotor(loco.locomotor):null;return {clearance:cfg?.pathfindRadius??cfg?.radius??0,maxSlopeDeg:cfg?.maxSlopeDeg??32,allowWater:cfg?.kind==='air'};}
 
   _spawnCompleted(producer,entry,cfg){
@@ -69,7 +71,7 @@ export class ProductionSystem{
       if(!producer.alive||producer.operational===false||!producer.production?.queue?.length)continue;const cfg=this._prodCfg(producer),entry=producer.production.queue[0];if(!cfg)continue;
       entry.state='BUILDING';entry.progressTicks+=this.economy.productionRateFactor(producer.playerId);
       if(entry.progressTicks+1e-6<entry.buildTimeTicks)continue;
-      entry.state='WAITING_EXIT';const unit=this._spawnCompleted(producer,entry,cfg);if(!unit)continue;producer.production.queue.shift();
+      entry.state='WAITING_EXIT';if(this._exitReserved(producer.id))continue;const unit=this._spawnCompleted(producer,entry,cfg);if(!unit)continue;producer.production.queue.shift();
     }
     this._stepRollouts();
   }

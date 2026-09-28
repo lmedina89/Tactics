@@ -15,6 +15,23 @@
       "headingOffset": 0.0
     },
     {
+      "type": "ResourceFieldVisual",
+      "clusterCount": 5,
+      "fieldRadius": 8.5,
+      "minClusterScale": 0.88,
+      "maxClusterScale": 1.22,
+      "glowColor": "#ffd06a",
+      "glowBlend": 0.72,
+      "colorBoost": 0.08,
+      "emissiveIntensity": 2.1,
+      "emissiveMaterialIncludes": [
+        "CRYSTAL"
+      ],
+      "groundGlowRadius": 10.0,
+      "groundGlowOpacity": 0.11,
+      "groundGlowColor": "#e8b54e"
+    },
+    {
       "type": "PlacementBlocker",
       "radius": 9
     }

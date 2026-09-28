@@ -62,3 +62,13 @@ test('interaction sessions are serializable and restorable',async()=>{
   const a=new InteractionManager({registry,entityLookup:id=>entities.get(id)}),s=a.request('resource_docking','h','r');a.advance(s.id,'GRANT');a.advance(s.id,'APPROACH');
   const state=a.snapshot(),b=new InteractionManager({registry,entityLookup:id=>entities.get(id)});b.restore(state);assert.deepEqual(b.snapshot(),state);
 });
+
+test('completed interaction history is bounded while active sessions are preserved',async()=>{
+  const harvester=await read('data/units/harvester.json'),refinery=await read('data/buildings/refinery.json'),protocol=await read('data/interactions/resource_docking.json');
+  const entities=new Map([['h',{id:'h',definitionId:'harvester'}],['r',{id:'r',definitionId:'refinery'}]]),registry=new Registry({defs:{harvester,refinery},protocols:{resource_docking:protocol}}),mgr=new InteractionManager({registry,entityLookup:id=>entities.get(id)});
+  const complete=s=>{for(const event of ['GRANT','APPROACH','ARRIVE','BEGIN_UNLOAD','UNLOAD_COMPLETE','EXIT','CLEAR'])mgr.advance(s.id,event);};
+  for(let i=0;i<12;i++)complete(mgr.request('resource_docking','h','r'));
+  const active=mgr.request('resource_docking','h','r');mgr.advance(active.id,'GRANT');
+  const removed=mgr.pruneCompleted(4);
+  assert.equal(removed,8);assert.equal([...mgr.sessions.values()].filter(s=>s.complete).length,4);assert.equal(mgr.sessions.has(active.id),true);assert.equal(mgr.sessions.get(active.id).complete,false);
+});

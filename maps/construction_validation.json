@@ -1,11 +1,11 @@
 {
   "manifestVersion": 2,
-  "id": "training_ground",
+  "id": "construction_validation",
   "name": "Construction Validation Range",
-  "version": 6,
+  "version": 7,
   "seed": 731904,
   "region": {
-    "id": "training_ground_region",
+    "id": "construction_validation_region",
     "streamable": true,
     "neighbors": [],
     "worldGrid": {

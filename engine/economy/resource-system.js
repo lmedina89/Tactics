@@ -42,8 +42,9 @@ export class ResourceSystem{
   }
 
   _providerBusy(providerId,exceptSessionId=null){
-    for(const s of this.interactions.sessions.values())if(!s.complete&&s.providerId===providerId&&s.id!==exceptSessionId)return true;
-    return false;
+    const provider=this.entityLookup(providerId),capacity=Math.max(1,this._dockCfg(provider)?.capacity??1);let active=0;
+    for(const s of this.interactions.sessions.values())if(!s.complete&&s.providerId===providerId&&s.id!==exceptSessionId)active++;
+    return active>=capacity;
   }
 
   _pointAround(provider,distance,side=0){
@@ -80,6 +81,7 @@ export class ResourceSystem{
         if(dist(entity,resource)>(cfg.harvestRadius??5.5)*1.35){c.state='TO_RESOURCE';continue;}
         const amount=Math.min((cfg.harvestRatePerSecond??120)*dt,c.cargoCapacity-c.cargo,resource.resourceRemaining);
         c.cargo+=amount;resource.resourceRemaining=Math.max(0,resource.resourceRemaining-amount);
+        const player=this.economy.players.get(entity.playerId),resCfg=this._resourceCfg(resource);if(player&&amount>0){player.resourcesHarvested??={};const type=resCfg?.resourceType||'generic';player.resourcesHarvested[type]=(player.resourcesHarvested[type]||0)+amount;}
         if(c.cargo>=c.cargoCapacity-0.001||resource.resourceRemaining<=0)this._startReturn(entity);
         continue;
       }

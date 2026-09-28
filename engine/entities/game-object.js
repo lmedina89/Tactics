@@ -64,7 +64,7 @@ export function createGameObjectRuntime({definition,spawn,player,registry,terrai
     locomotorId:locoBinding?.locomotor??null,
     armorId:armor?.armor??null,
     radius:loco?.radius??0,
-    ai:modules.has('UnitAIUpdate')?createUnitAIState():null,
+    ai:modules.has('UnitAIUpdate')?createUnitAIState(modules.get('UnitAIUpdate')):null,
     weaponSlots:weaponSet?{slots:(weaponSet.slots||[]).map(s=>({slot:s.slot||'PRIMARY',weaponId:s.weapon,ammoInClip:null,nextFireTick:0,reloadUntilTick:0,prefireUntilTick:0,targetId:null}))}:null,
     turretYaw:turretAI?(spawn.yaw||0):null,turretAngularSpeed:0,
     combat:{manualTargetId:null,autoTargetId:null,activeTargetId:null,nextScanTick:0},

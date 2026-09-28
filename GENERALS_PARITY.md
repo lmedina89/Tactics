@@ -6,12 +6,12 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.5.0 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.5.2 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
-| Serializable commands | mission/action orders | `MessageStream` / GUI commands | behavior receives data, not UI events | `engine/commands/CommandBus` | MOVE / STOP / **ATTACK** implemented |
+| Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
 | GameObject composition | object classes + explicit state | object/update-module architecture | `GameObject` composed from Body/AI/Draw/Behaviors/etc. | `engine/entities/game-object.js` + JSON modules | Implemented foundation |
-| Unit AI requested destination/state | mission/state handling | `AIUpdate` module family | AI behavior as module | `engine/ai/unit-ai-update.js` | MOVE + **persistent ATTACK approach/engage state** |
+| Unit AI requested destination/state | mission/state handling | `AIUpdate` commands incl. attack-move/guard/path append | AI behavior as module | `engine/ai/unit-ai-update.js` | **MOVE / ATTACK / ATTACK_MOVE / GUARD, queued orders, data-defined stance/acquisition** |
 | Locomotor templates | movement classes | `Locomotor.h` family (`FOUR_WHEELS`, `TREADS`, turn rate, wheel angle, reverse state) | locomotor set data | `engine/locomotion/locomotor.js` + JSON | Tracks pivot/turn; wheels steer on curvature with bounded reverse + three-point turn-around; legs/air separate; facing simulation-owned |
 | Pathfinder destination correction | cell movement | AI/pathfinder family | geometry/pathing data separate | `engine/pathfinding/grid-pathfinder.js` | nearest-valid destination + clearance + attack approach point |
 | Weapons / Weapon templates/runtime | projectile/warhead behavior | `WeaponTemplate` / `Weapon` | `WeaponSet` modules | `engine/combat/weapon-system.js` + `data/weapons` | **Implemented initial hitscan/projectile, prefire, cadence, clip/reload, target masks** |
@@ -20,22 +20,25 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Turret/body aim | turreted vehicle fire logic | `TurretAI` under AIUpdate | turret behavior module | CombatSystem + Render turret bindings | **Independent turret yaw; body-aim infantry; Guardian auto-acquire** |
 | Projectile objects | projectile classes | projectile Thing/Object weapon delivery | projectile behavior data | `engine/combat/projectile-system.js` | **Deterministic projectile runtime + snapshot** |
 | Interaction protocols | refinery/harvester radio/docking handshakes | production/contain/dock behavior families | behavior modules/endpoints | `engine/interactions/interaction-protocol.js` | **Resource docking + infantry/vehicle rollout used by live systems** |
-| Gesture/context input | classic click orders | selection/context translation | client behavior separate from simulation | `ui/gesture-resolver.js` + InputController | TAP/LONG_PRESS/PAN/PINCH + hostile ATTACK context |
+| Gesture/context input | classic click/group orders | selection/context translation | client behavior separate from simulation | `ui/gesture-resolver.js` + InputController | **TAP/LONG_PRESS/PAN/PINCH + box/add selection + group tactical contexts** |
 | Terrain/passability separation | map cells/regions | `MapReaderWriterInfo.h` | terrain appearance vs gameplay data | `MapManifest` + TerrainSampler + Pathfinder | Implemented foundation |
 | Height/blend terrain | tile/cell terrain | WorldBuilder blend terrain | layered terrain data | `renderer/terrain-renderer.js` | 3-layer splat terrain |
 | Roads | map overlays | WorldBuilder roads | data-defined terrain feature | map `roads[]` + renderer | Foundation implemented |
 | Rivers/water | map cells/water logic | terrain/water systems | water as independent feature data | map `water` + renderer | Foundation implemented |
 | Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | Owner/threat/resources/activity/discovery implemented |
 | Stable starts/waypoints | cell/waypoint mission logic | player start/rally waypoints | named anchors | map `waypoints[]` | Data implemented |
-| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v8 adds construction sites, operational state and construction-system state to prior economy/combat/locomotion state** |
+| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v9 adds queued tactical orders/stances and resource-harvest accounting; v8 restore accepted** |
 | Player economy/power | house/resources | `Player` | player/faction data | `FactionEconomySystem` / player state | **Credits + power + low-power policy implemented** |
 | Production | factory queues/service | production update modules | Production behavior | `engine/production/production-system.js` | **Generic queues, costs, build time, cancellation, dynamic spawn, rollout/rally implemented** |
-| Command sets / contextual UI | sidebar/build lists | `CommandButton` / control bar / GUI command staging | `CommandSet` on `GameObject` | `data/commandsets/*` + HUD renderer | **Data-driven BUILD / PRODUCE / RETURN / CANCEL command presentation implemented** |
+| Command sets / contextual UI | sidebar/build lists | `CommandButton` / control bar / GUI command staging | `CommandSet` on `GameObject` | `data/commandsets/*` + HUD renderer | **BUILD / PRODUCE / RETURN / CANCEL + tactical ATTACK_MOVE / GUARD / QUEUE / STANCE presentation** |
 | Build eligibility / tech tree | house build rules | `Player` buildability / affordability / prerequisite checks | `Buildable`, prerequisites, build cost | `engine/construction/tech-tree.js` | **Builder permission, prerequisites, build limits and affordability implemented** |
 | Structure placement | cell legality | `InGameUI` build-place mode / legal build feedback | `StructurePlacementBehavior`, projected buildability | `engine/construction/placement-validator.js` + placement ghost | **Client ghost + authoritative terrain/footprint/radius validation implemented** |
 | Construction state | building creation | `DozerAIUpdate` build task / structure construction lifecycle | `BuildTime`, `RefundValue`, construction-yard/placement modules | `engine/construction/construction-system.js` | **Real damageable sites, progress, cancellation/refund, completion/activation implemented** |
 | Construction approach sockets | docking/build approach points | `DozerAIUpdate` build dock locations | structure behavior data | `Construction.sockets[]` | **Data foundation implemented; current Command Post uses yard style, mobile-builder path is scaffolded** |
 | Dynamic structure occupancy | cell occupancy | pathing/object footprint integration | geometry/placement separate from art | `GridPathfinder` dynamic obstacles | **New/cancelled structures update navigation at runtime** |
+| Resource-field presentation | ore/gem field readability | supply-resource visual readability | client visual modules separate from resource behavior | `ResourceFieldVisual` + renderer | **One logical Resource renders deterministic multi-cluster GLB field/glow/depletion cues** |
+| Command authority/source | house/player ownership | player/script/AI command-origin distinction | commands are data, owner checks in gameplay | `CommandBus` + `Simulation._apply` | **Issuer/source metadata + authoritative ownership validation** |
+| Group/queued tactical orders | grouped orders | attack-move / guard / appended user paths | generic behavior command data | InputController + UnitAIUpdate | **Multi-select, box/add, ATTACK_MOVE, GUARD, serialized appended order queue** |
 | Teams/attack groups | teams/groups | `Team` / `AIGroup` | team data | `TeamManager` | Planned |
 | Strategic AI | house AI | `AIPlayer` | AI modules/data | `AIController` | Planned |
 | Mission conditions/actions | triggers/actions | Scripts / Conditions / Actions | script data | `MissionSystem` | Planned; never owns world lifetime |
@@ -68,3 +71,10 @@ Do not copy EA art, audio, names, trademarks, map artwork, or proprietary later-
 ## v0.5.1 construction validation boundary
 
 v0.5.1 does not add another C&C subsystem. It validates the existing v0.5.0 construction/CommandSet/tech-tree boundaries through a build-from-foundation scenario and a clearer mobile client. The UI can predict and explain placement/eligibility, but authoritative build acceptance still lives in `TechTreeSystem` + `PlacementValidator` + `ConstructionSystem`. The prebuilt training map remains a regression fixture; the player-facing map intentionally starts without tech structures so no authored object can silently satisfy prerequisites.
+
+
+## v0.5.2 tactical command / resource readability reference boundary
+
+v0.5.2 uses the released Generals / Zero Hour command vocabulary as an architectural reference: move, attack-move, guard-position/object, appended paths, and explicit command origin are high-level AI/game commands rather than UI-specific behaviors. ForgeRTS mirrors that separation with serializable CommandBus records and persistent UnitAI state, but the implementation is original JavaScript rather than a line-for-line source port. Combat acquisition/leash/return policy is definition data so future AIPlayer/Team logic can issue the same orders as the human client.
+
+Mineral readability remains deliberately renderer-side. `ResourceFieldVisual` composes deterministic copies of the existing GLB plus emissive/ground-glow cues around one simulation Resource. This follows the broader RA3-style client/game separation without multiplying authoritative resource objects.

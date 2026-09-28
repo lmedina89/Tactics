@@ -52,6 +52,7 @@
     "data/commandsets/aegis_command_post.json",
     "data/commandsets/aegis_barracks.json",
     "data/commandsets/aegis_vehicle_factory.json",
-    "data/commandsets/aegis_harvester.json"
+    "data/commandsets/aegis_harvester.json",
+    "data/commandsets/aegis_combat_unit.json"
   ]
 }

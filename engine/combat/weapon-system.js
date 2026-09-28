@@ -26,6 +26,8 @@ export class CombatSystem{
   targetFor(entity,tick){
     const explicitId=entity.ai?.order?.type==='ATTACK'?entity.ai.order.targetId:null;
     if(explicitId){const t=this.entityLookup(explicitId);if(t?.alive&&this._enemy(entity,t))return t;}
+    const engagementId=entity.ai?.engagementTargetId||entity.combat?.manualTargetId||null;
+    if(engagementId){const t=this.entityLookup(engagementId);if(t?.alive&&this._enemy(entity,t))return t;}
     const turret=entity.modules?.TurretAI;
     if(!turret?.autoAcquire)return null;
     entity.combat ??= {};

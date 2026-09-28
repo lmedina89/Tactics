@@ -1,38 +1,10 @@
-export const GestureType=Object.freeze({TAP:'TAP',LONG_PRESS:'LONG_PRESS',PAN_START:'PAN_START',PAN:'PAN',PINCH:'PINCH'});
+export const GestureType=Object.freeze({TAP:'TAP',LONG_PRESS:'LONG_PRESS',PAN_START:'PAN_START',PAN:'PAN',PAN_END:'PAN_END',PINCH:'PINCH'});
 
 export class GestureResolver{
-  constructor({tapMovePx=30,panStartPx=34,longPressMs=520,tapMaxMs=720}={}){
-    this.tapMovePx=tapMovePx;this.panStartPx=panStartPx;this.longPressMs=longPressMs;this.tapMaxMs=tapMaxMs;
-    this.pointers=new Map();this.mode='IDLE';this.lastPinchDistance=0;this.multiTouch=false;
-  }
-  down(id,x,y,time){
-    this.pointers.set(id,{x,y,sx:x,sy:y,lastX:x,lastY:y,time});
-    if(this.pointers.size===2){this.mode='PINCH';this.multiTouch=true;this.lastPinchDistance=this._pinchDistance();}
-    return [];
-  }
-  move(id,x,y,time){
-    const p=this.pointers.get(id);if(!p)return [];
-    const dx=x-p.x,dy=y-p.y;p.lastX=p.x;p.lastY=p.y;p.x=x;p.y=y;
-    if(this.pointers.size>=2||this.mode==='PINCH'){
-      this.mode='PINCH';this.multiTouch=true;const d=this._pinchDistance(),delta=this.lastPinchDistance?this.lastPinchDistance-d:0;this.lastPinchDistance=d;
-      return [{type:GestureType.PINCH,delta,x,y,time}];
-    }
-    const travel=Math.hypot(x-p.sx,y-p.sy);
-    if(this.mode!=='PAN'&&travel>=this.panStartPx){this.mode='PAN';return [{type:GestureType.PAN_START,x,y,time},{type:GestureType.PAN,dx,dy,x,y,time}];}
-    if(this.mode==='PAN')return [{type:GestureType.PAN,dx,dy,x,y,time}];
-    return [];
-  }
-  up(id,x,y,time){
-    const p=this.pointers.get(id);if(!p)return [];
-    const travel=Math.hypot(x-p.sx,y-p.sy),duration=time-p.time,mode=this.mode,wasMulti=this.multiTouch;
-    this.pointers.delete(id);
-    if(this.pointers.size<2)this.lastPinchDistance=0;
-    if(this.pointers.size===0){this.mode='IDLE';this.multiTouch=false;}
-    if(mode==='PAN'||mode==='PINCH'||wasMulti)return [];
-    if(travel<=this.tapMovePx&&duration>=this.longPressMs)return [{type:GestureType.LONG_PRESS,x,y,duration,time}];
-    if(travel<=this.tapMovePx&&duration<=this.tapMaxMs)return [{type:GestureType.TAP,x,y,duration,time}];
-    return [];
-  }
+  constructor({tapMovePx=30,panStartPx=34,longPressMs=520,tapMaxMs=720}={}){this.tapMovePx=tapMovePx;this.panStartPx=panStartPx;this.longPressMs=longPressMs;this.tapMaxMs=tapMaxMs;this.pointers=new Map();this.mode='IDLE';this.lastPinchDistance=0;this.multiTouch=false;}
+  down(id,x,y,time){this.pointers.set(id,{x,y,sx:x,sy:y,lastX:x,lastY:y,time});if(this.pointers.size===2){this.mode='PINCH';this.multiTouch=true;this.lastPinchDistance=this._pinchDistance();}return [];}
+  move(id,x,y,time){const p=this.pointers.get(id);if(!p)return [];const dx=x-p.x,dy=y-p.y;p.lastX=p.x;p.lastY=p.y;p.x=x;p.y=y;if(this.pointers.size>=2||this.mode==='PINCH'){this.mode='PINCH';this.multiTouch=true;const d=this._pinchDistance(),delta=this.lastPinchDistance?this.lastPinchDistance-d:0;this.lastPinchDistance=d;return [{type:GestureType.PINCH,delta,x,y,sx:p.sx,sy:p.sy,time}];}const travel=Math.hypot(x-p.sx,y-p.sy);if(this.mode!=='PAN'&&travel>=this.panStartPx){this.mode='PAN';return [{type:GestureType.PAN_START,x,y,sx:p.sx,sy:p.sy,time},{type:GestureType.PAN,dx,dy,x,y,sx:p.sx,sy:p.sy,time}];}if(this.mode==='PAN')return [{type:GestureType.PAN,dx,dy,x,y,sx:p.sx,sy:p.sy,time}];return [];}
+  up(id,x,y,time){const p=this.pointers.get(id);if(!p)return [];const travel=Math.hypot(x-p.sx,y-p.sy),duration=time-p.time,mode=this.mode,wasMulti=this.multiTouch;this.pointers.delete(id);if(this.pointers.size<2)this.lastPinchDistance=0;if(this.pointers.size===0){this.mode='IDLE';this.multiTouch=false;}if(mode==='PAN')return [{type:GestureType.PAN_END,x,y,sx:p.sx,sy:p.sy,duration,time}];if(mode==='PINCH'||wasMulti)return [];if(travel<=this.tapMovePx&&duration>=this.longPressMs)return [{type:GestureType.LONG_PRESS,x,y,sx:p.sx,sy:p.sy,duration,time}];if(travel<=this.tapMovePx&&duration<=this.tapMaxMs)return [{type:GestureType.TAP,x,y,sx:p.sx,sy:p.sy,duration,time}];return [];}
   cancel(id){this.pointers.delete(id);if(this.pointers.size===0){this.mode='IDLE';this.multiTouch=false;this.lastPinchDistance=0;}return [];}
   _pinchDistance(){const a=[...this.pointers.values()];return a.length<2?0:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);}
 }

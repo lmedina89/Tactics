@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.5.2 — Tactical Commands + Resource Readability
+
+- Added data-driven `ResourceFieldVisual` presentation: each logical mineral deposit can render deterministic multi-cluster copies of the existing GLB with definition-controlled radius, scale variation, crystal-material matching, emissive strength, glow color, and ground glow.
+- Resource-field depletion now progressively removes/fades visual clusters while the authoritative simulation remains one finite Resource GameObject; production GLBs are unchanged.
+- Added brief HARVEST target feedback for resource-field taps.
+- Added data-driven combat CommandSet with `ATTACK_MOVE`, `GUARD`, queued-order toggle, and stance cycling.
+- Added multi-unit selection, drag/box selection, additive selection, and group order issuing in the client layer.
+- Expanded `UnitAIUpdate` with persistent `ATTACK_MOVE`, `GUARD_POSITION`, `GUARD_OBJECT`, serializable appended order queues, GUARD/AGGRESSIVE/HOLD_POSITION stance state, and data-defined idle auto-acquisition/scan/leash/return policy.
+- Added command-source/issuer metadata (`FROM_PLAYER`, `FROM_SCRIPT`, `FROM_AI`, `FROM_SYSTEM`) and authoritative simulation ownership checks; the UI now consumes command results instead of assuming acceptance.
+- Friendly-unit separation now revalidates candidate positions against pathfinding walkability.
+- Interaction cleanup now bounds completed-session history while retaining active sessions; docking provider capacity is respected.
+- Production rollout adds same-producer exit reservation through a `WAITING_EXIT` state instead of spawning another unit into an occupied rollout.
+- Player resource-harvest totals are explicit simulation state, preventing field-test progress from depending on future enemy depletion.
+- Fixed duplicate validation-map ID and made camera zoom operate around maintained camera focus rather than world origin.
+- Snapshot format advanced to **v9** for tactical AI/order state and harvest accounting, with v8 restore compatibility.
+- Added regression coverage for authority rejection, queued orders, Attack Move resume, Guard engagement, idle stance auto-acquisition, v8 AI-state normalization, resource-visual definitions/map identity, interaction-history pruning, and player harvest accounting.
+- Full suite: **62/62 tests passing**.
+
 ## v0.5.1 — Construction Validation + Mobile Command UI
 
 - Added a dedicated `construction_validation.json` playable scenario while preserving the full `training_ground.json` regression map.

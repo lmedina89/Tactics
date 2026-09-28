@@ -4,14 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>ForgeRTS v0.5.1</title>
+  <title>ForgeRTS v0.5.2</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
   <canvas id="game"></canvas>
+  <div id="selection-box" class="selection-box" hidden></div>
   <div class="hud">
-    <div class="chip brand">FORGERTS <span class="version">v0.5.1</span></div>
+    <div class="chip brand">FORGERTS <span class="version">v0.5.2</span></div>
     <div class="chip economy" id="economy">$0 · PWR 0/0</div>
     <div class="chip" id="selection">NONE</div>
     <div class="chip status-chip"><span id="status">LOADING…</span> · <span id="tick">TICK 0</span></div>
@@ -31,8 +32,8 @@
     <div id="context-controls" class="context-controls"></div>
   </div>
 
-  <div class="help">FIELD TEST: build your base from the Command Post, establish power and a Refinery, harvest crystals, then bring Barracks and Vehicle Factory production online.</div>
-  <div class="controls"><button id="stop">STOP</button><button id="center">CENTER</button><button id="clear">CLEAR</button></div>
+  <div class="help">FIELD TEST: build the base, harvest the glowing mineral fields, then validate multi-select, Attack Move, Guard, queued orders and combat stances.</div>
+  <div class="controls"><button id="stop">STOP</button><button id="box-select">BOX</button><button id="add-select">ADD</button><button id="center">CENTER</button><button id="clear">CLEAR</button></div>
 </div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
 <script type="module" src="main.js"></script>

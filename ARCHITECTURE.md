@@ -36,6 +36,15 @@
 34. **Structure occupancy is dynamic navigation state.** Built/cancelled structures register/remove runtime pathfinding obstacles without rebuilding the authored map or baking construction into static terrain data.
 35. **Prerequisites and build limits are centralized.** Tech-tree eligibility is resolved from player-owned operational objects and data-defined requirements rather than individual buttons or concrete building names.
 36. **Construction sockets belong to structure data.** Even when the current Command Post uses construction-yard style placement, structure definitions carry reusable approach sockets for future mobile builders, repair, and service workflows.
+37. **Command authority is simulation-owned.** Commands carry issuer/source metadata and simulation validates ownership; UI selection restrictions are convenience, never security/authority.
+38. **Orders are reusable state-machine vocabulary.** MOVE, ATTACK, ATTACK_MOVE, GUARD and later tactical orders belong to UnitAI and may be issued by player, AI or scripts through the same CommandBus.
+39. **Queued orders are deterministic state.** Appended commands become a serializable UnitAI order queue rather than client-only waypoints.
+40. **Stance and acquisition policy are data.** Idle auto-acquisition, guard radius, attack-move scan/chase limits, return radius and default stance live in `UnitAIUpdate` definition data.
+41. **Selection is client state; group orders are simulation commands.** Box/additive selection never mutates entities. Issuing an order serializes selected IDs through the common command path.
+42. **Resource-field multiplicity is visual only.** A mineral deposit remains one Resource GameObject; `ResourceFieldVisual` may render deterministic GLB clones/glow/depletion cues without creating extra economy/pathfinding entities.
+43. **Interaction history is bounded.** Completed protocol sessions may be pruned after a deterministic retention window; active sessions may never be discarded by cleanup.
+44. **Capacity is provider data.** Dock/service concurrency is governed by module capacity, not an implicit one-session global lock.
+45. **Camera focus is client state.** Pan/zoom/center manipulate a maintained view target and must never feed back into simulation truth.
 
 
 ## v0.5.1 validation-layer rule
@@ -43,3 +52,10 @@
 A feature is not considered ready for the next major subsystem merely because its isolated engine tests pass. Core RTS loops must also be exposed through a small playable validation scenario with enough UI feedback for a human tester to prove the chain end-to-end on the target mobile browser. The validation scenario is separate from the dense prebuilt regression map so regression fixtures do not accidentally satisfy tech prerequisites for the player.
 
 The validation UI remains a client layer: objectives, command-dock labels, placement banners, and initial camera/selection do not mutate simulation truth except through the existing CommandBus and authoritative construction/production/resource systems.
+
+
+## v0.5.2 tactical-command / resource-visual rule
+
+The player command layer must use the same serializable vocabulary intended for future AI, scripts, replay and networking. `InputController` resolves selection and context only; it does not contain combat/pathing implementations. `UnitAIUpdate` owns persistent Attack Move / Guard / stance behavior, and all tunable acquisition/leash/return values are definition data.
+
+Resource readability follows the opposite ownership boundary: multi-cluster mineral fields, emissive emphasis, ground glow and depletion presentation are renderer-only projections of one authoritative resource entity. Visual multiplicity must not multiply resource capacity, blockers, interaction endpoints or snapshot entities.

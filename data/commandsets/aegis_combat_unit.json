@@ -1,0 +1,21 @@
+{
+  "id": "aegis_combat_unit",
+  "commands": [
+    {
+      "type": "ATTACK_MOVE",
+      "label": "ATTACK MOVE"
+    },
+    {
+      "type": "GUARD",
+      "label": "GUARD"
+    },
+    {
+      "type": "TOGGLE_QUEUE",
+      "label": "QUEUE ORDERS"
+    },
+    {
+      "type": "CYCLE_STANCE",
+      "label": "STANCE"
+    }
+  ]
+}

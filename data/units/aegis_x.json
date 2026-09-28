@@ -33,7 +33,21 @@
       "enabled": true
     },
     {
-      "type": "UnitAIUpdate"
+      "type": "UnitAIUpdate",
+      "autoAcquireEnemiesWhenIdle": true,
+      "defaultStance": "GUARD",
+      "acquisitionRange": 78,
+      "idleScanIntervalTicks": 10,
+      "idleChaseDistance": 88,
+      "aggressiveRangeMultiplier": 1.25,
+      "aggressiveChaseDistance": 132,
+      "attackMoveAcquisitionRange": 86,
+      "attackMoveScanIntervalTicks": 6,
+      "attackMoveChaseDistance": 115,
+      "guardRange": 82,
+      "guardScanIntervalTicks": 8,
+      "guardChaseDistance": 100,
+      "guardReturnRadius": 10
     },
     {
       "type": "Locomotor",
@@ -63,6 +77,10 @@
       "queueType": "vehicle",
       "credits": 1100,
       "buildTimeSeconds": 9.0
+    },
+    {
+      "type": "CommandSet",
+      "id": "aegis_combat_unit"
     }
   ]
 }

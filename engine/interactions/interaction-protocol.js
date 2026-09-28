@@ -20,7 +20,7 @@ export class InteractionManager{
     if(protocol.requesterRole&&!rr.includes(protocol.requesterRole))throw new Error(`${requesterId} lacks interaction role ${protocol.requesterRole}`);
     if(protocol.providerRole&&!pr.includes(protocol.providerRole))throw new Error(`${providerId} lacks interaction role ${protocol.providerRole}`);
     const id=`ix:${++this.serial}`;
-    const session={id,protocolId,requesterId,providerId,state:protocol.initialState,complete:false,metadata:clone(metadata),history:[{state:protocol.initialState,event:null}]};
+    const session={id,serial:this.serial,protocolId,requesterId,providerId,state:protocol.initialState,complete:false,metadata:clone(metadata),history:[{state:protocol.initialState,event:null}]};
     this.sessions.set(id,session);return session;
   }
 
@@ -38,6 +38,8 @@ export class InteractionManager{
   cancel(sessionId,reason='CANCELLED'){
     const s=this.sessions.get(sessionId);if(!s)return null;s.state=reason;s.complete=true;s.history.push({state:reason,event:'CANCEL'});return s;
   }
+
+  pruneCompleted(maxCompleted=64){const completed=[...this.sessions.values()].filter(s=>s.complete);if(completed.length<=maxCompleted)return 0;completed.sort((a,b)=>(a.serial??Number(a.id.split(':')[1])??0)-(b.serial??Number(b.id.split(':')[1])??0));let removed=0;for(const s of completed.slice(0,completed.length-maxCompleted)){this.sessions.delete(s.id);removed++;}return removed;}
 
   snapshot(){return {serial:this.serial,sessions:[...this.sessions.values()].map(clone)};}
   restore(state){this.serial=state?.serial??0;this.sessions=new Map((state?.sessions||[]).map(s=>[s.id,clone(s)]));}

@@ -87,6 +87,8 @@ export class GridPathfinder {
     return true;
   }
 
+  isWalkableWorld(x,z,profile={}){if(x<-this.halfW||x>=this.halfW||z<-this.halfD||z>=this.halfD)return false;const c=this._cellOf(x,z);return this.isWalkableCell(c.x,c.z,profile);}
+
   nearestWalkable(x,z,profile={},maxR=16){
     const c=this._cellOf(x,z);
     if(this.isWalkableCell(c.x,c.z,profile))return this._worldOf(c.x,c.z);

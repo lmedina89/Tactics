@@ -7,7 +7,7 @@ test('gesture resolver emits no gameplay tap before pointer-up classification',(
 });
 
 test('deliberate drag becomes pan and never emits tap',()=>{
-  const g=new GestureResolver();g.down(1,0,0,0);const m=g.move(1,40,0,100);assert.ok(m.some(x=>x.type===GestureType.PAN_START));assert.ok(m.some(x=>x.type===GestureType.PAN));assert.deepEqual(g.up(1,42,0,180),[]);
+  const g=new GestureResolver();g.down(1,0,0,0);const m=g.move(1,40,0,100);assert.ok(m.some(x=>x.type===GestureType.PAN_START));assert.ok(m.some(x=>x.type===GestureType.PAN));const end=g.up(1,42,0,180);assert.equal(end.length,1);assert.equal(end[0].type,GestureType.PAN_END);
 });
 
 test('long press is classified separately from tap',()=>{

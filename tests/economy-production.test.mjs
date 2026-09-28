@@ -35,7 +35,7 @@ test('Harvester mines a finite field, docks through interaction protocol, unload
   s.issueHarvest([h.id],r.id);
   for(let i=0;i<3600&&r.resourceRemaining>0.001;i++)s.step(FIXED_DT);
   for(let i=0;i<1400&&(h.collector.cargo>0.001||h.collector.state!=='IDLE');i++)s.step(FIXED_DT);
-  assert.equal(Math.round(r.resourceRemaining),0);assert.equal(Math.round(h.collector.cargo),0);assert.equal(h.collector.state,'IDLE');assert.equal(Math.round(s.players.get('player').credits-start),1250);
+  assert.equal(Math.round(r.resourceRemaining),0);assert.equal(Math.round(h.collector.cargo),0);assert.equal(h.collector.state,'IDLE');assert.equal(Math.round(s.players.get('player').credits-start),1250);assert.equal(Math.round(s.players.get('player').resourcesHarvested.mineral),1250);
   const completed=[...s.interactions.sessions.values()].filter(x=>x.protocolId==='resource_docking'&&x.requesterId===h.id&&x.complete);assert.ok(completed.length>=1);
 });
 
@@ -56,7 +56,7 @@ test('Barracks production uses same generic queue/rollout system and cancellatio
   assert.ok([...s.entities.values()].some(e=>e.definitionId==='rifleman'&&e.playerId==='player'&&e.id!=='p_rifle'));
 });
 
-test('v8 snapshot restores dynamically produced entities, queues, cargo, faction economy and interaction state',async()=>{
+test('v9 snapshot restores dynamically produced entities, queues, cargo, faction economy and interaction state',async()=>{
   const s=await sim();s.issueProduce('p_factory','hmmwv50');s.issueHarvest(['p_harvester'],'rich_w');for(let i=0;i<240;i++)s.step(FIXED_DT);
   const snap=s.snapshot(),s2=await sim();s2.restore(snap);assert.deepEqual(s2.snapshot(),snap);
   for(let i=0;i<180;i++){s.step(FIXED_DT);s2.step(FIXED_DT);}assert.deepEqual(s2.snapshot(),s.snapshot());

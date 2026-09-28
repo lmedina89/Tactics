@@ -1,48 +1,54 @@
-# ForgeRTS v0.5.1 Test Report
+# ForgeRTS v0.5.2 Test Report
 
 ## Release target
 
-**ForgeRTS v0.5.1 — Construction Validation + Mobile Command UI**
+**ForgeRTS v0.5.2 — Tactical Commands + Resource Readability**
 
-This release intentionally focuses on proving the v0.5.0 construction/economy/production architecture through a player-facing mobile scenario rather than adding another major simulation subsystem.
+This release keeps the validated v0.5.1 build/construction/economy loop and adds the player-side tactical command layer plus renderer-only mineral-field readability before strategic enemy AI.
 
 ## Automated suite
 
 Command: `npm test`
 
-Result: **53/53 tests passing**.
+Result: **62/62 tests passing**.
 
-New v0.5.1 coverage verifies:
+New v0.5.2 coverage verifies:
 
-- the playable validation map starts with only Command Post, Aegis-X, HMMWV-50, and Harvester for the player
-- player begins with $8,500 and no prebuilt Power Node / Refinery / Barracks / Vehicle Factory / Guardian Turret
-- Power Node is initially legal while later tech is prerequisite-locked
-- constructing a real Power Node unlocks Refinery and Barracks while Vehicle Factory remains locked until Refinery exists
-- the client loads the dedicated validation map and exposes explicit command-dock / placement-banner guidance
-- the playable scenario can complete an end-to-end Power → Refinery → begin harvesting → Barracks → Rifleman production sequence using the real simulation systems
+- simulation-authoritative ownership rejects a player order against an enemy unit while an appropriately issued AI order remains valid
+- appended MOVE commands persist as a deterministic/serializable waypoint-like queue
+- Attack Move acquires/destroys a hostile and then resumes to its terminal destination
+- Guard Position persists and engages hostiles inside data-defined guard behavior
+- idle GUARD stance auto-acquires hostiles through `UnitAIUpdate` definition policy
+- combat CommandSet data exposes Attack Move / Guard / queue / stance controls
+- resource definitions expose renderer-only multi-cluster/glow presentation data
+- `construction_validation` and `training_ground` have distinct stable IDs
+- completed interaction history can be pruned without deleting active sessions
+- player `resourcesHarvested` accounting advances from real finite-resource harvesting
+- snapshot v9 remains deterministic across construction/economy/production/combat state
+- v8 tactical AI state without the new queue/stance fields is normalized safely before new appended orders
 
-All previous movement, steering/reverse, combat, armor, projectile, docking, economy, production, construction, snapshot, gesture, terrain, module, and map regression tests remain passing.
+All prior movement, steering/reverse, combat, armor, projectile, docking, economy, production, construction, placement, gesture, terrain, module, interaction, and mobile vertical-slice regression tests remain passing.
 
 ## Static validation
 
-- **37** JavaScript / MJS files passed `node --check`.
-- **46** JSON files parsed successfully.
-- `ASSET_HASHES.sha256` passed for every listed production GLB and terrain texture.
+- **38** JavaScript / MJS files pass `node --check`.
+- **47** JSON files parse successfully.
+- `ASSET_HASHES.sha256` passes for every listed production GLB and terrain texture.
 - Production GLBs were not modified.
-- Snapshot schema remains **v8**; this release does not add simulation-state fields.
+- Snapshot schema is **v9**; restore accepts v8 or v9.
 
-## Packaging validation
+## Browser smoke-test limitation
 
-The final release is packaged with `index.html` at the ZIP root for direct GitHub Pages/static-host deployment. The dedicated playable map is `maps/construction_validation.json`; the complete prebuilt `maps/training_ground.json` remains available as the regression fixture.
-
-A localhost HTTP smoke test was attempted in the execution environment, but loopback connections are blocked here even while the local server process is running. No browser-runtime claim is based on that unavailable check; the release relies on the automated simulation/UI-source/static validation above plus the user's real iPhone/GitHub Pages test.
+A localhost static server is available in the execution environment, but the page imports Three.js from jsDelivr and the environment cannot resolve external DNS. A headless Chromium visual/runtime smoke test therefore cannot load the external Three.js module here. No claim of browser-render verification is based on that unavailable dependency; the release is validated by the automated simulation/source/static checks and should receive the normal real iPhone/GitHub Pages visual check.
 
 ## Manual iPhone focus
 
-1. Load the page and confirm the Command Post is already selected and centered.
-2. Confirm BUILD controls are visible and locked structures state their prerequisite.
-3. Place a Power Node and verify live green/red placement feedback and specific invalid reasons.
-4. Build Refinery, harvest crystals, and observe cargo/credits.
-5. Build Barracks and train a Rifleman.
-6. Build Vehicle Factory and produce a vehicle.
-7. Build Guardian Turret and confirm the FIELD TEST objective reports completion.
+1. Confirm rich/dense mineral deposits read as obvious multi-cluster glowing fields from normal RTS camera height.
+2. Harvest a field and confirm visual clusters reduce as the authoritative resource depletes and credits still arrive through the Refinery.
+3. Use BOX to select several combat units; test additive selection.
+4. Issue Attack Move through hostile territory and confirm engagement followed by resumed movement.
+5. Issue Guard to terrain and to a friendly object; confirm the unit protects/returns to the guard area.
+6. Toggle QUEUE and issue several movement/tactical destinations; confirm they execute in order.
+7. Cycle stance and verify idle GUARD auto-acquisition while HOLD POSITION does not chase outside its intended policy.
+8. Pan away from map origin and pinch/zoom; confirm zoom stays around the current camera focus.
+9. Re-run the existing Command Post → Power → Refinery → harvest → Barracks → Rifleman → Vehicle Factory → vehicle → Guardian Turret chain.
