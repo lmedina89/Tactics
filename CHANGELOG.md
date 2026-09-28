@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.5.1 — Construction Validation + Mobile Command UI
+
+- Added a dedicated `construction_validation.json` playable scenario while preserving the full `training_ground.json` regression map.
+- Player now begins with only Command Post, Aegis-X, HMMWV-50, Harvester, and $8,500; all player tech structures must be constructed through the real v0.5.0 systems.
+- Added an 8-step FIELD TEST objective sequence covering power, refinery, harvesting, Barracks, infantry production, Vehicle Factory, vehicle production, and Guardian Turret.
+- Command Post is auto-selected and camera-centered at startup so the construction flow is immediately discoverable on mobile.
+- Reworked contextual controls into an explicit mobile command dock with BUILD / PRODUCTION / HARVESTER / CONSTRUCTION headings and concise interaction hints.
+- Locked build commands remain visible and report missing prerequisites / funds / limits.
+- Added a dedicated placement banner with live VALID / invalid-reason feedback while the world-space building ghost moves.
+- Placement preview changes now notify the UI continuously instead of only when entering/leaving placement mode.
+- Added `InputController.selectById()` for deterministic initial UI selection without synthesizing touch input.
+- Snapshot format remains v8; no new simulation-state schema was required.
+- Added dedicated vertical-slice regression coverage, including an end-to-end Power → Refinery → harvest → Barracks → Rifleman sequence.
+- Full suite: **53/53 tests passing**.
+- Production GLBs and terrain textures remain unchanged.
+
 ## v0.5.0 — Base Construction + Tech Tree + Command Sets
 
 - Added data-driven `CommandSet` registry and selected-object command rendering for construction, production, cargo return, and queue cancellation.

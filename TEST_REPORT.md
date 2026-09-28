@@ -1,73 +1,48 @@
-# ForgeRTS v0.5.0 Validation Report
+# ForgeRTS v0.5.1 Test Report
 
-## Automated tests
+## Release target
 
-`npm test` passes **49/49** tests.
+**ForgeRTS v0.5.1 — Construction Validation + Mobile Command UI**
 
-New construction / tech-tree coverage includes:
+This release intentionally focuses on proving the v0.5.0 construction/economy/production architecture through a player-facing mobile scenario rather than adding another major simulation subsystem.
 
-- CommandSet data exposes HQ construction and existing Barracks/Vehicle Factory production through generic commands
-- authoritative placement accepts clear terrain and rejects occupied footprints / out-of-radius locations
-- construction deducts credits and creates a real non-operational site
-- under-construction power and production modules remain inactive
-- completed Power Node activates its power module
-- cancellation removes the runtime pathfinding footprint and returns the configured partial refund
-- operational prerequisites can lock construction when a prerequisite structure is lost
-- damage taken during construction remains damage after completion rather than being healed away
-- destroyed construction sites never activate completed-building modules
-- snapshot **v8** restores active construction and continues deterministically
+## Automated suite
 
-Economy / production coverage remains intact for:
+Command: `npm test`
 
-- faction credits and data-driven power budget
-- finite mineral harvesting
-- explicit Refinery docking/unloading protocol
-- credit income and resource depletion
-- Barracks and Vehicle Factory production
-- queue-time costs and cancellation refunds
-- controlled rollout / rally behavior
-- dynamically produced entity snapshot restore
+Result: **53/53 tests passing**.
 
-Combat regression coverage remains intact for:
+New v0.5.1 coverage verifies:
 
-- armor/weapon relationships
-- persistent ATTACK approach behavior
-- independent Aegis-X turret aiming and projectile fire
-- HMMWV hitscan vs infantry
-- autonomous Guardian Turret acquisition
-- destruction and projectile snapshot determinism
+- the playable validation map starts with only Command Post, Aegis-X, HMMWV-50, and Harvester for the player
+- player begins with $8,500 and no prebuilt Power Node / Refinery / Barracks / Vehicle Factory / Guardian Turret
+- Power Node is initially legal while later tech is prerequisite-locked
+- constructing a real Power Node unlocks Refinery and Barracks while Vehicle Factory remains locked until Refinery exists
+- the client loads the dedicated validation map and exposes explicit command-dock / placement-banner guidance
+- the playable scenario can complete an end-to-end Power → Refinery → begin harvesting → Barracks → Rifleman production sequence using the real simulation systems
 
-Locomotion/input/map regression coverage remains intact for:
+All previous movement, steering/reverse, combat, armor, projectile, docking, economy, production, construction, snapshot, gesture, terrain, module, and map regression tests remain passing.
 
-- tracked pivot behavior
-- bounded short reverse and long-route forward preference
-- wheeled three-point turnaround state
-- persistent MOVE / STOP
-- dynamic building-aware path clearance
-- real-map repeated movement
-- TAP / PAN / LONG_PRESS / PINCH classification
-- GameObject module validation
-- MapManifest v2 terrain/passability/region foundations
+## Static validation
 
-## Syntax / data validation
+- **37** JavaScript / MJS files passed `node --check`.
+- **46** JSON files parsed successfully.
+- `ASSET_HASHES.sha256` passed for every listed production GLB and terrain texture.
+- Production GLBs were not modified.
+- Snapshot schema remains **v8**; this release does not add simulation-state fields.
 
-All JavaScript and MJS files pass `node --check`. All JSON files parse successfully. The browser `DataRegistry` was also loaded under a file-backed test `fetch` implementation and successfully validated all definitions and **4 CommandSets**.
+## Packaging validation
 
-## Asset integrity
+The final release is packaged with `index.html` at the ZIP root for direct GitHub Pages/static-host deployment. The dedicated playable map is `maps/construction_validation.json`; the complete prebuilt `maps/training_ground.json` remains available as the regression fixture.
 
-`sha256sum -c ASSET_HASHES.sha256` passes. All **16 production GLBs** remain byte-for-byte unchanged. Existing terrain textures remain unchanged.
+A localhost HTTP smoke test was attempted in the execution environment, but loopback connections are blocked here even while the local server process is running. No browser-runtime claim is based on that unavailable check; the release relies on the automated simulation/UI-source/static validation above plus the user's real iPhone/GitHub Pages test.
 
-## Construction implementation notes
+## Manual iPhone focus
 
-- CommandBus now carries `BUILD_STRUCTURE` and `CANCEL_CONSTRUCTION` in addition to the previous movement/combat/economy/production commands.
-- `TechTreeSystem` owns builder permission, prerequisites, build limits, and affordability.
-- `PlacementValidator` is the authoritative placement rule owner; the renderer ghost is prediction/presentation only.
-- `ConstructionSystem` owns construction-site progress, health growth, cancellation/refund, source builder linkage, and completion.
-- under-construction objects exist as real GameObjects and reserve their footprint immediately.
-- runtime building obstacles are registered dynamically in `GridPathfinder`, allowing construction cancellation to remove occupancy cleanly.
-- `operational === false` gates power, production, Refinery docking, and autonomous weapon use until completion.
-- snapshot format is **v8**.
-
-## Intentionally deferred
-
-A dedicated mobile builder/dozer asset, assisted construction, repair/rearm, structure selling, advanced projected buildability/base expansion, upgrades/sciences, enemy base-building AI, teams, and mission scripting remain deferred.
+1. Load the page and confirm the Command Post is already selected and centered.
+2. Confirm BUILD controls are visible and locked structures state their prerequisite.
+3. Place a Power Node and verify live green/red placement feedback and specific invalid reasons.
+4. Build Refinery, harvest crystals, and observe cargo/credits.
+5. Build Barracks and train a Rifleman.
+6. Build Vehicle Factory and produce a vehicle.
+7. Build Guardian Turret and confirm the FIELD TEST objective reports completion.

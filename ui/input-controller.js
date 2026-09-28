@@ -13,6 +13,7 @@ export class InputController{
     this._bind();
   }
   selected(){const e=this.selectedId?this.sim.entities.get(this.selectedId):null;if(!e?.alive){this.selectedId=null;return null;}return e;}
+  selectById(id){const e=id?this.sim.entities.get(id):null;if(!e?.alive||!e.selectable||e.playerId!=='player')return false;this.selectedId=e.id;this.onSelection(e);return true;}
   clear(){this.cancelPlacement();this.selectedId=null;this.onSelection(null);}
   isPlacing(){return !!this.placement;}
   _bind(){
@@ -62,7 +63,7 @@ export class InputController{
   cancelPlacement(){if(!this.placement)return;this.placement=null;this.renderer.endPlacementGhost();this.onPlacementChanged(null);}
   rotatePlacement(){if(!this.placement)return;this.placement.yaw=(this.placement.yaw+Math.PI/2)%(Math.PI*2);if(this.placement.lastPoint)this._updatePlacementAt(this.placement.lastPoint);this.onStatus('BUILD ROTATED 90°');}
   _updatePlacementPreview(x,y){if(!this.placement)return;const p=this._groundPoint(x,y);if(p)this._updatePlacementAt(p);}
-  _updatePlacementAt(p){if(!this.placement)return;const result=this.sim.previewBuild(this.placement.sourceId,this.placement.definitionId,{...p,yaw:this.placement.yaw});this.placement.lastPoint=p;this.placement.lastResult=result;this.renderer.updatePlacementGhost(p,this.placement.yaw,result.ok);}
+  _updatePlacementAt(p){if(!this.placement)return;const result=this.sim.previewBuild(this.placement.sourceId,this.placement.definitionId,{...p,yaw:this.placement.yaw});this.placement.lastPoint=p;this.placement.lastResult=result;this.renderer.updatePlacementGhost(p,this.placement.yaw,result.ok);this.onPlacementChanged(this.placement);}
   _confirmPlacement(x,y){
     const p=this._groundPoint(x,y);if(!p){this.onStatus('NO TERRAIN TARGET');return;}this._updatePlacementAt(p);const pl=this.placement;if(!pl?.lastResult?.ok){this.onStatus(REASON_LABEL[pl?.lastResult?.reason]||`INVALID PLACEMENT · ${pl?.lastResult?.reason||'UNKNOWN'}`);return;}
     const name=this.renderer.registry.definition(pl.definitionId).name.toUpperCase();this.sim.issueBuildStructure(pl.sourceId,pl.definitionId,{...p,yaw:pl.yaw});this.onStatus(`CONSTRUCT ${name}`);this.cancelPlacement();

@@ -4,18 +4,34 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>ForgeRTS v0.5.0</title>
+  <title>ForgeRTS v0.5.1</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
   <canvas id="game"></canvas>
   <div class="hud">
-    <div class="chip brand">FORGERTS <span class="version">v0.5.0</span></div>
-    <div class="chip economy" id="economy">$0 · PWR 0/0</div><div class="chip" id="selection">NONE</div>
-    <div class="chip"><span id="status">LOADING…</span> · <span id="tick">TICK 0</span></div>
+    <div class="chip brand">FORGERTS <span class="version">v0.5.1</span></div>
+    <div class="chip economy" id="economy">$0 · PWR 0/0</div>
+    <div class="chip" id="selection">NONE</div>
+    <div class="chip status-chip"><span id="status">LOADING…</span> · <span id="tick">TICK 0</span></div>
   </div>
-  <div class="help">Tap friendly units/structures to select. Select the Command Post to BUILD structures: choose a structure, move/tap the translucent placement ghost, rotate if needed, then tap terrain to confirm. Barracks/Vehicle Factory train units; Harvester mines crystal fields. Construction, economy, production, combat, docking and movement are deterministic simulation state.</div><div id="context-controls" class="context-controls"></div>
+
+  <div id="objective" class="objective">FIELD TEST · INITIALIZING</div>
+  <div id="placement-banner" class="placement-banner" hidden>
+    <strong id="placement-title">PLACE STRUCTURE</strong>
+    <span id="placement-state">MOVE GHOST · TAP TO PLACE</span>
+  </div>
+
+  <div id="command-dock" class="command-dock">
+    <div class="command-head">
+      <strong id="command-title">COMMANDS</strong>
+      <span id="command-hint">Select the Command Post to begin the field test.</span>
+    </div>
+    <div id="context-controls" class="context-controls"></div>
+  </div>
+
+  <div class="help">FIELD TEST: build your base from the Command Post, establish power and a Refinery, harvest crystals, then bring Barracks and Vehicle Factory production online.</div>
   <div class="controls"><button id="stop">STOP</button><button id="center">CENTER</button><button id="clear">CLEAR</button></div>
 </div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>

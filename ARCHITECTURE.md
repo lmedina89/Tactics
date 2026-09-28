@@ -36,3 +36,10 @@
 34. **Structure occupancy is dynamic navigation state.** Built/cancelled structures register/remove runtime pathfinding obstacles without rebuilding the authored map or baking construction into static terrain data.
 35. **Prerequisites and build limits are centralized.** Tech-tree eligibility is resolved from player-owned operational objects and data-defined requirements rather than individual buttons or concrete building names.
 36. **Construction sockets belong to structure data.** Even when the current Command Post uses construction-yard style placement, structure definitions carry reusable approach sockets for future mobile builders, repair, and service workflows.
+
+
+## v0.5.1 validation-layer rule
+
+A feature is not considered ready for the next major subsystem merely because its isolated engine tests pass. Core RTS loops must also be exposed through a small playable validation scenario with enough UI feedback for a human tester to prove the chain end-to-end on the target mobile browser. The validation scenario is separate from the dense prebuilt regression map so regression fixtures do not accidentally satisfy tech prerequisites for the player.
+
+The validation UI remains a client layer: objectives, command-dock labels, placement banners, and initial camera/selection do not mutate simulation truth except through the existing CommandBus and authoritative construction/production/resource systems.

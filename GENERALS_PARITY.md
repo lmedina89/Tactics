@@ -63,3 +63,8 @@ ForgeRTS v0.5.0 follows the released C&C separation between player build eligibi
 ## Licensing / content boundary
 
 Do not copy EA art, audio, names, trademarks, map artwork, or proprietary later-game engine code into ForgeRTS. Any future direct translation of GPL-covered released source must be explicitly marked with provenance and applicable notices.
+
+
+## v0.5.1 construction validation boundary
+
+v0.5.1 does not add another C&C subsystem. It validates the existing v0.5.0 construction/CommandSet/tech-tree boundaries through a build-from-foundation scenario and a clearer mobile client. The UI can predict and explain placement/eligibility, but authoritative build acceptance still lives in `TechTreeSystem` + `PlacementValidator` + `ConstructionSystem`. The prebuilt training map remains a regression fixture; the player-facing map intentionally starts without tech structures so no authored object can silently satisfy prerequisites.

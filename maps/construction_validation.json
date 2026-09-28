@@ -1,0 +1,540 @@
+{
+  "manifestVersion": 2,
+  "id": "training_ground",
+  "name": "Construction Validation Range",
+  "version": 6,
+  "seed": 731904,
+  "region": {
+    "id": "training_ground_region",
+    "streamable": true,
+    "neighbors": [],
+    "worldGrid": {
+      "x": 0,
+      "z": 0
+    },
+    "strategic": {
+      "owner": null,
+      "threat": 0.18,
+      "resourceValue": 4250,
+      "aiActivity": 0.25,
+      "discoveredBy": [
+        "player",
+        "enemy"
+      ],
+      "tags": [
+        "training",
+        "temperate",
+        "contested"
+      ]
+    }
+  },
+  "size": {
+    "width": 640,
+    "depth": 480
+  },
+  "terrain": {
+    "heightfield": {
+      "baseHeight": 2,
+      "noise": {
+        "scale": 118,
+        "amplitude": 5.2,
+        "octaves": 4,
+        "persistence": 0.48
+      },
+      "features": [
+        {
+          "id": "north_ridge_w",
+          "x": -145,
+          "z": -176,
+          "radius": 118,
+          "height": 21
+        },
+        {
+          "id": "north_ridge_e",
+          "x": 145,
+          "z": -172,
+          "radius": 126,
+          "height": 18
+        },
+        {
+          "id": "west_upland",
+          "x": -285,
+          "z": 95,
+          "radius": 105,
+          "height": 14
+        },
+        {
+          "id": "east_upland",
+          "x": 285,
+          "z": 88,
+          "radius": 110,
+          "height": 15
+        },
+        {
+          "id": "center_knoll",
+          "x": 0,
+          "z": 28,
+          "radius": 78,
+          "height": 7
+        }
+      ]
+    },
+    "materials": [
+      {
+        "id": "grass",
+        "albedo": "assets/terrain/temperate_grass.png",
+        "tileMeters": 18,
+        "roughness": 0.95
+      },
+      {
+        "id": "dirt",
+        "albedo": "assets/terrain/temperate_dirt.png",
+        "tileMeters": 14,
+        "roughness": 0.98
+      },
+      {
+        "id": "rock",
+        "albedo": "assets/terrain/temperate_rock.png",
+        "tileMeters": 12,
+        "roughness": 0.88
+      }
+    ],
+    "splat": {
+      "mode": "generated",
+      "drivers": [
+        "slope",
+        "river-moisture",
+        "seeded-noise"
+      ]
+    },
+    "cliffs": {
+      "slopeStartDeg": 23,
+      "slopeFullDeg": 36
+    }
+  },
+  "roads": [
+    {
+      "id": "main_east_west",
+      "width": 10,
+      "shoulderWidth": 5,
+      "surface": "assets/terrain/road_asphalt.png",
+      "shoulder": "assets/terrain/road_shoulders.png",
+      "points": [
+        {
+          "x": -275,
+          "z": -38
+        },
+        {
+          "x": -205,
+          "z": -34
+        },
+        {
+          "x": -118,
+          "z": -18
+        },
+        {
+          "x": -32,
+          "z": -12
+        },
+        {
+          "x": 55,
+          "z": -18
+        },
+        {
+          "x": 145,
+          "z": -30
+        },
+        {
+          "x": 275,
+          "z": -35
+        }
+      ]
+    },
+    {
+      "id": "south_service_road",
+      "width": 7,
+      "shoulderWidth": 4,
+      "surface": "assets/terrain/road_asphalt.png",
+      "shoulder": "assets/terrain/road_shoulders.png",
+      "points": [
+        {
+          "x": -205,
+          "z": -35
+        },
+        {
+          "x": -175,
+          "z": 32
+        },
+        {
+          "x": -125,
+          "z": 72
+        },
+        {
+          "x": -86,
+          "z": 102
+        }
+      ]
+    },
+    {
+      "id": "enemy_service_road",
+      "width": 7,
+      "shoulderWidth": 4,
+      "surface": "assets/terrain/road_asphalt.png",
+      "shoulder": "assets/terrain/road_shoulders.png",
+      "points": [
+        {
+          "x": 205,
+          "z": -35
+        },
+        {
+          "x": 176,
+          "z": 28
+        },
+        {
+          "x": 130,
+          "z": 68
+        },
+        {
+          "x": 92,
+          "z": 98
+        }
+      ]
+    }
+  ],
+  "water": {
+    "rivers": [
+      {
+        "id": "south_fork",
+        "width": 22,
+        "bankWidth": 15,
+        "depth": 4.2,
+        "waterLevel": -0.4,
+        "color": "#496f75",
+        "points": [
+          {
+            "x": -320,
+            "z": 142
+          },
+          {
+            "x": -230,
+            "z": 128
+          },
+          {
+            "x": -145,
+            "z": 137
+          },
+          {
+            "x": -55,
+            "z": 121
+          },
+          {
+            "x": 38,
+            "z": 132
+          },
+          {
+            "x": 130,
+            "z": 117
+          },
+          {
+            "x": 225,
+            "z": 129
+          },
+          {
+            "x": 320,
+            "z": 112
+          }
+        ]
+      }
+    ],
+    "lakes": []
+  },
+  "navigation": {
+    "cellSize": 4,
+    "defaultMaxSlopeDeg": 32,
+    "waterIsBlocked": true
+  },
+  "passability": {
+    "blockedRects": [
+      {
+        "id": "north_cliff_gate_w",
+        "x": -70,
+        "z": -186,
+        "width": 54,
+        "depth": 30
+      },
+      {
+        "id": "north_cliff_gate_e",
+        "x": 78,
+        "z": -182,
+        "width": 58,
+        "depth": 28
+      }
+    ]
+  },
+  "players": [
+    {
+      "id": "player",
+      "faction": "aegis",
+      "isHuman": true,
+      "startWaypoint": "Player_1_Start",
+      "startingCredits": 8500
+    },
+    {
+      "id": "enemy",
+      "faction": "crimson",
+      "isHuman": false,
+      "startWaypoint": "Player_2_Start",
+      "startingCredits": 3000
+    }
+  ],
+  "waypoints": [
+    {
+      "id": "Player_1_Start",
+      "x": -225,
+      "z": -18
+    },
+    {
+      "id": "Player_1_Rally",
+      "x": -145,
+      "z": -18
+    },
+    {
+      "id": "Player_2_Start",
+      "x": 225,
+      "z": -18
+    },
+    {
+      "id": "Player_2_Rally",
+      "x": 145,
+      "z": -18
+    },
+    {
+      "id": "Center_Field",
+      "x": 0,
+      "z": 4
+    },
+    {
+      "id": "South_Resource_W",
+      "x": -88,
+      "z": 92
+    },
+    {
+      "id": "South_Resource_E",
+      "x": 92,
+      "z": 88
+    }
+  ],
+  "triggerAreas": [
+    {
+      "id": "center_zone",
+      "shape": "circle",
+      "x": 0,
+      "z": 4,
+      "radius": 58
+    },
+    {
+      "id": "player_base_zone",
+      "shape": "circle",
+      "x": -215,
+      "z": -20,
+      "radius": 78
+    },
+    {
+      "id": "enemy_base_zone",
+      "shape": "circle",
+      "x": 215,
+      "z": -20,
+      "radius": 78
+    }
+  ],
+  "resourceFields": [
+    {
+      "id": "rich_w",
+      "definition": "mineral_rich",
+      "x": -92,
+      "z": 88,
+      "capacity": 1250
+    },
+    {
+      "id": "dense_w",
+      "definition": "mineral_dense",
+      "x": -58,
+      "z": 102,
+      "capacity": 3000
+    },
+    {
+      "id": "rich_e",
+      "definition": "mineral_rich",
+      "x": 92,
+      "z": 88,
+      "capacity": 1250
+    },
+    {
+      "id": "dense_e",
+      "definition": "mineral_dense",
+      "x": 58,
+      "z": 102,
+      "capacity": 3000
+    }
+  ],
+  "aiAnchors": [
+    {
+      "id": "player_defense_anchor",
+      "x": -170,
+      "z": -8,
+      "role": "base-defense"
+    },
+    {
+      "id": "enemy_defense_anchor",
+      "x": 170,
+      "z": -8,
+      "role": "base-defense"
+    }
+  ],
+  "staticObstacles": [
+    {
+      "id": "rock_w",
+      "x": -54,
+      "z": 44,
+      "width": 18,
+      "depth": 18
+    },
+    {
+      "id": "rock_e",
+      "x": 58,
+      "z": -66,
+      "width": 22,
+      "depth": 18
+    }
+  ],
+  "objects": [
+    {
+      "id": "p_hq",
+      "definition": "command_post",
+      "owner": "player",
+      "x": -238,
+      "z": -20,
+      "yaw": 1.5708
+    },
+    {
+      "id": "p_tank",
+      "definition": "aegis_x",
+      "owner": "player",
+      "x": -157,
+      "z": -22,
+      "yaw": 1.5708
+    },
+    {
+      "id": "p_hmmwv",
+      "definition": "hmmwv50",
+      "owner": "player",
+      "x": -158,
+      "z": 15,
+      "yaw": 1.5708
+    },
+    {
+      "id": "e_hq",
+      "definition": "command_post",
+      "owner": "enemy",
+      "x": 238,
+      "z": -20,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_factory",
+      "definition": "vehicle_factory",
+      "owner": "enemy",
+      "x": 222,
+      "z": 48,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_turret",
+      "definition": "guardian_turret",
+      "owner": "enemy",
+      "x": 183,
+      "z": -54,
+      "yaw": 3.1416
+    },
+    {
+      "id": "e_tank",
+      "definition": "aegis_x",
+      "owner": "enemy",
+      "x": 157,
+      "z": -22,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_hmmwv",
+      "definition": "hmmwv50",
+      "owner": "enemy",
+      "x": 158,
+      "z": 15,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_rifle",
+      "definition": "rifleman",
+      "owner": "enemy",
+      "x": 139,
+      "z": 31,
+      "yaw": -1.5708
+    },
+    {
+      "id": "p_harvester",
+      "definition": "harvester",
+      "owner": "player",
+      "x": -190,
+      "z": 72,
+      "yaw": 1.5708
+    },
+    {
+      "id": "e_power",
+      "definition": "power_node",
+      "owner": "enemy",
+      "x": 270,
+      "z": 30,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_refinery",
+      "definition": "refinery",
+      "owner": "enemy",
+      "x": 248,
+      "z": 68,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_barracks",
+      "definition": "barracks",
+      "owner": "enemy",
+      "x": 198,
+      "z": 72,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_harvester",
+      "definition": "harvester",
+      "owner": "enemy",
+      "x": 166,
+      "z": 88,
+      "yaw": -1.5708
+    }
+  ],
+  "environment": {
+    "skyColor": "#8da0a4",
+    "fogColor": "#8b9791",
+    "fogNear": 300,
+    "fogFar": 820,
+    "hemisphereSky": "#cad8df",
+    "hemisphereGround": "#3f4638",
+    "hemisphereIntensity": 1.65,
+    "sunColor": "#fff2d5",
+    "sunIntensity": 2.15,
+    "sunDirection": {
+      "x": -0.55,
+      "y": 1.0,
+      "z": 0.32
+    }
+  }
+}

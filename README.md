@@ -1,154 +1,89 @@
-# ForgeRTS v0.5.0 — Base Construction + Tech Tree + Command Sets
+# ForgeRTS v0.5.1 — Construction Validation + Mobile Command UI
 
-ForgeRTS is a clean, separate browser-native RTS engine. It does **not** modify the existing WorldForge / Skirmish project.
+ForgeRTS is a separate browser-native RTS engine. WorldForge / Skirmish remains untouched and serves only as the older asset/reference project.
 
-v0.5.0 adds the missing base-construction layer on top of v0.4.0 economy/production and the existing combat/locomotor systems:
+v0.5.1 is deliberately a **validation build**, not another large engine layer. v0.5.0 already added the C&C-style CommandSet, tech-tree, placement, construction, economy, production, combat, and locomotion foundations. This update makes those systems easy to prove end-to-end on a phone before enemy AI is added.
 
-`select Command Post → choose build command → placement ghost → authoritative validation → construction site → completion → existing building modules activate`
+## What changed
 
-The implementation remains original ForgeRTS JavaScript. The architecture follows the released C&C family at the system-boundary level: build eligibility belongs to player/faction state, build commands are data, placement preview is client-side only, construction creates a real simulation object, and completed structures activate existing production/power/docking/combat modules rather than spawning a second bespoke behavior path.
+The browser now loads a dedicated `construction_validation.json` scenario instead of the fully prebuilt regression map.
 
-## Player-facing changes
+The player starts with only:
 
-- Select the **Tactical Command Post** to open the first data-driven base build menu.
-- Initial build commands:
-  - Field Power Node — **$500 / 5 s**
-  - Field Refinery — **$1200 / 9 s**
-  - Field Barracks — **$700 / 7 s**
-  - Vehicle Factory — **$1500 / 11 s**
-  - Guardian Turret — **$600 / 6 s**
-- Selecting a build command enters placement mode with a translucent world-space ghost.
-- Valid placement is shown green; invalid placement is shown red.
-- `ROTATE 90°` and `CANCEL BUILD` are available while placing.
-- Placement is validated against:
-  - builder radius
-  - map bounds
-  - water
-  - slope / height variation
-  - static blocked terrain
-  - existing building footprints
-  - resource-field blockers
-  - tech prerequisites
-  - build limits
-  - available credits
-- Confirmed placement deducts credits and creates a real, selectable **construction site**.
-- Construction sites immediately reserve their building footprint for pathfinding.
-- Under-construction structures do **not** provide power, production, refinery docking, or weapon fire.
-- Structure health grows with build progress while preserving damage taken during construction.
-- A destroyed construction site never activates.
-- Construction can be cancelled for the configured partial refund.
-- When construction completes, the same existing modules from earlier milestones turn on automatically:
-  - Power Node contributes power
-  - Refinery accepts Harvester docking
-  - Barracks exposes Rifleman production
-  - Vehicle Factory exposes HMMWV / Harvester / Aegis-X production
-  - Guardian Turret becomes an autonomous combat structure
+- Tactical Command Post
+- Aegis-X
+- HMMWV-50
+- Field Harvester
+- **$8,500**
 
-## CommandSet foundation
+There is **no prebuilt Power Node, Refinery, Barracks, Vehicle Factory, Guardian Turret, or Rifleman** on the player side. The enemy side remains populated as a combat target/reference.
 
-Object UI commands are now defined in data instead of being hard-wired into the HUD.
+The intended playable chain is therefore real:
 
-Current CommandSets include:
+`Command Post → Power Node → Refinery → harvest crystals → Barracks → Rifleman → Vehicle Factory → produced vehicle → Guardian Turret`
 
-- **Command Post:** build Power Node / Refinery / Barracks / Vehicle Factory / Guardian Turret
-- **Barracks:** produce Rifleman / cancel queued production
-- **Vehicle Factory:** produce HMMWV-50 / Harvester / Aegis-X / cancel queued production
-- **Harvester:** return cargo
+## Mobile command / placement UI
 
-The UI asks the selected object for its `CommandSet`, then renders the applicable commands. This gives later upgrades, abilities, repair, sell, stances, special powers, and faction-specific command layouts a generic home.
+- The Command Post is selected and centered automatically on load.
+- A persistent **FIELD TEST** objective walks through the build/economy/production chain.
+- The selected object's contextual actions now live in an explicit bottom **command dock**.
+- Selecting the Command Post shows the full build list immediately.
+- Locked structures stay visible and show the exact prerequisite / affordability reason rather than disappearing.
+- Placement mode has a dedicated banner showing:
+  - structure being placed
+  - `VALID · TAP TERRAIN TO CONFIRM`
+  - or the specific rejection reason, such as outside build radius, object overlap, resource field, water, or terrain slope.
+- `ROTATE 90°` and `CANCEL BUILD` remain available during placement.
+- Selecting a construction site shows construction progress and the cancellation refund.
+- Completed Barracks / Vehicle Factory immediately expose their existing production CommandSets.
+- Harvester selection explains the crystal-field interaction and refinery requirement.
 
-## Tech tree foundation
+## Field-test sequence
 
-Construction requirements are data-driven through each structure's `Construction` module.
+1. The Command Post should already be selected. Tap **POWER NODE**.
+2. Move the translucent ghost around. Confirm that valid areas read **VALID** and blocked/illegal areas show a reason.
+3. Place and finish the Power Node.
+4. Return to the Command Post and build a **REFINERY**.
+5. Select the Harvester and tap a crystal field. Cargo should begin increasing; with a working Refinery it can return/unload into faction credits.
+6. Build a **BARRACKS**, select it after completion, and train a Rifleman.
+7. Build a **VEHICLE FACTORY**, select it, and produce HMMWV / Harvester / Aegis-X.
+8. Build a **GUARDIAN TURRET**.
+9. The FIELD TEST banner should report the construction/economy/production chain complete.
 
-Current initial prerequisite chain:
+Useful negative tests:
 
-- Power Node: Command Post builder only
-- Refinery: requires Power Node
-- Barracks: requires Power Node
-- Vehicle Factory: requires Power Node + Refinery
-- Guardian Turret: requires Barracks
+- try placing beyond the Command Post build radius
+- try placing over another structure
+- try placing on/near a crystal field
+- try steep/water/blocked terrain
+- rotate before placement
+- cancel a half-built structure and confirm the refund / footprint removal
+- select a locked structure command before its prerequisite exists and confirm its requirement remains visible
 
-The engine does not branch on concrete building names. Prerequisites, cost, build time, build limit, refund fraction, terrain rules, and future construction sockets are all data.
+## Architecture preserved
 
-## Construction architecture
+v0.5.1 does **not** replace the v0.5.0 construction architecture. It validates it.
 
-v0.5.0 adds three focused systems:
+- `CommandSet` — data-defined contextual actions
+- `TechTreeSystem` — builder permission, prerequisites, limits, affordability
+- `PlacementValidator` — authoritative placement legality
+- `ConstructionSystem` — real construction-site objects, progress, cancel/refund, module activation
+- `FactionEconomySystem` — credits / power
+- `ResourceSystem` — finite crystals + Harvester docking loop
+- `ProductionSystem` — generic Barracks / Factory queues and rollout
+- `CombatSystem` — weapons, armor, projectiles, turret behavior
+- `UnitAIUpdate` + locomotor system — persistent movement and vehicle steering
 
-`TechTreeSystem`
-- checks builder permission, operational prerequisites, build limits, and affordability
-
-`PlacementValidator`
-- validates world-space footprint placement independently from the UI ghost
-
-`ConstructionSystem`
-- reserves credits and footprint
-- owns construction progress/state
-- supports cancellation/refund
-- supports static construction-yard style builders now and contains the socket/state foundation for future mobile builders
-- activates the finished object's existing modules instead of reimplementing them
-
-Dynamic structure footprints are now registered in the pathfinder at runtime, so newly built and cancelled structures affect navigation immediately without rebuilding the entire navigation map.
-
-## Existing systems preserved
-
-v0.5.0 keeps the earlier validated chains intact:
-
-**Economy / production**
-
-`crystal field → Harvester cargo → Refinery docking/unload → faction credits → production queue → rollout → battlefield`
-
-**Combat**
-
-`ATTACK → UnitAI approach → hull/turret aim → weapon runtime → projectile/hitscan → armor → Body health/destruction`
-
-**Locomotion**
-
-- tracked pivot behavior
-- wheeled steering arcs
-- bounded tactical reverse
-- three-point turnaround for long behind-orders
+The old `training_ground.json` remains in the package as the complete prebuilt regression scenario used by the automated tests. The playable page uses `construction_validation.json` so the player actually has to build the base.
 
 ## Snapshot format
 
-Snapshot format is now **v8**.
+Snapshot format remains **v8** because v0.5.1 changes the playable scenario and client validation UI rather than simulation-state structure.
 
-It preserves:
+## Validation
 
-- credits / power
-- resource depletion
-- Harvester cargo and docking state
-- production queues and rollout sessions
-- dynamically produced units
-- construction sites, progress, builder source, refund data, operational state
-- combat / projectile state
-- locomotor maneuver state
-- persistent region state
-
-## Intentionally deferred
-
-- dedicated mobile dozer/construction vehicle art and production
-- multi-builder assisted construction
-- repair / rearm / service commands
-- structure selling
-- advanced projected buildability / base-expansion radii
-- upgrades / sciences / veterancy
-- strategic enemy base-construction decisions
-- full team/skirmish AI
-- missions / trigger scripting
-
-The v0.5.0 architecture is designed so those systems can use the same CommandBus, CommandSet, tech-tree, placement, and construction state rather than adding parallel special-case code.
-
-## Validation focus
-
-1. Select the Command Post and build a Power Node in a clear area.
-2. Try placing on top of another structure, outside the build radius, on steep/water terrain, and near a mineral field; invalid placement should stay red and should not spend credits.
-3. Rotate a building before placement.
-4. Select the construction site and cancel it; confirm the partial refund and that the removed footprint no longer blocks movement.
-5. Complete a Barracks or Vehicle Factory and immediately use its production CommandSet.
-6. Damage/destroy a construction site during a combat test and verify it does not magically complete.
-7. Re-test Harvester economy, unit production, combat, and vehicle movement for regressions.
+The release test suite now covers the dedicated field-test scenario in addition to all previous regression coverage. It verifies that the map starts without player tech structures, prerequisites unlock only after real construction, and the same scenario can build Power → Refinery → Barracks, begin harvesting, and train a Rifleman end-to-end.
 
 ## Run
 
-Serve the folder from any static HTTP server or deploy directly to GitHub Pages. `index.html` is at the project root.
+Serve the folder with any static HTTP server or deploy it directly to GitHub Pages. `index.html` is at the ZIP root.
