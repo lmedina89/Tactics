@@ -74,8 +74,10 @@ export class TeamManager{
       }
       const alive=[];for(const memberId of team.memberIds){const e=this.entityLookup(memberId);if(e?.alive&&e.teamId===team.id)alive.push(memberId);}
       team.memberIds=alive;
-      if(!alive.length&&team.createdTick<tick){team.active=false;team.state=TeamState.DESTROYED;team.destroyedTick=tick;continue;}
+      // Recruiting teams are intentional work orders: they may remain empty while factories satisfy
+      // their data-defined composition. Rallying teams that lose members fall back to recruiting.
       if(team.state===TeamState.RALLYING&&!this.minimumSatisfied(team)){team.active=false;team.state=TeamState.RECRUITING;team.lastOrderSignature=null;}
+      if(!alive.length&&team.createdTick<tick&&team.state!==TeamState.RECRUITING){team.active=false;team.state=TeamState.DESTROYED;team.destroyedTick=tick;continue;}
     }
   }
 

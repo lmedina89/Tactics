@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.6.1 — Autonomous AI Economy + Construction + Production
+
+- Added generic `SkirmishEconomyPlanner` as the economy/base-building layer beneath `SkirmishAIPlayer`; policy is defined by AI-profile JSON rather than concrete unit/building branches.
+- Added autonomous Harvester control through ordinary authoritative `HARVEST` / `RETURN_CARGO` commands. Idle collectors only seek resources once an owned operational Refinery exists, and resource choice considers distance plus current collector congestion.
+- Added data-driven AI `buildList` goals with desired counts, priority, placement anchor/yaw policy, spacing/search parameters, and a configurable active-construction-site limit. Existing construction sites count toward desired structure totals so the planner cannot spam duplicate pending builds.
+- AI structure decisions call the same `ConstructionSystem.eligibility()` and `PlacementValidator` path used by the player, then issue ordinary `CONSTRUCT` commands through `CommandBus`. No AI-only structure spawning path was added.
+- Added generic low-power recovery bias for definitions containing `PowerProducer`, without naming a concrete power structure in runtime AI code.
+- Added production-demand planning for desired Harvesters, missing `RECRUITING` Team composition, and data-defined free-unit reserves. Producer selection uses normal `ProductionSystem.canQueue()` legality and queue/load state before issuing `PRODUCE`.
+- Empty `RECRUITING` Teams now remain valid work orders while factories satisfy their minimum composition; RALLYING teams that fall below minimum return to RECRUITING. Existing recruit timeouts still bound stalled work orders.
+- Updated `crimson_skirmish_basic` with economy timers, two-Harvester target, structure build list, reserve Rifleman policy, and per-Team production priority. On the validation map the AI can mine, add a second Harvester, expand power/defense, replace missing desired structures, and produce missing Team composition after casualties.
+- Snapshot format advanced to **v11**, including economy-planner timers; restore accepts v8/v9/v10/v11 and refreshes restored controller references to the authoritative player state.
+- Added DataRegistry validation for AI economy intervals, Harvester definition/capabilities, build-list definitions/placement policies, free-unit reserves, and Team production priorities.
+- Added six v0.6.1 economy/production tests covering data policy, autonomous harvesting/expansion, refinery reconstruction, empty-Team production work orders, deterministic v11 restore, and a source guard forbidding direct gameplay mutation from the planner.
+- Full automated suite now passes **85/85** tests.
+- No production GLBs or terrain assets were modified.
+
 ## v0.6.0 — Teams + Skirmish AI Foundation
 
 - Added data-driven `TeamPrototype` content for Crimson base-defense and assault roles, including composition minima/maxima, recruitment/rally policy, stance, formation metadata, common-target policy scaffolding, and instance limits.

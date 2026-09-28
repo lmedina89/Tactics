@@ -95,12 +95,32 @@ export class DataRegistry {
     if(!value?.id)throw new Error(`${source}: AI profile missing id`);
     for(const key of ['thinkIntervalTicks','enemyAcquireIntervalTicks','orderRefreshTicks'])if(value[key]!=null&&(!Number.isInteger(value[key])||value[key]<1))throw new Error(`${source}: ${key} must be a positive integer`);
     for(const key of ['initialDelayTicks','baseThreatRadius'])if(value[key]!=null&&!(value[key]>=0))throw new Error(`${source}: ${key} must be >= 0`);
+    const economy=value.economy??{};
+    for(const key of ['harvestCheckIntervalTicks','constructionCheckIntervalTicks','productionCheckIntervalTicks'])if(economy[key]!=null&&(!Number.isInteger(economy[key])||economy[key]<1))throw new Error(`${source}: economy.${key} must be a positive integer`);
+    if(economy.maxActiveConstructionSites!=null&&(!Number.isInteger(economy.maxActiveConstructionSites)||economy.maxActiveConstructionSites<1))throw new Error(`${source}: economy.maxActiveConstructionSites must be >= 1`);
+    if(economy.harvester){
+      const def=this.definitions.get(economy.harvester.definition);if(!def||!moduleConfig(def,'ResourceCollector'))throw new Error(`${source}: economy.harvester must reference a ResourceCollector definition`);
+      if(!Number.isInteger(economy.harvester.desiredCount??0)||(economy.harvester.desiredCount??0)<0)throw new Error(`${source}: economy.harvester.desiredCount must be a nonnegative integer`);
+    }
+    const buildDefs=new Set();
+    for(const entry of economy.buildList||[]){
+      const def=this.definitions.get(entry.definition);if(!def||def.kind!=='building'||!moduleConfig(def,'Construction'))throw new Error(`${source}: economy buildList references non-constructible ${entry.definition}`);
+      if(buildDefs.has(entry.definition))throw new Error(`${source}: duplicate economy buildList definition ${entry.definition}`);buildDefs.add(entry.definition);
+      if(!Number.isInteger(entry.desiredCount??0)||(entry.desiredCount??0)<0)throw new Error(`${source}: desiredCount must be a nonnegative integer for ${entry.definition}`);
+      const placement=entry.placement??{};if(placement.anchor&&!['HOME','DEFENSE','RESOURCE','ENEMY'].includes(placement.anchor))throw new Error(`${source}: invalid placement anchor ${placement.anchor}`);
+      if(placement.yawMode&&!['MATCH_BUILDER','FACE_TARGET','FACE_OUTWARD','FACE_HOME'].includes(placement.yawMode))throw new Error(`${source}: invalid yawMode ${placement.yawMode}`);
+      for(const key of ['minRadius','maxRadius','ringStep','angleStepDeg'])if(placement[key]!=null&&!(placement[key]>0))throw new Error(`${source}: placement.${key} must be > 0`);
+    }
+    for(const reserve of economy.unitReserves||[]){
+      const def=this.definitions.get(reserve.definition);if(!def||!moduleConfig(def,'ProductionCost'))throw new Error(`${source}: unitReserves references non-producible ${reserve.definition}`);
+      if(!Number.isInteger(reserve.desiredFree??0)||(reserve.desiredFree??0)<0)throw new Error(`${source}: unitReserves desiredFree must be a nonnegative integer`);
+    }
     const ids=new Set();
     for(const plan of value.teamPlans||[]){
       if(!plan.id||ids.has(plan.id))throw new Error(`${source}: duplicate/missing team plan id ${plan.id||''}`);ids.add(plan.id);
       if(!this.teamPrototypes.has(plan.prototype))throw new Error(`${source}: unknown TeamPrototype ${plan.prototype}`);
       if(plan.maxConcurrent!=null&&(!Number.isInteger(plan.maxConcurrent)||plan.maxConcurrent<1))throw new Error(`${source}: maxConcurrent must be >= 1`);
-      for(const key of ['startDelayTicks','retryTicks'])if(plan[key]!=null&&(!Number.isInteger(plan[key])||plan[key]<0))throw new Error(`${source}: ${key} must be a nonnegative integer`);
+      for(const key of ['startDelayTicks','retryTicks','productionPriority'])if(plan[key]!=null&&(!Number.isInteger(plan[key])||plan[key]<0))throw new Error(`${source}: ${key} must be a nonnegative integer`);
     }
   }
 

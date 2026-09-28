@@ -1,6 +1,6 @@
 # NOTICE
 
-ForgeRTS v0.6.0 is an original browser-native implementation created for this project.
+ForgeRTS v0.6.1 is an original browser-native implementation created for this project.
 
 Command & Conquer: Generals / Zero Hour, Red Alert, Red Alert 3, and related names belong to their respective owners. Released C&C source and schemas are used as engineering and behavioral references unless a future ForgeRTS file is explicitly marked as a GPL-derived translation with provenance.
 
@@ -16,5 +16,7 @@ For v0.5.4, the released Generals / Zero Hour separation between object geometry
 
 
 For v0.6.0, the released Generals / Zero Hour `Team.h`, `AIPlayer.h`, and `AISkirmishPlayer.cpp` are architectural and behavioral references for invariant TeamPrototype-style data, runtime Team instances, recruitment/rally activation, timer-bounded strategic thinking, and AIPlayer coordination. ForgeRTS implements its own JSON TeamPrototype/AI profiles, JavaScript `TeamManager`, and `SkirmishAIPlayer`; no EA Team/AI implementation code was copied line-for-line in this release.
+
+For v0.6.1, the released Generals / Zero Hour AIPlayer/AISkirmishPlayer base-building, supply/gatherer, factory-selection, and work-order logic is used as an architectural and behavioral reference. ForgeRTS implements its own data-defined economy policy and JavaScript `SkirmishEconomyPlanner`, and routes harvesting/construction/production through existing authoritative shared systems; no EA economy/base-building implementation code was copied line-for-line in this release.
 
 No EA art, audio, map artwork, or trademarks are included as ForgeRTS game assets. The included GLB models and terrain assets are the project's existing WorldForge/ForgeRTS assets.

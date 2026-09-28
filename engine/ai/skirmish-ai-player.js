@@ -1,13 +1,15 @@
 import {CommandSource,CommandType} from '../commands/command-bus.js';
 import {TeamState} from '../teams/team-manager.js';
+import {SkirmishEconomyPlanner} from './skirmish-economy-planner.js';
 
 const clone=v=>structuredClone(v);
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const roundedPoint=p=>({x:Math.round(p.x*2)/2,z:Math.round(p.z*2)/2});
 
 export class SkirmishAIPlayer{
-  constructor({playerId,profile,map,players,teamManager,entitiesProvider,commandBus}){
-    this.playerId=playerId;this.profile=profile;this.map=map;this.players=players;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;
+  constructor({playerId,profile,map,players,teamManager,entitiesProvider,commandBus,registry,economy,construction,production}){
+    this.playerId=playerId;this.profile=profile;this.map=map;this.players=players;this.teamManager=teamManager;this.entitiesProvider=entitiesProvider;this.commandBus=commandBus;this.registry=registry;
+    this.economyPlanner=new SkirmishEconomyPlanner({playerId,profile,map,registry,players,teamManager,entitiesProvider,commandBus,economy,construction,production});
     const mp=map.players.find(p=>p.id===playerId)??{};this.mapConfig=mp.ai??{};
     this.currentEnemyPlayerId=null;this.nextThinkTick=this.profile.initialDelayTicks??0;this.nextEnemyAcquireTick=0;this.planRetryTicks={};
   }
@@ -98,20 +100,22 @@ export class SkirmishAIPlayer{
   update(tick){
     if(tick<this.nextThinkTick)return;this.nextThinkTick=tick+(this.profile.thinkIntervalTicks??15);this._acquireEnemy(tick);
     for(const plan of this.profile.teamPlans||[])this._startOrRecruitPlan(plan,tick);
+    const enemyBase=this.currentEnemyPlayerId?this._baseCenter(this.currentEnemyPlayerId):null;
+    this.economyPlanner.update(tick,{home:this._baseCenter(),defense:this._defensePoint(),enemyBase});
     for(const team of this.teamManager.teams.values()){
       if(team.playerId!==this.playerId)continue;if(team.state===TeamState.RALLYING)this._updateRallying(team,tick);else if(team.state===TeamState.ACTIVE)this._updateActive(team,tick);
     }
   }
 
-  snapshot(){return {playerId:this.playerId,currentEnemyPlayerId:this.currentEnemyPlayerId,nextThinkTick:this.nextThinkTick,nextEnemyAcquireTick:this.nextEnemyAcquireTick,planRetryTicks:clone(this.planRetryTicks)};}
-  restore(state={}){if('currentEnemyPlayerId' in state)this.currentEnemyPlayerId=state.currentEnemyPlayerId??null;if('nextThinkTick' in state)this.nextThinkTick=state.nextThinkTick??0;if('nextEnemyAcquireTick' in state)this.nextEnemyAcquireTick=state.nextEnemyAcquireTick??0;if('planRetryTicks' in state)this.planRetryTicks=clone(state.planRetryTicks??{});}
+  snapshot(){return {playerId:this.playerId,currentEnemyPlayerId:this.currentEnemyPlayerId,nextThinkTick:this.nextThinkTick,nextEnemyAcquireTick:this.nextEnemyAcquireTick,planRetryTicks:clone(this.planRetryTicks),economyPlanner:this.economyPlanner.snapshot()};}
+  restore(state={}){if('currentEnemyPlayerId' in state)this.currentEnemyPlayerId=state.currentEnemyPlayerId??null;if('nextThinkTick' in state)this.nextThinkTick=state.nextThinkTick??0;if('nextEnemyAcquireTick' in state)this.nextEnemyAcquireTick=state.nextEnemyAcquireTick??0;if('planRetryTicks' in state)this.planRetryTicks=clone(state.planRetryTicks??{});this.economyPlanner.restore(state.economyPlanner??{});}
 }
 
 export class SkirmishAISystem{
-  constructor({registry,map,players,teamManager,entitiesProvider,commandBus}){
+  constructor({registry,map,players,teamManager,entitiesProvider,commandBus,economy,construction,production}){
     this.controllers=new Map();
     if(typeof registry.aiProfile!=='function')return;
-    for(const p of map.players||[]){if(p.isHuman||!p.ai?.profile)continue;const profile=registry.aiProfile(p.ai.profile);if(!profile)throw new Error(`Unknown AI profile ${p.ai.profile} for player ${p.id}`);this.controllers.set(p.id,new SkirmishAIPlayer({playerId:p.id,profile,map,players,teamManager,entitiesProvider,commandBus}));}
+    for(const p of map.players||[]){if(p.isHuman||!p.ai?.profile)continue;const profile=registry.aiProfile(p.ai.profile);if(!profile)throw new Error(`Unknown AI profile ${p.ai.profile} for player ${p.id}`);this.controllers.set(p.id,new SkirmishAIPlayer({playerId:p.id,profile,map,players,teamManager,entitiesProvider,commandBus,registry,economy,construction,production}));}
   }
   update(tick){for(const c of this.controllers.values())c.update(tick);}
   snapshot(){return {controllers:[...this.controllers.values()].map(c=>c.snapshot())};}

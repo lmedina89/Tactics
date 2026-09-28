@@ -6,20 +6,108 @@
   "initialDelayTicks": 90,
   "baseThreatRadius": 115,
   "orderRefreshTicks": 360,
+  "economy": {
+    "harvestCheckIntervalTicks": 45,
+    "constructionCheckIntervalTicks": 45,
+    "productionCheckIntervalTicks": 30,
+    "maxActiveConstructionSites": 1,
+    "harvester": {
+      "definition": "harvester",
+      "desiredCount": 2,
+      "priority": 1200
+    },
+    "buildList": [
+      {
+        "definition": "power_node",
+        "desiredCount": 2,
+        "priority": 1000,
+        "placement": {
+          "anchor": "HOME",
+          "minRadius": 38,
+          "maxRadius": 104,
+          "ringStep": 12,
+          "angleStepDeg": 22.5,
+          "startAngleDeg": 35,
+          "yawMode": "MATCH_BUILDER"
+        }
+      },
+      {
+        "definition": "refinery",
+        "desiredCount": 1,
+        "priority": 900,
+        "placement": {
+          "anchor": "RESOURCE",
+          "minRadius": 52,
+          "maxRadius": 136,
+          "ringStep": 12,
+          "angleStepDeg": 18,
+          "yawMode": "FACE_TARGET"
+        }
+      },
+      {
+        "definition": "barracks",
+        "desiredCount": 1,
+        "priority": 800,
+        "placement": {
+          "anchor": "DEFENSE",
+          "minRadius": 46,
+          "maxRadius": 118,
+          "ringStep": 12,
+          "angleStepDeg": 22.5,
+          "yawMode": "FACE_TARGET"
+        }
+      },
+      {
+        "definition": "vehicle_factory",
+        "desiredCount": 1,
+        "priority": 700,
+        "placement": {
+          "anchor": "DEFENSE",
+          "minRadius": 62,
+          "maxRadius": 136,
+          "ringStep": 12,
+          "angleStepDeg": 18,
+          "yawMode": "FACE_TARGET"
+        }
+      },
+      {
+        "definition": "guardian_turret",
+        "desiredCount": 2,
+        "priority": 550,
+        "placement": {
+          "anchor": "DEFENSE",
+          "minRadius": 72,
+          "maxRadius": 140,
+          "ringStep": 10,
+          "angleStepDeg": 15,
+          "yawMode": "FACE_TARGET"
+        }
+      }
+    ],
+    "unitReserves": [
+      {
+        "definition": "rifleman",
+        "desiredFree": 1,
+        "priority": 250
+      }
+    ]
+  },
   "teamPlans": [
     {
       "id": "base_guard",
       "prototype": "crimson_base_guard",
       "startDelayTicks": 0,
       "maxConcurrent": 1,
-      "retryTicks": 90
+      "retryTicks": 90,
+      "productionPriority": 900
     },
     {
       "id": "first_assault",
       "prototype": "crimson_assault",
       "startDelayTicks": 540,
       "maxConcurrent": 1,
-      "retryTicks": 150
+      "retryTicks": 150,
+      "productionPriority": 700
     }
   ]
 }

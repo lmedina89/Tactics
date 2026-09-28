@@ -114,3 +114,26 @@ ForgeRTS models the first computer player layer after the released Generals / Ze
 The current vertical slice intentionally recruits already-authored enemy combat units so the team/strategy/control architecture can be proven before introducing an autonomous AI economy. AI harvesting, construction, production, reinforcement, rebuild logic, diplomacy, personality/difficulty, common-target coordination, and full formation routing are later v0.6.x layers and must build on this same separation rather than bypass it.
 
 No EA AI/Team C++ implementation was directly translated for v0.6.0. The released source is the architectural/behavioral reference; the runtime is original ForgeRTS JavaScript designed around the existing browser simulation.
+
+
+## v0.6.1 autonomous-economy / production rule
+
+`SkirmishAIPlayer` owns strategic intent but does not own gameplay mutation. Its `SkirmishEconomyPlanner` may inspect authoritative state and ask shared systems whether an action is legal, but all resulting actions must enter through `CommandBus` as `FROM_AI` commands.
+
+The planning split is:
+
+`AI profile data → SkirmishEconomyPlanner → CommandBus → Construction / Production / Resource systems → ordinary simulation state`
+
+Rules:
+
+- AI build goals, desired Harvester counts, free-unit reserves, placement policy, and timer cadence are data.
+- Existing construction sites count toward desired structure totals.
+- AI placement uses the same `ConstructionSystem.eligibility()` / `PlacementValidator` authority as player construction.
+- AI production uses the same `ProductionSystem.canQueue()` legality and real producer queues as player production.
+- Team composition shortages are work-order demand, not permission to spawn units directly.
+- Harvesters use ordinary HARVEST / RETURN_CARGO commands and the existing Resource/Docking interaction path.
+- Strategic scans remain timer-bounded and deterministic; no planner decision depends on renderer state, wall-clock time, randomness, or unordered iteration.
+- Planner state that affects future decisions is serialized; derived transient search candidates are not.
+- No concrete production object ID may become a runtime branch when module/capability data can express the same behavior.
+
+The released Generals / Zero Hour AIPlayer/AISkirmishPlayer source is the architecture/behavior reference for build lists, desired gatherers, factory work orders, and timer-bounded base-building. v0.6.1 remains an original browser-native implementation and does not directly translate those C++ functions.

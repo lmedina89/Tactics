@@ -56,7 +56,7 @@ test('Barracks production uses same generic queue/rollout system and cancellatio
   assert.ok([...s.entities.values()].some(e=>e.definitionId==='rifleman'&&e.playerId==='player'&&e.id!=='p_rifle'));
 });
 
-test('v10 snapshot restores dynamically produced entities, queues, cargo, faction economy and interaction state',async()=>{
+test('v11 snapshot restores dynamically produced entities, queues, cargo, faction economy and interaction state',async()=>{
   const s=await sim();s.issueProduce('p_factory','hmmwv50');s.issueHarvest(['p_harvester'],'rich_w');for(let i=0;i<240;i++)s.step(FIXED_DT);
   const snap=s.snapshot(),s2=await sim();s2.restore(snap);assert.deepEqual(s2.snapshot(),snap);
   for(let i=0;i<180;i++){s.step(FIXED_DT);s2.step(FIXED_DT);}assert.deepEqual(s2.snapshot(),s.snapshot());

@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.0 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.1 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
@@ -43,7 +43,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Command authority/source | house/player ownership | player/script/AI command-origin distinction | commands are data, owner checks in gameplay | `CommandBus` + `Simulation._apply` | **Issuer/source metadata + authoritative ownership validation** |
 | Group/queued tactical orders | grouped orders | attack-move / guard / appended user paths | generic behavior command data | InputController + UnitAIUpdate | **Multi-select, box/add, ATTACK_MOVE, GUARD, serialized appended order queue** |
 | Teams/attack groups | teams/groups | `TeamTemplateInfo` / `TeamPrototype` / runtime `Team` | invariant team data + runtime instances | `engine/teams/team-manager.js` | **TeamPrototype composition, stable runtime membership, recruit/rally/active lifecycle + snapshot implemented** |
-| Strategic AI | house AI | `AIPlayer` / `AISkirmishPlayer` | AI policy/profile data | `engine/ai/skirmish-ai-player.js` | **Timer-bounded enemy acquisition, base-defense + assault team coordination through normal CommandBus; economy/build planning next** |
+| Strategic AI | house AI | `AIPlayer` / `AISkirmishPlayer` | AI policy/profile data | `engine/ai/skirmish-ai-player.js` + `skirmish-economy-planner.js` | **Timer-bounded enemy acquisition, Teams, autonomous harvesting, build-list construction and factory work orders through normal CommandBus** |
 | Mission conditions/actions | triggers/actions | Scripts / Conditions / Actions | script data | `MissionSystem` | Planned; never owns world lifetime |
 | Fog/shroud/radar | map visibility | shroud/radar systems | client/game visibility split | `VisibilitySystem` | Planned |
 | Veterancy/upgrades/sciences | veteran/unit upgrades | experience / upgrades | upgrade modules | data modules | Planned |
@@ -102,3 +102,12 @@ The primary references for v0.6.0 are the released Generals / Zero Hour `Team.h`
 ForgeRTS maps that architecture to JSON TeamPrototype/AI-profile data, deterministic `TeamManager` runtime state, and one `SkirmishAIPlayer` per map-configured computer player. AI orders use `FROM_AI` through the same `CommandBus` and simulation authority as player/script commands; Team/AI state is included in v10 snapshots.
 
 No EA Team/AI C++ implementation was copied line-for-line in v0.6.0. The browser-native JavaScript is original and intentionally narrower: the first release recruits existing combat units into base-defense and assault teams. Autonomous AI economy, construction, production, reinforcement/rebuild logic, diplomacy/relationships, personality/difficulty, common-target coordination, and full formation routing remain later v0.6.x work on the same foundation.
+
+
+## v0.6.1 autonomous economy / base-building reference boundary
+
+The released Generals / Zero Hour `AIPlayer` / `AISkirmishPlayer` source is the primary reference for this layer. The relevant pattern is that skirmish AI maintains desired base structures and supply/gatherer counts, periodically processes base-building, checks ordinary funds/build legality before construction, finds compatible factories for missing units/gatherers, and turns those needs into production work orders. Strategic work is rate-limited with logic-frame timers.
+
+ForgeRTS maps that pattern to data-defined `economy` policy inside AI profiles plus a generic `SkirmishEconomyPlanner`. The planner queries existing authoritative Construction/Production services but performs no direct gameplay mutation; harvesting, construction and production are expressed as `FROM_AI` CommandBus commands and then pass through the same simulation code as human orders. Missing Team composition therefore becomes real factory demand rather than an AI-only spawn path.
+
+No Generals economy/base-building C++ was copied line-for-line. The shared ForgeRTS systems already provide the relevant authority boundaries, making an original JS implementation both cleaner and more consistent with the project's deterministic browser architecture.

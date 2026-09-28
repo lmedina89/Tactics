@@ -1,4 +1,4 @@
-# ForgeRTS v0.6.0 — Team / Skirmish AI Audit
+# ForgeRTS v0.6.1 — Team / Skirmish AI Audit
 
 ## Reference mapping
 
@@ -29,17 +29,17 @@ ForgeRTS reproduces that architecture in its existing browser-native simulation 
 - Team and controller snapshot/restore
 - player-HUD isolation from AI command results
 
+## v0.6.1 extension
+
+v0.6.1 adds `SkirmishEconomyPlanner` beneath the same controller: harvesting, build-list construction, desired Harvester production, Team-composition work orders, free-unit reserves, and rebuilding of missing desired structures all use ordinary shared gameplay systems and `FROM_AI` commands. Empty RECRUITING Teams may remain alive as bounded work orders while real factories fill their composition. See `AI_ECONOMY_AUDIT.md` for the detailed source mapping.
+
 ## Deliberately deferred
 
-The current map has no diplomacy/relationship system yet, so the v0.6.0 two-player SkirmishAI treats every other player with surviving entities as hostile. Do not generalize this into multi-faction behavior without adding authoritative player relationships first.
+The current map has no diplomacy/relationship system yet, so the two-player SkirmishAI treats every other player with surviving entities as hostile. Do not generalize this into multi-faction behavior without adding authoritative player relationships first.
 
 Also deferred to later v0.6.x work:
 
-- autonomous AI harvesting/economy
-- construction and legal placement planning
-- production queues and reinforcement
-- rebuilding destroyed infrastructure
-- power/tech recovery planning
+- richer power/tech recovery planning beyond build-list/PowerProducer priority
 - richer threat maps and target valuation
 - Harvester protection / escort assignment
 - damaged-team retreat/reform/reinforcement
@@ -51,4 +51,4 @@ Also deferred to later v0.6.x work:
 
 ## Copy/translation decision
 
-Directly translating the Generals C++ is not the best engineering choice for this milestone. The existing ForgeRTS CommandBus, UnitAI, snapshot model, ES-module data registry, and browser constraints already provide native equivalents for the important boundaries. v0.6.0 therefore copies the proven *architecture and behavior pattern*, not EA implementation text. If a later AI subsystem contains an algorithm whose direct GPL-covered translation is materially better than a native implementation, that should be an explicit provenance/licensing decision before code is introduced.
+Directly translating the Generals C++ is not the best engineering choice for these milestones. The existing ForgeRTS CommandBus, UnitAI, Construction, Production, Resource, snapshot model, ES-module data registry, and browser constraints already provide native equivalents for the important boundaries. v0.6.x therefore copies the proven *architecture and behavior pattern*, not EA implementation text. If a later AI subsystem contains an algorithm whose direct GPL-covered translation is materially better than a native implementation, that should be an explicit provenance/licensing decision before code is introduced.

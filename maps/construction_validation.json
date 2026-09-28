@@ -2,7 +2,7 @@
   "manifestVersion": 2,
   "id": "construction_validation",
   "name": "Construction Validation Range",
-  "version": 8,
+  "version": 9,
   "seed": 731904,
   "region": {
     "id": "construction_validation_region",
