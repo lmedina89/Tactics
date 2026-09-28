@@ -68,19 +68,19 @@ function chooseTrackDirection(entity,cfg,info){
   return {direction:1,desiredFacing:info.heading,diff:diffForward};
 }
 
-function stepTracks(entity,cfg,dt,terrain,info){
+function stepTracks(entity,cfg,dt,terrain,info,constraints={}){
   const {direction,diff}=chooseTrackDirection(entity,cfg,info);
   const absDiff=Math.abs(diff),pivotThreshold=cfg.pivotAngleThreshold??0.48,hardPivotThreshold=cfg.hardPivotAngleThreshold??0.95;
   const pivotRate=cfg.pivotTurnRate??cfg.turnRate??2.4,movingRate=cfg.movingTurnRate??cfg.turnRate??1.6,canPivot=cfg.turnInPlace!==false;
   let turnRate=movingRate;
   const reverseFactor=direction<0?(cfg.reverseMaxSpeedFactor??0.45):1;
-  let targetSpeed=(cfg.maxSpeed??8)*reverseFactor*direction;
+  let targetSpeed=(cfg.maxSpeed??8)*(constraints.speedScale??1)*reverseFactor*direction;
   if(canPivot&&absDiff>pivotThreshold){
-    turnRate=pivotRate;const crawl=cfg.pivotCrawlSpeedFactor??0.08;targetSpeed=(cfg.maxSpeed??8)*crawl*reverseFactor*direction;
+    turnRate=pivotRate;const crawl=cfg.pivotCrawlSpeedFactor??0.08;targetSpeed=(cfg.maxSpeed??8)*(constraints.speedScale??1)*crawl*reverseFactor*direction;
     if(absDiff>hardPivotThreshold)targetSpeed=0;
   }else{
     const penalty=cfg.speedTurnPenalty??0.72,alignment=clamp(1-(absDiff/Math.PI)*penalty,0.28,1);
-    targetSpeed=(cfg.maxSpeed??8)*alignment*reverseFactor*direction;
+    targetSpeed=(cfg.maxSpeed??8)*(constraints.speedScale??1)*alignment*reverseFactor*direction;
   }
   const yawStep=clamp(diff,-turnRate*dt,turnRate*dt);entity.yaw=wrapPi(entity.yaw+yawStep);entity.angularSpeed=yawStep/dt;entity.steeringAngle=0;
   const rate=Math.abs(targetSpeed)>Math.abs(entity.speed)?(cfg.acceleration??6):(cfg.braking??10);entity.speed=approach(entity.speed,targetSpeed,rate,dt);entity.movingBackward=entity.speed<-.02;
@@ -118,9 +118,9 @@ function wheelKinematics(entity,cfg,dt,desiredSteer,targetSpeed){
   entity.yaw=wrapPi(entity.yaw+yawRate*dt);entity.angularSpeed=yawRate;
 }
 
-function stepWheels(entity,cfg,dt,terrain,info){
+function stepWheels(entity,cfg,dt,terrain,info,constraints={}){
   const s=chooseWheelMode(entity,cfg,info);s.modeTime+=dt;s.cooldown=Math.max(0,(s.cooldown??0)-dt);
-  const maxSteer=Math.max(0.05,cfg.wheelTurnAngle??cfg.maxSteerAngle??0.62),maxSpeed=cfg.maxSpeed??10;
+  const maxSteer=Math.max(0.05,cfg.wheelTurnAngle??cfg.maxSteerAngle??0.62),maxSpeed=(cfg.maxSpeed??10)*(constraints.speedScale??1);
   const routeDiff=wrapPi(info.heading-entity.yaw),terminalDiff=wrapPi(info.terminalHeading-entity.yaw);
   let desiredSteer=0,targetSpeed=0;
 
@@ -153,28 +153,29 @@ function stepWheels(entity,cfg,dt,terrain,info){
   entity.x+=Math.sin(entity.yaw)*entity.speed*dt;entity.z+=Math.cos(entity.yaw)*entity.speed*dt;clampToMap(entity,terrain);updateGroundHeight(entity,cfg,terrain);
 }
 
-function stepLegs(entity,cfg,dt,terrain,info){
+function stepLegs(entity,cfg,dt,terrain,info,constraints={}){
   const diff=wrapPi(info.heading-entity.yaw),turnRate=cfg.turnRate??7,yawStep=clamp(diff,-turnRate*dt,turnRate*dt);
   entity.yaw=wrapPi(entity.yaw+yawStep);entity.angularSpeed=yawStep/dt;entity.steeringAngle=0;entity.movingBackward=false;
-  const alignment=clamp(1-Math.abs(diff)/Math.PI*(cfg.speedTurnPenalty??0.2),0.65,1),targetSpeed=(cfg.maxSpeed??5)*alignment,rate=targetSpeed>entity.speed?(cfg.acceleration??12):(cfg.braking??14);
+  const alignment=clamp(1-Math.abs(diff)/Math.PI*(cfg.speedTurnPenalty??0.2),0.65,1),targetSpeed=(cfg.maxSpeed??5)*(constraints.speedScale??1)*alignment,rate=targetSpeed>entity.speed?(cfg.acceleration??12):(cfg.braking??14);
   entity.speed=approach(entity.speed,targetSpeed,rate,dt);entity.x+=Math.sin(entity.yaw)*entity.speed*dt;entity.z+=Math.cos(entity.yaw)*entity.speed*dt;clampToMap(entity,terrain);updateGroundHeight(entity,cfg,terrain);
   const s=locomotionState(entity);s.mode='FORWARD';s.modeTime+=dt;s.cooldown=Math.max(0,(s.cooldown??0)-dt);
 }
 
-function stepAir(entity,cfg,dt,terrain,info){
+function stepAir(entity,cfg,dt,terrain,info,constraints={}){
   const diff=wrapPi(info.heading-entity.yaw),turnRate=cfg.turnRate??2.2,yawStep=clamp(diff,-turnRate*dt,turnRate*dt);
   entity.yaw=wrapPi(entity.yaw+yawStep);entity.angularSpeed=yawStep/dt;entity.steeringAngle=0;entity.movingBackward=false;
-  const alignment=clamp(1-(Math.abs(diff)/Math.PI)*(cfg.speedTurnPenalty??0.55),0.28,1),targetSpeed=(cfg.maxSpeed??12)*alignment,rate=targetSpeed>entity.speed?(cfg.acceleration??7):(cfg.braking??9);
+  const alignment=clamp(1-(Math.abs(diff)/Math.PI)*(cfg.speedTurnPenalty??0.55),0.28,1),targetSpeed=(cfg.maxSpeed??12)*(constraints.speedScale??1)*alignment,rate=targetSpeed>entity.speed?(cfg.acceleration??7):(cfg.braking??9);
   entity.speed=approach(entity.speed,targetSpeed,rate,dt);entity.x+=Math.sin(entity.yaw)*entity.speed*dt;entity.z+=Math.cos(entity.yaw)*entity.speed*dt;clampToMap(entity,terrain);updateGroundHeight(entity,cfg,terrain);
   const s=locomotionState(entity);s.mode='FORWARD';s.modeTime+=dt;s.cooldown=Math.max(0,(s.cooldown??0)-dt);
 }
 
-export function stepLocomotor(entity,cfg,dt,terrain){
-  const info=goalInfo(entity);if(!info){brakeIdle(entity,cfg,dt,terrain);return;}if(info.dist<0.001){brakeIdle(entity,cfg,dt,terrain);return;}
+export function stepLocomotor(entity,cfg,dt,terrain,constraints={}){
+  let info=goalInfo(entity);if(!info){brakeIdle(entity,cfg,dt,terrain);return;}if(info.dist<0.001){brakeIdle(entity,cfg,dt,terrain);return;}
+  if(constraints.headingOffset){info={...info,heading:wrapPi(info.heading+constraints.headingOffset)};}
   const appearance=cfg.appearance||'';
-  if(cfg.kind==='air'||appearance==='THRUST'||appearance==='WINGS'){stepAir(entity,cfg,dt,terrain,info);return;}
-  if(appearance==='TREADS'||cfg.kind==='tracks'){stepTracks(entity,cfg,dt,terrain,info);return;}
-  if(appearance==='FOUR_WHEELS'||appearance==='MOTORCYCLE'||cfg.kind==='wheels'){stepWheels(entity,cfg,dt,terrain,info);return;}
-  if(appearance==='TWO_LEGS'||cfg.kind==='legs'){stepLegs(entity,cfg,dt,terrain,info);return;}
-  stepLegs(entity,cfg,dt,terrain,info);
+  if(cfg.kind==='air'||appearance==='THRUST'||appearance==='WINGS'){stepAir(entity,cfg,dt,terrain,info,constraints);return;}
+  if(appearance==='TREADS'||cfg.kind==='tracks'){stepTracks(entity,cfg,dt,terrain,info,constraints);return;}
+  if(appearance==='FOUR_WHEELS'||appearance==='MOTORCYCLE'||cfg.kind==='wheels'){stepWheels(entity,cfg,dt,terrain,info,constraints);return;}
+  if(appearance==='TWO_LEGS'||cfg.kind==='legs'){stepLegs(entity,cfg,dt,terrain,info,constraints);return;}
+  stepLegs(entity,cfg,dt,terrain,info,constraints);
 }

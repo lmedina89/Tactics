@@ -24,7 +24,7 @@ export class DataRegistry {
 
     const registry = await get('data/registry.json');
     for (const p of registry.factions || []) this._insertUnique(this.factions, await get(p), p);
-    for (const p of registry.locomotors || []) this._insertUnique(this.locomotors, await get(p), p);
+    for (const p of registry.locomotors || []) { const value=await get(p); this._validateLocomotor(value,p); this._insertUnique(this.locomotors,value,p); }
     for (const p of registry.interactions || []) this._insertUnique(this.interactions, await get(p), p);
     for (const p of registry.armors || []) this._insertUnique(this.armors, await get(p), p);
     for (const p of registry.weapons || []) this._insertUnique(this.weapons, await get(p), p);
@@ -44,6 +44,15 @@ export class DataRegistry {
     map.set(value.id, value);
   }
 
+
+  _validateLocomotor(value,source){
+    if(!(value?.radius>=0))throw new Error(`${source}: locomotor radius must be >= 0`);
+    if(value.collisionLayer&&!['GROUND','AIR'].includes(value.collisionLayer))throw new Error(`${source}: invalid collisionLayer ${value.collisionLayer}`);
+    if(value.collisionMass!=null&&!(value.collisionMass>0))throw new Error(`${source}: collisionMass must be > 0`);
+    if(value.avoidanceLookAheadSeconds!=null&&value.avoidanceLookAheadSeconds<0)throw new Error(`${source}: avoidanceLookAheadSeconds must be >= 0`);
+    if(value.avoidanceBuffer!=null&&value.avoidanceBuffer<0)throw new Error(`${source}: avoidanceBuffer must be >= 0`);
+  }
+
   _validateDefinitionRefs(def,source){
     const loco=moduleConfig(def,'Locomotor');if(loco&&!this.locomotors.has(loco.locomotor))throw new Error(`${source}: unknown locomotor ${loco.locomotor}`);
     const armor=moduleConfig(def,'ArmorSet');if(armor&&!this.armors.has(armor.armor))throw new Error(`${source}: unknown armor ${armor.armor}`);
@@ -54,6 +63,7 @@ export class DataRegistry {
     const cost=moduleConfig(def,'ProductionCost');if(cost&&!cost.queueType)throw new Error(`${source}: ProductionCost missing queueType`);
     const dock=moduleConfig(def,'DockingProvider');if(dock?.protocol&&!this.interactions.has(dock.protocol))throw new Error(`${source}: unknown docking protocol ${dock.protocol}`);
     const commandSet=moduleConfig(def,'CommandSet');if(commandSet&&!this.commandSets.has(commandSet.id))throw new Error(`${source}: unknown CommandSet ${commandSet.id}`);
+    const geom=moduleConfig(def,'Geometry');if(geom){if(!['BOX','CYLINDER','SPHERE'].includes(geom.shape))throw new Error(`${source}: invalid Geometry shape ${geom.shape}`);if(!(geom.majorRadius>0))throw new Error(`${source}: Geometry majorRadius must be > 0`);if(geom.shape==='BOX'&&!(geom.minorRadius>0))throw new Error(`${source}: BOX Geometry minorRadius must be > 0`);if(geom.height!=null&&!(geom.height>0))throw new Error(`${source}: Geometry height must be > 0`);}
   }
 
   _validateLateDefinitionRefs(def,source){

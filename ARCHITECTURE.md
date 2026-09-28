@@ -45,6 +45,11 @@
 43. **Interaction history is bounded.** Completed protocol sessions may be pruned after a deterministic retention window; active sessions may never be discarded by cleanup.
 44. **Capacity is provider data.** Dock/service concurrency is governed by module capacity, not an implicit one-session global lock.
 45. **Camera focus is client state.** Pan/zoom/center manipulate a maintained view target and must never feed back into simulation truth.
+46. **Physical footprint is object data.** `Geometry` describes collision extent independently from render meshes and locomotor behavior; long vehicles must not collapse to width-sized circles.
+47. **Dynamic traffic is layered.** Pathfinder supplies the route, local avoidance supplies transient speed/heading constraints, locomotor applies vehicle-specific motion, and hard overlap resolution is only the final safety net.
+48. **Collision is ownership-independent.** Ground movers are physically solid based on layer/geometry, not player allegiance.
+49. **Avoidance tuning is data.** Personal space, look-ahead, braking/yield response, collision mass, padding, and avoidance steering limits live in locomotor definitions rather than concrete unit branches.
+50. **Transient avoidance is derived state.** Local traffic constraints are recomputed deterministically each simulation tick and are not serialized into snapshots.
 
 
 ## v0.5.1 validation-layer rule
@@ -74,3 +79,23 @@ Rules:
 - Only create `AnimationMixer` instances for objects that actually declare embedded clips.
 - If an authored pivot lacks a trustworthy gameplay semantic or axis, leave it dormant until the corresponding state exists rather than inventing fake motion.
 - Procedural animation must remain disposable with the rendered view and must not enlarge simulation snapshots.
+
+
+## v0.5.4 dynamic-collision / local-avoidance rule
+
+Dynamic mover handling is a four-layer pipeline:
+
+`Pathfinder route → predictive LocalAvoidance constraints → vehicle-specific Locomotor → hard Geometry overlap resolution`
+
+`Geometry` is the simulation object's physical footprint, while `Locomotor` remains the definition of how that object accelerates, steers, reverses, pivots, yields, and navigates. The renderer's mesh bounds are reference measurements only; gameplay never reads live Three.js bounds back into simulation.
+
+Rules:
+
+- Use BOX/CYLINDER-style physical geometry from data rather than concrete unit-name collision branches.
+- Broadphase must remain bounded/scalable; current dynamic mover pairing uses a deterministic spatial hash.
+- Local avoidance should prevent overlap by slowing/yielding/steering before contact; hard separation exists only as a safety net.
+- Hard separation may never knowingly push a unit into invalid terrain/static obstacles; candidate positions are navigation-validated and may roll back to the previous legal position when trapped.
+- Friendly/enemy identity does not change physical solidity.
+- Vehicle locomotor semantics remain authoritative: avoidance must not replace tracked pivots, wheeled steering, bounded reversing, or three-point turns with sideways sliding.
+- Air/bridge/layer collision should be added only when the corresponding altitude/path-layer semantics exist. Do not fake those systems with a 2D ground collision shortcut.
+- No transient pair/constraint state is saved; identical authoritative state and inputs must regenerate the same avoidance result.

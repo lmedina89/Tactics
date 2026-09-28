@@ -1,6 +1,7 @@
 import {CommandType,CommandSource} from '../commands/command-bus.js';
 import {GridPathfinder} from '../pathfinding/grid-pathfinder.js';
 import {stepLocomotor} from '../locomotion/locomotor.js';
+import {LocalAvoidanceSystem} from '../locomotion/local-avoidance-system.js';
 import {SeededRng} from './rng.js';
 import {TerrainSampler} from '../maps/terrain-sampler.js';
 import {assignMoveOrder,assignAttackOrder,assignAttackMoveOrder,assignGuardPositionOrder,assignGuardObjectOrder,setUnitStance,clearOrders,stepUnitAI} from '../ai/unit-ai-update.js';
@@ -26,6 +27,7 @@ export class Simulation{
     this.terrain=new TerrainSampler(map);
     this.navigationMap=this._buildNavigationMap(map);
     this.pathfinder=new GridPathfinder(this.navigationMap,this.terrain,map.navigation?.cellSize??4);
+    this.localAvoidance=new LocalAvoidanceSystem({registry:this.registry,pathfinder:this.pathfinder,terrain:this.terrain});
     this._spawnMap();
     this.interactions=new InteractionManager({registry:this.registry,entityLookup:id=>this.entities.get(id)});
     this.projectiles=new ProjectileSystem();
@@ -79,13 +81,14 @@ export class Simulation{
     this.economy.recalculatePower();
     this.resources.step(dt,this.tick);
     this.production.step(this.tick);
-    for(const e of this.entities.values()){
-      if(!e.alive||!e.locomotorId)continue;
+    const movers=[...this.entities.values()].filter(e=>e.alive&&e.locomotorId);
+    for(const e of movers){
       const cfg=this.registry.locomotor(e.locomotorId);
       if(e.modules?.UnitAIUpdate)stepUnitAI(e,cfg,this.pathfinder,this.tick,{registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values()});
-      stepLocomotor(e,cfg,dt,this.terrain);
     }
-    this._separateFriendlies();
+    const motionConstraints=this.localAvoidance.prepare(movers,dt);
+    for(const e of movers){const cfg=this.registry.locomotor(e.locomotorId);stepLocomotor(e,cfg,dt,this.terrain,motionConstraints.get(e.id));}
+    this.localAvoidance.resolve(movers,dt);
     this.combat.step(dt,this.tick);
     this.interactions.pruneCompleted?.(64);
     this.tick++;
@@ -131,16 +134,6 @@ export class Simulation{
     return this._finishCommand(c,{reason:'UNKNOWN_COMMAND'});
   }
 
-  _separationProfile(e){const cfg=this.registry.locomotor(e.locomotorId);return {clearance:cfg?.pathfindRadius??e.radius??0,maxSlopeDeg:cfg?.maxSlopeDeg??32,allowWater:cfg?.kind==='air'};}
-  _applySeparatedPosition(e,x,z){const cfg=this.registry.locomotor(e.locomotorId);if(!this.pathfinder.isWalkableWorld(x,z,this._separationProfile(e)))return false;e.x=x;e.z=z;e.y=cfg.kind==='air'?this.terrain.heightAt(x,z)+(cfg.preferredHeight??18):this.terrain.heightAt(x,z);return true;}
-  _separateFriendlies(){
-    const movers=[...this.entities.values()].filter(e=>e.alive&&e.locomotorId&&e.playerId);
-    for(let i=0;i<movers.length;i++)for(let j=i+1;j<movers.length;j++){
-      const a=movers[i],b=movers[j];if(a.playerId!==b.playerId)continue;const dx=b.x-a.x,dz=b.z-a.z,d=Math.hypot(dx,dz)||0.001,min=(a.radius+b.radius)*0.82;if(d>=min)continue;
-      const total=Math.min(min-d,0.7),half=total*.5,nx=dx/d,nz=dz/d;const ax=a.x-nx*half,az=a.z-nz*half,bx=b.x+nx*half,bz=b.z+nz*half;const aOk=this.pathfinder.isWalkableWorld(ax,az,this._separationProfile(a)),bOk=this.pathfinder.isWalkableWorld(bx,bz,this._separationProfile(b));
-      if(aOk)this._applySeparatedPosition(a,ax,az);if(bOk)this._applySeparatedPosition(b,bx,bz);if(!aOk&&bOk)this._applySeparatedPosition(b,b.x+nx*half,b.z+nz*half);else if(aOk&&!bOk)this._applySeparatedPosition(a,a.x-nx*half,a.z-nz*half);
-    }
-  }
 
   snapshot(){
     return {

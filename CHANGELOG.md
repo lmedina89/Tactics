@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.5.4 — Dynamic Collision + Local Avoidance Foundation
+
+- Replaced the old friendly-only post-movement circle shove with a deterministic `LocalAvoidanceSystem` that operates before and after locomotion.
+- Added a data-driven simulation `Geometry` module separate from locomotor behavior and render meshes. Aegis-X, HMMWV-50, Field Harvester and Talon define oriented BOX footprints; Rifleman defines a CYLINDER footprint.
+- Corrected the core vehicle-footprint mismatch: long vehicles are no longer approximated only by their narrow width-sized movement radius.
+- Added deterministic spatial-hash broadphase for nearby mover pairs instead of an all-movers O(n²) separation pass.
+- Added predictive local yielding from relative motion with locomotor-defined personal space, avoidance buffer/look-ahead, braking, maximum avoidance heading offset, collision mass, padding and impact-speed retention.
+- Extended locomotors to consume generic transient `speedScale` / `headingOffset` constraints while retaining their own tracked, wheeled, infantry and air steering rules.
+- Added hard OBB/circle overlap resolution after movement as a safety net. Separation attempts are revalidated against navigation; when neither side can move legally, previous legal positions are available for rollback rather than pushing through blocked terrain.
+- Ground collision is ownership-independent: friendly and enemy ground movers remain physically solid to one another.
+- Left rotary-air dynamic collision disabled until an altitude/layer-aware policy exists instead of imposing inaccurate 2D collision on aircraft.
+- Added registry validation for geometry and locomotor collision/avoidance data.
+- Added regression tests for long-vehicle geometry, head-on HMMWV traffic, enemy/friendly solidity, convoy yielding behind a stopped tank, and deterministic three-vehicle crossing, and wall-side collision correction that never pushes units into blocked navigation.
+- Snapshot schema remains **v9**; no transient avoidance state is serialized.
+- Production GLBs remain byte-for-byte unchanged.
+- Full suite: **72/72 tests passing**.
+
 ## v0.5.3 — Client Animation Foundation
 
 - Added generic data-driven `ClientAnimation` presentation modules, following the C&C GameLogic/client-draw separation: simulation state remains authoritative while the renderer drives embedded GLB clips and authored mechanical pivots.

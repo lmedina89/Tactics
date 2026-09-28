@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.5.3 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.5.4 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
@@ -14,6 +14,8 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Unit AI requested destination/state | mission/state handling | `AIUpdate` commands incl. attack-move/guard/path append | AI behavior as module | `engine/ai/unit-ai-update.js` | **MOVE / ATTACK / ATTACK_MOVE / GUARD, queued orders, data-defined stance/acquisition** |
 | Locomotor templates | movement classes | `Locomotor.h` family (`FOUR_WHEELS`, `TREADS`, turn rate, wheel angle, reverse state) | locomotor set data | `engine/locomotion/locomotor.js` + JSON | Tracks pivot/turn; wheels steer on curvature with bounded reverse + three-point turn-around; legs/air separate; facing simulation-owned |
 | Pathfinder destination correction | cell movement | AI/pathfinder family | geometry/pathing data separate | `engine/pathfinding/grid-pathfinder.js` | nearest-valid destination + clearance + attack approach point |
+| Object collision geometry | cell/object occupancy | `Object` `GeometryInfo`, collision/partition hooks | geometry independent from Draw/AI | `Geometry` module + `collisionShape()` | **BOX/CYLINDER physical footprints implemented for mobile units** |
+| Dynamic local avoidance | local occupancy/separation | partition/repulsor + AI/path/locomotor families | behavior parameters in data | `engine/locomotion/local-avoidance-system.js` | **Deterministic spatial hash + predictive yield/steer + hard OBB/circle resolver** |
 | Weapons / Weapon templates/runtime | projectile/warhead behavior | `WeaponTemplate` / `Weapon` | `WeaponSet` modules | `engine/combat/weapon-system.js` + `data/weapons` | **Implemented initial hitscan/projectile, prefire, cadence, clip/reload, target masks** |
 | Weapon slots / selection | weapon/warhead choices | primary/secondary/tertiary weapon slots + damage estimation | WeaponSet data | `engine/combat/targeting.js` | **Generic slots + armor-adjusted best-weapon scoring implemented** |
 | Armor/damage | armor/warhead relationships | `ArmorTemplate` / DamageType / Body | `ArmorSet` | `engine/combat/damage-system.js` + `data/armors` | **Implemented coefficients, health states, destruction** |
@@ -84,3 +86,10 @@ Mineral readability remains deliberately renderer-side. `ResourceFieldVisual` co
 ## v0.5.3 client-animation reference boundary
 
 The C&C family keeps visual presentation separate from authoritative GameLogic, and the RA3 data model exposes draw/client behavior separately from gameplay behaviors. ForgeRTS follows that boundary with a data-driven `ClientAnimation` module. Authored GLB clips are played by the renderer, while named mechanical pivots are driven procedurally from authoritative speed, steering, combat events, harvesting state, or harmless client-time presentation state. No EA animation implementation was translated directly; the runtime is original JavaScript/Three.js.
+
+
+## v0.5.4 movement / collision reference boundary
+
+The released Generals / Zero Hour architecture is used here for the **separation of concerns** rather than a line-for-line port: physical object geometry/collision/partition concepts live with the GameObject, while locomotor definitions own movement-specific behavior and tuning. ForgeRTS maps that shape to a compact browser-native `Geometry` module plus data-driven locomotor avoidance fields and a deterministic `LocalAvoidanceSystem`.
+
+No EA collision or locomotor implementation was copied into v0.5.4. The local avoidance, OBB/circle overlap solver, spatial hash, yielding policy, and browser-facing integration are original ForgeRTS JavaScript. If a later system (for example layered bridges, crushability, formation routing, or aircraft altitude collision) would materially benefit from a direct GPL-covered translation, that will remain an explicit provenance/licensing decision rather than an implicit copy.

@@ -8,6 +8,14 @@
       "maxHealth": 950
     },
     {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 4.35,
+      "minorRadius": 1.95,
+      "height": 3.4,
+      "isSmall": false
+    },
+    {
       "type": "ArmorSet",
       "armor": "industrial_vehicle"
     },

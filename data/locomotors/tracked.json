@@ -22,5 +22,15 @@
   "speedTurnPenalty": 0.72,
   "reverseEntryAngle": 2.62,
   "maxReverseDistance": 4.5,
-  "preferForwardDistance": 7.5
+  "preferForwardDistance": 7.5,
+  "collisionLayer": "GROUND",
+  "dynamicCollision": true,
+  "personalSpace": 0.28,
+  "avoidanceBuffer": 3.0,
+  "avoidanceLookAheadSeconds": 0.85,
+  "avoidanceMaxHeadingOffset": 0.42,
+  "avoidanceBraking": 0.94,
+  "collisionMass": 6.0,
+  "collisionPadding": 0.08,
+  "impactSpeedRetention": 0.18
 }

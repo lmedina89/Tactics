@@ -32,5 +32,15 @@
   "threePointSwitchAngle": 2.15,
   "threePointExitAngle": 1.38,
   "threePointReverseMaxTime": 1.65,
-  "reverseReentryCooldown": 2.0
+  "reverseReentryCooldown": 2.0,
+  "collisionLayer": "GROUND",
+  "dynamicCollision": true,
+  "personalSpace": 0.3,
+  "avoidanceBuffer": 3.0,
+  "avoidanceLookAheadSeconds": 0.9,
+  "avoidanceMaxHeadingOffset": 0.4,
+  "avoidanceBraking": 0.95,
+  "collisionMass": 5.5,
+  "collisionPadding": 0.08,
+  "impactSpeedRetention": 0.16
 }

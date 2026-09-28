@@ -8,6 +8,14 @@
       "maxHealth": 100
     },
     {
+      "type": "Geometry",
+      "shape": "CYLINDER",
+      "majorRadius": 0.42,
+      "minorRadius": 0.42,
+      "height": 1.8,
+      "isSmall": true
+    },
+    {
       "type": "BodyAim",
       "turnRate": 8.5,
       "aimTolerance": 0.16

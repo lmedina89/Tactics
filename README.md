@@ -1,10 +1,25 @@
-# ForgeRTS v0.5.3 — Client Animation Foundation
+# ForgeRTS v0.5.4 — Dynamic Collision + Local Avoidance Foundation
 
 ForgeRTS is a separate browser-native RTS engine. WorldForge / Skirmish remains untouched and serves only as the older asset/reference project.
 
-v0.5.3 builds on the validated v0.5.2 tactical-command/resource-readability slice. It does **not** add strategic enemy AI yet. This pass activates the animation-ready presentation work already authored into the production GLBs while keeping simulation state authoritative and the runtime fully data-driven.
+v0.5.4 builds on the validated v0.5.3 client-animation foundation. It does **not** add strategic enemy AI yet. This pass replaces the old post-movement friendly-circle shove with data-driven physical footprints, predictive local avoidance, and deterministic hard-overlap resolution so vehicle groups can cross, convoy, and maneuver without merging through one another.
 
 ## What changed
+
+### Dynamic collision + local avoidance
+
+- Mobile GameObjects may now declare a simulation-side `Geometry` module independent of their `Locomotor` and render asset.
+- Long vehicles use oriented BOX footprints; infantry uses a CYLINDER/circle footprint. This fixes the old assumption that a tank or Harvester could be represented by a small width-sized circle.
+- `LocalAvoidanceSystem` uses a deterministic spatial hash broadphase rather than testing every mover against every other mover.
+- Before locomotion, nearby movers receive predictive, data-driven speed/yaw constraints from relative motion, collision mass, personal space, look-ahead, braking, and steering limits.
+- After locomotion, oriented-box/circle minimum-translation collision resolution acts as a safety net. Candidate separation remains subject to pathfinder legality; if neither side can be separated legally, the system can restore the previous legal position instead of pushing a unit through blocked terrain.
+- Ground units are physically solid regardless of ownership, so enemy and friendly vehicles cannot intentionally phase through one another.
+- Collision tuning belongs to locomotor/geometry data, not concrete unit-name branches.
+- Air dynamic collision is intentionally deferred until ForgeRTS has a real altitude/layer policy; helicopters are not forced into a fake 2D ground-style collision model.
+- Existing tracked pivoting, wheeled steering/reverse/three-point turns, combat orders, harvesting, production, and client animation remain intact.
+
+The split follows the C&C engineering lesson we want to preserve: **object geometry describes physical extent; locomotor data describes how the object moves and yields**. ForgeRTS implements that architecture in original JavaScript rather than directly translating EA collision code.
+
 
 ### Resource fields
 
@@ -94,7 +109,7 @@ Build/production/Harvester contextual controls remain data-driven through their 
 - `InteractionManager` — explicit bounded object-to-object protocols
 - `ProductionSystem` — generic queues / rollout
 - `CombatSystem` — weapons / armor / projectiles / turret behavior
-- pathfinder + locomotor — route choice separated from physical movement
+- pathfinder + local avoidance + locomotor — route choice, dynamic traffic constraints, and physical movement remain separate
 - Three.js renderer — disposable presentation; multi-cluster resource visuals never become simulation entities
 - `ClientAnimation` — data-driven embedded-clip and mechanical-pivot presentation driven from authoritative simulation state
 
@@ -116,7 +131,7 @@ Run:
 npm test
 ```
 
-The release suite covers construction, economy, production, combat, movement, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, resource-field visual configuration, client-animation GLB binding validation, map identity, snapshot determinism, and the original mobile construction vertical slice. Current result: **66/66 tests passing**.
+The release suite covers construction, economy, production, combat, movement, oriented dynamic collision, predictive local avoidance, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, resource-field visual configuration, client-animation GLB binding validation, map identity, snapshot determinism, and the original mobile construction vertical slice. Current result: **72/72 tests passing**.
 
 ## Run
 

@@ -8,6 +8,14 @@
       "maxHealth": 650
     },
     {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 4.2,
+      "minorRadius": 2.1,
+      "height": 2.2,
+      "isSmall": false
+    },
+    {
       "type": "ArmorSet",
       "armor": "aircraft_light"
     },

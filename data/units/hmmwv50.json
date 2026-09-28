@@ -8,6 +8,14 @@
       "maxHealth": 450
     },
     {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 2.65,
+      "minorRadius": 1.22,
+      "height": 2.3,
+      "isSmall": false
+    },
+    {
       "type": "TurretAI",
       "turnRate": 2.9,
       "aimTolerance": 0.12,

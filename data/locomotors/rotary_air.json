@@ -13,5 +13,15 @@
   "maxSlopeDeg": 90,
   "canMoveBackward": false,
   "turnInPlace": true,
-  "speedTurnPenalty": 0.35
+  "speedTurnPenalty": 0.35,
+  "collisionLayer": "AIR",
+  "dynamicCollision": false,
+  "personalSpace": 0.5,
+  "avoidanceBuffer": 3.0,
+  "avoidanceLookAheadSeconds": 0.8,
+  "avoidanceMaxHeadingOffset": 0.35,
+  "avoidanceBraking": 0.8,
+  "collisionMass": 3.0,
+  "collisionPadding": 0.08,
+  "impactSpeedRetention": 0.25
 }
