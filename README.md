@@ -1,4 +1,11 @@
-# ForgeRTS v0.6.3 — Projectile Correctness + Strategic Intelligence
+# ForgeRTS v0.6.4 — Skirmish Defense + Combat Completion
+
+
+## v0.6.4 — Skirmish Defense + Combat Completion
+
+v0.6.4 closes the remaining known skirmish-defense and ordinary cannon-collision gaps before the v0.7 mission/trigger phase. A new data-driven EconomicDefenseManager creates temporary threat-sized response Teams when Harvesters/economic assets are attacked, requests missing defenders through normal factory production, can temporarily recall an intact nearby assault Team for severe raids, maintains bounded escort duty after repeated attacks, and returns recalled forces to their normal strategy when the danger clears or dedicated defenders arrive. Physical cannon shells now collide with the earliest eligible intervening hostile unit/building or terrain using authoritative GameObject Geometry; the designated-target collision path remains separate. Snapshot format is v14 with v8–v13 restore compatibility retained.
+
+See `SKIRMISH_DEFENSE_COMBAT_AUDIT.md` for the source comparison, data model and deferred combat layers.
 
 ForgeRTS is a separate browser-native RTS engine. WorldForge / Skirmish remains untouched and serves only as the older asset/reference project.
 
@@ -169,7 +176,7 @@ Run:
 npm test
 ```
 
-The release suite covers construction, economy, production, combat, movement, oriented dynamic collision, predictive local avoidance, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, TeamPrototype/AI-profile loading, exact team recruitment, authoritative `FROM_AI` command flow, base-defense reactions, deterministic Team/AI snapshot restore, resource-field visual configuration, client-animation GLB binding validation, map identity, and the original mobile construction vertical slice. Current result: **101/101 tests passing**.
+The release suite covers construction, economy, production, combat, movement, oriented dynamic collision, predictive local avoidance, interaction protocols, authority, queued orders, Attack Move, Guard, idle auto-acquisition, TeamPrototype/AI-profile loading, exact team recruitment, authoritative `FROM_AI` command flow, base-defense reactions, deterministic Team/AI snapshot restore, resource-field visual configuration, client-animation GLB binding validation, map identity, and the original mobile construction vertical slice. Current result: **109/109 tests passing**.
 
 ## Run
 
@@ -184,3 +191,14 @@ Serve the folder with any static HTTP server or deploy it directly to GitHub Pag
 5. Use the map AI data to try `AGGRESSIVE`, `DEFENSIVE`, or `ECONOMIST`; only planning cadence/posture should change—not damage, credits, movement, or other simulation rules.
 6. In a long economy test, deplete the AI's local mineral field and verify expansion logic can choose a remote resource and raise the desired Refinery count instead of treating an empty/no-baseline area as depletion.
 7. Save/restore while projectiles are in flight and while strategic policy is active; v13 state should continue deterministically.
+
+### v0.6.4 field-test focus
+
+1. Attack an enemy Harvester with a Rifleman/HMMWV and then with an Aegis-X; confirm the response scales from a light/mobile to a heavy economic-defense Team rather than only the single base guard reacting.
+2. Destroy or withhold available defenders and confirm the emergency response becomes real Barracks/Vehicle Factory demand rather than spawned reinforcements.
+3. With the dedicated heavy response unavailable, hit the Harvester with a serious armored threat and confirm an existing nearby assault Team can be temporarily recalled intact, then returns to its normal assault assignment after the threat clears or dedicated defenders arrive.
+4. Raid the same economic asset repeatedly and confirm a bounded escort remains with it, then releases after the configured safe interval.
+5. Fire a cannon through an intervening hostile vehicle/building and confirm the nearer object physically takes the shell instead of the designated target behind it.
+6. Fire across a ridge/terrain obstruction and confirm the shell terminates on terrain rather than passing through the hill.
+7. Re-check moving-target cannon hits, harvesting, construction, production, assault reform and strategic personality behavior for regressions.
+8. Save/restore during an active economic response and while projectiles are in flight; v14 state should continue deterministically.

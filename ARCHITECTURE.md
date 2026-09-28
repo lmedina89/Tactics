@@ -170,3 +170,14 @@ Projectile delivery is simulation state, not a renderer approximation. A project
 `StrategicAIPlanner` sits above `SkirmishAIPlayer`, TeamManager and SkirmishEconomyPlanner. It is timer-bounded and produces policy only: wealth state, TeamPrototype choice, difficulty/personality pacing multipliers, gatherer demand adjustment, and optional expansion goals. It cannot spawn objects, change credits, deal damage, or issue low-level movement directly. All execution remains ordinary Team/Economy planning and authoritative `FROM_AI` commands.
 
 Team composition adaptation is data-driven: enemy objects expose generic `AITargetable` categories; Team plan variants declare base priority, counter weights, wealth gates and personality bias. Difficulty/personality alter decision cadence/posture, not simulation rules. Resource expansion requires a real local-resource depletion baseline before increasing desired Refinery count and selecting a deterministic remote field.
+
+
+## v0.6.4 economic-defense + projectile-world-collision rule
+
+Economic protection is a player-level policy above TeamManager, not a Harvester special case. `EconomicDefenseManager` converts recent authoritative damage on configured economic categories into a threat-sized temporary Team work order; recruitment, factory demand, combat orders and release all use the same shared systems as ordinary AI Teams.
+
+Projectile collision remains simulation-authoritative. Each physical projectile sweeps its fixed-tick segment against designated target Geometry, configured world-entity Geometry and terrain, choosing the earliest deterministic collision. Building `Footprint` remains placement/navigation data while building `Geometry` is authoritative 3D combat volume.
+
+### v0.6.4 emergency Team recall rule
+
+Economic defense may temporarily borrow control of a whole ACTIVE Team selected by data-defined role/threat/distance policy. It does not transfer individual members out of the source Team. While borrowed, normal SkirmishAI orders for that Team are suspended; dedicated response production continues through the ordinary economy planner. Release restores the Team to its normal strategic controller on the next AI update.

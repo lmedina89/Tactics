@@ -165,7 +165,54 @@
       "HARVESTER",
       "ECONOMY",
       "BUILDER"
-    ]
+    ],
+    "economicDefense": {
+      "enabled": true,
+      "scanIntervalTicks": 15,
+      "recentDamageTicks": 180,
+      "holdTicks": 270,
+      "orderRefreshTicks": 90,
+      "maxRetaliateDistance": 180,
+      "threatScanRadius": 105,
+      "responseLeashDistance": 125,
+      "protectedCategories": [
+        "HARVESTER",
+        "ECONOMY",
+        "BUILDER"
+      ],
+      "threatWeights": {
+        "INFANTRY": 1.0,
+        "LIGHT_ARMOR": 2.5,
+        "HEAVY_ARMOR": 5.0,
+        "AIRCRAFT": 4.5,
+        "COMBAT": 1.25,
+        "DEFENSE": 4.0
+      },
+      "defaultThreatValue": 1.0,
+      "responseBands": [
+        {
+          "minThreat": 0,
+          "prototype": "crimson_economic_defense_light"
+        },
+        {
+          "minThreat": 2.25,
+          "prototype": "crimson_economic_defense_medium"
+        },
+        {
+          "minThreat": 4.0,
+          "prototype": "crimson_economic_defense_heavy"
+        }
+      ],
+      "escortAfterIncidents": 2,
+      "escortIncidentWindowTicks": 900,
+      "escortDurationTicks": 900,
+      "borrowRoles": [
+        "ASSAULT"
+      ],
+      "borrowMinThreat": 4.0,
+      "borrowRadius": 220,
+      "maxBorrowedTeams": 1
+    }
   },
   "defaultDifficulty": "NORMAL",
   "strategy": {

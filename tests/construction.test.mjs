@@ -82,8 +82,8 @@ test('a destroyed construction site never activates its completed building modul
   site.alive=false;site.health=0;for(let i=0;i<240;i++)s.step(FIXED_DT);assert.equal(site.operational,false);assert.notEqual(site.construction.state,'COMPLETE');
 });
 
-test('v13 snapshot restores active construction and continues deterministically',async()=>{
-  const s=await sim();s.issueBuildStructure('p_hq','power_node',VALID_POWER);for(let i=0;i<55;i++)s.step(FIXED_DT);const snap=s.snapshot();assert.equal(snap.version,13);
+test('v14 snapshot restores active construction and continues deterministically',async()=>{
+  const s=await sim();s.issueBuildStructure('p_hq','power_node',VALID_POWER);for(let i=0;i<55;i++)s.step(FIXED_DT);const snap=s.snapshot();assert.equal(snap.version,14);
   const s2=await sim();s2.restore(snap);assert.deepEqual(s2.snapshot(),snap);
   for(let i=0;i<120;i++){s.step(FIXED_DT);s2.step(FIXED_DT);}assert.deepEqual(s2.snapshot(),s.snapshot());
 });

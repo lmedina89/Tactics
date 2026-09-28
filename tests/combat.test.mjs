@@ -129,3 +129,39 @@ test('GUIDED_PROJECTILE turns through bounded guidance policy rather than telepo
   const a0=Math.atan2(before.vx,before.vz),a1=Math.atan2(live.vx,live.vz),d=Math.abs(Math.atan2(Math.sin(a1-a0),Math.cos(a1-a0)));
   assert.ok(d<=FIXED_DT+1e-6,`turn ${d} should be bounded by guidanceTurnRate*dt`);
 });
+
+test('physical cannon shell hits the nearest intervening hostile object before its designated target',async()=>{
+  const reg=await registry(),sim=new Simulation({registry:reg,map:mapWith([
+    {id:'p',definition:'aegis_x',owner:'player',x:0,z:-32,yaw:0},
+    {id:'blocker',definition:'power_node',owner:'enemy',x:0,z:0,yaw:0},
+    {id:'target',definition:'power_node',owner:'enemy',x:0,z:32,yaw:0}
+  ]),commandBus:new CommandBus()});
+  const blocker=sim.entities.get('blocker'),target=sim.entities.get('target');sim.issueAttack(['p'],'target');
+  let impact=null;for(let i=0;i<180&&!impact;i++){sim.step(FIXED_DT);impact=[...sim.combat.events].reverse().find(ev=>ev.type==='PROJECTILE_IMPACT'&&ev.hit);}
+  assert.ok(impact,'expected world collision impact');assert.equal(impact.targetId,'blocker');assert.equal(impact.intendedTargetId,'target');assert.equal(impact.impactType,'WORLD_ENTITY');
+  assert.ok(blocker.health<blocker.maxHealth,'intervening structure should receive impact damage');assert.equal(target.health,target.maxHealth,'designated target behind blocker should not receive the blocked shot');
+});
+
+test('projectile terrain sweep terminates a shell on intervening terrain',()=>{
+  const ps=new ProjectileSystem(),source={id:'s',playerId:'player'},target={id:'t',playerId:'enemy',alive:true,kind:'vehicle',x:20,y:0,z:0,yaw:0,motionVX:0,motionVY:0,motionVZ:0,modules:{Geometry:{shape:'BOX',majorRadius:2,minorRadius:1,height:2}}};
+  const terrain={heightAt:(x,z)=>x>=8&&x<=12?5:0};let impact=null;
+  const weapon={id:'terrain_test',range:40,projectile:{speed:60,radius:.2,behavior:'DUMB_PROJECTILE',leadTarget:false,designatedTargetCollision:true,targetHeightFactor:.5,worldCollision:{enabled:true,relations:['ENEMY'],kinds:['unit','building'],terrain:true,terrainSampleStep:.5}}};
+  ps.spawn({source,target,weapon,start:{x:0,y:2,z:0},tick:0});
+  for(let i=0;i<30&&ps.projectiles.size;i++)ps.step(FIXED_DT,{entityLookup:id=>id==='t'?target:null,entitiesProvider:()=>[target],terrain,onImpact:(p,t,hit,info)=>{impact={p,t,hit,info};}});
+  assert.ok(impact?.hit);assert.equal(impact.info.type,'TERRAIN');assert.equal(impact.t,null);assert.ok(impact.p.x<target.x);
+});
+
+test('all footprint buildings expose authoritative Geometry for projectile collision',async()=>{
+  const r=await read('data/registry.json');
+  for(const rel of r.definitions){const d=await read(rel);if(d.kind!=='building')continue;const fp=(d.modules||[]).find(m=>m.type==='Footprint');if(!fp)continue;const g=(d.modules||[]).find(m=>m.type==='Geometry');assert.ok(g,`${d.id} missing Geometry`);assert.equal(g.shape,'BOX');assert.ok(g.majorRadius>0&&g.minorRadius>0&&g.height>0,`${d.id} has invalid Geometry`);}
+});
+
+test('world-collision broadphase includes intervening units that cross the shell path during the tick',()=>{
+  const ps=new ProjectileSystem(),source={id:'s',playerId:'player'},target={id:'t',playerId:'enemy',alive:true,kind:'vehicle',x:100,y:0,z:0,motionVX:0,motionVY:0,motionVZ:0,modules:{Geometry:{shape:'BOX',majorRadius:2,minorRadius:1,height:2}}};
+  // End-of-tick position is well off the shell line, but its reconstructed start pose was on the other side.
+  const crossing={id:'cross',playerId:'enemy',alive:true,kind:'vehicle',x:3,y:0,z:4,motionVX:0,motionVY:0,motionVZ:240,modules:{Geometry:{shape:'CYLINDER',radius:.7,height:2}}};
+  const weapon={id:'sweep_cross',range:120,projectile:{speed:180,radius:.1,behavior:'DUMB_PROJECTILE',leadTarget:false,designatedTargetCollision:true,targetHeightFactor:.5,worldCollision:{enabled:true,relations:['ENEMY'],kinds:['unit'],terrain:false}}};
+  let impact=null;ps.spawn({source,target,weapon,start:{x:0,y:1,z:0},tick:0});
+  ps.step(FIXED_DT,{entityLookup:id=>id==='t'?target:id==='cross'?crossing:null,entitiesProvider:()=>[target,crossing],onImpact:(p,t,hit,info)=>{impact={p,t,hit,info};}});
+  assert.ok(impact?.hit,'swept moving blocker should collide during the tick');assert.equal(impact.t?.id,'cross');assert.equal(impact.info.type,'WORLD_ENTITY');
+});

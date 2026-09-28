@@ -34,7 +34,7 @@ export class Simulation{
     this.teams=new TeamManager({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values()});
     this.interactions=new InteractionManager({registry:this.registry,entityLookup:id=>this.entities.get(id)});
     this.projectiles=new ProjectileSystem();
-    this.combat=new CombatSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),projectiles:this.projectiles}).bindEntitiesProvider(()=>this.entities.values());
+    this.combat=new CombatSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),projectiles:this.projectiles,terrain:this.terrain}).bindEntitiesProvider(()=>this.entities.values());
     this.economy=new FactionEconomySystem({registry:this.registry,players:this.players,entitiesProvider:()=>this.entities.values()});
     this.resources=new ResourceSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),interactions:this.interactions,economy:this.economy,pathfinder:this.pathfinder});
     this.production=new ProductionSystem({registry:this.registry,entityLookup:id=>this.entities.get(id),entitiesProvider:()=>this.entities.values(),economy:this.economy,interactions:this.interactions,pathfinder:this.pathfinder,spawnEntity:o=>this._spawnEntity(o)});
@@ -148,7 +148,7 @@ export class Simulation{
 
   snapshot(){
     return {
-      version:13,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),constructionSystem:this.construction.snapshot(),teams:this.teams.snapshot(),skirmishAI:this.skirmishAI.snapshot(),
+      version:14,tick:this.tick,rngState:this.rng.snapshot(),commandBus:this.commandBus.snapshot(),interactions:this.interactions.snapshot(),projectiles:this.projectiles.snapshot(),combat:this.combat.snapshot(),resources:this.resources.snapshot(),productionSystem:this.production.snapshot(),constructionSystem:this.construction.snapshot(),teams:this.teams.snapshot(),skirmishAI:this.skirmishAI.snapshot(),
       players:[...this.players.values()].map(p=>structuredClone(p)),regionStates:[...this.regionStates.values()].map(r=>structuredClone(r)),
       entities:[...this.entities.values()].map(e=>({
         id:e.id,definitionId:e.definitionId,playerId:e.playerId,teamId:e.teamId??null,factionId:e.factionId,kind:e.kind,
@@ -161,7 +161,7 @@ export class Simulation{
   }
 
   restore(snapshot){
-    if(![8,9,10,11,12,13].includes(snapshot?.version??0))throw new Error('Unsupported ForgeRTS snapshot version');
+    if(![8,9,10,11,12,13,14].includes(snapshot?.version??0))throw new Error('Unsupported ForgeRTS snapshot version');
     this.tick=snapshot.tick??0;this.rng.restore(snapshot.rngState??1);this.commandBus.restore(snapshot.commandBus??{});
     this.players=new Map((snapshot.players||[]).map(p=>[p.id,{...structuredClone(p),resourcesHarvested:structuredClone(p.resourcesHarvested||{})}]));this.economy.players=this.players;this.construction.techTree.economy=this.economy;for(const c of this.skirmishAI.controllers.values()){c.players=this.players;if(c.economyPlanner)c.economyPlanner.players=this.players;if(c.strategyPlanner)c.strategyPlanner.players=this.players;}
     this.regionStates=new Map((snapshot.regionStates||[]).map(r=>[r.id,structuredClone(r)]));

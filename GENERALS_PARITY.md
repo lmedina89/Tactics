@@ -6,7 +6,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 - **Generals / Zero Hour:** primary reference for the full 3D RTS simulation architecture, commands, AIUpdate, locomotors, pathfinding, weapons, players, production, teams, AI, missions, fog/radar, upgrades, veterancy, bridges, save/replay behavior.
 - **Red Alert 3 schemas/modding data:** primary reference for mature data-driven `GameObject` composition and behavior/module definitions.
 
-| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.3 status |
+| System | Red Alert reference | Generals / ZH reference | RA3-style data lesson | ForgeRTS owner | v0.6.4 status |
 |---|---|---|---|---|---|
 | Fixed game simulation | deterministic game loop/state | `GameLogic` | simulation separate from presentation | `engine/sim/Simulation` | Foundation implemented |
 | Serializable commands | mission/action orders | `MessageStream` / GUI/AI commands + command origin | behavior receives data, not UI events | `engine/commands/CommandBus` | **MOVE / STOP / ATTACK / ATTACK_MOVE / GUARD / stance + issuer/source metadata** |
@@ -14,7 +14,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Unit AI requested destination/state | mission/state handling | `AIUpdate` commands incl. attack-move/guard/path append | AI behavior as module | `engine/ai/unit-ai-update.js` | **MOVE / ATTACK / ATTACK_MOVE / GUARD, queued orders, data-defined stance/acquisition** |
 | Locomotor templates | movement classes | `Locomotor.h` family (`FOUR_WHEELS`, `TREADS`, turn rate, wheel angle, reverse state) | locomotor set data | `engine/locomotion/locomotor.js` + JSON | Tracks pivot/turn; wheels steer on curvature with bounded reverse + three-point turn-around; legs/air separate; facing simulation-owned |
 | Pathfinder destination correction | cell movement | AI/pathfinder family | geometry/pathing data separate | `engine/pathfinding/grid-pathfinder.js` | nearest-valid destination + clearance + attack approach point |
-| Object collision geometry | cell/object occupancy | `Object` `GeometryInfo`, collision/partition hooks | geometry independent from Draw/AI | `Geometry` module + `collisionShape()` | **BOX/CYLINDER physical footprints implemented for mobile units** |
+| Object collision geometry | cell/object occupancy | `Object` `GeometryInfo`, collision/partition hooks | geometry independent from Draw/AI | `Geometry` module + `collisionShape()` | **BOX/CYLINDER physical footprints implemented for mobile units + authoritative BOX Geometry on production buildings** |
 | Dynamic local avoidance | local occupancy/separation | partition/repulsor + AI/path/locomotor families | behavior parameters in data | `engine/locomotion/local-avoidance-system.js` | **Deterministic spatial hash + predictive yield/steer + hard OBB/circle resolver** |
 | Weapons / Weapon templates/runtime | projectile/warhead behavior | `WeaponTemplate` / `Weapon` | `WeaponSet` modules | `engine/combat/weapon-system.js` + `data/weapons` | **Implemented initial hitscan/projectile, prefire, cadence, clip/reload, target masks** |
 | Weapon slots / selection | weapon/warhead choices | primary/secondary/tertiary weapon slots + damage estimation | WeaponSet data | `engine/combat/targeting.js` | **Generic slots + armor-adjusted best-weapon scoring implemented** |
@@ -29,7 +29,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Rivers/water | map cells/water logic | terrain/water systems | water as independent feature data | map `water` + renderer | Foundation implemented |
 | Strategic regions | base/cell threat concepts | AI/map areas | future region metadata | `map.region.strategic` + Simulation region state | Owner/threat/resources/activity/discovery implemented |
 | Stable starts/waypoints | cell/waypoint mission logic | player start/rally waypoints | named anchors | map `waypoints[]` | Data implemented |
-| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v12 includes Team/SkirmishAI/economy/tactical reform-target state; v8-v11 restore accepted** |
+| Persistent/save state | saveable world state | Snapshot/Xfer patterns | module state serialized | `Simulation.snapshot/restore` | **v14 includes Team/SkirmishAI/economy/strategic/economic-defense/projectile state; v8-v13 restore accepted** |
 | Player economy/power | house/resources | `Player` | player/faction data | `FactionEconomySystem` / player state | **Credits + power + low-power policy implemented** |
 | Production | factory queues/service | production update modules | Production behavior | `engine/production/production-system.js` | **Generic queues, costs, build time, cancellation, dynamic spawn, rollout/rally implemented** |
 | Command sets / contextual UI | sidebar/build lists | `CommandButton` / control bar / GUI command staging | `CommandSet` on `GameObject` | `data/commandsets/*` + HUD renderer | **BUILD / PRODUCE / RETURN / CANCEL + tactical ATTACK_MOVE / GUARD / QUEUE / STANCE presentation** |
@@ -127,3 +127,14 @@ The released Generals/Zero Hour source keeps authoritative weapon firing/object 
 For projectile combat, ForgeRTS preserves the C&C distinction between physical projectile delivery and target/object geometry: designated targets remain explicit projectile state, collision uses authored simulation geometry, unguided shells and guided missiles have separate policies, and renderer state is non-authoritative. The implementation is original JS optimized for the existing 30 Hz simulation.
 
 For skirmish strategy, Team work orders remain separate from strategic policy. `StrategicAIPlanner` chooses among invariant TeamPrototype variants from generic enemy categories and data-defined wealth/difficulty/personality settings; existing TeamManager/SkirmishEconomyPlanner then satisfy those choices through normal production/construction/CommandBus paths. Resource expansion similarly changes desired build goals rather than spawning expansion structures.
+
+
+## v0.6.4 supply defense + projectile collision parity
+
+The released Generals AIPlayer/Player interfaces expose supply-source attacked/safe checks and team guard-supply-center behavior. ForgeRTS v0.6.4 maps that responsibility to a timer-bounded, data-driven `EconomicDefenseManager` that creates normal Team work orders and uses ordinary production/CommandBus paths instead of direct spawning.
+
+Generals weapon data distinguishes the designated target from other objects that happen to intersect projectile flight. ForgeRTS now preserves the same useful distinction: designated-target swept collision is always evaluated independently, while data-defined world-collision filters govern intervening entities; terrain is an additional authoritative collision source in ForgeRTS.
+
+### v0.6.4 economic-defense recall refinement
+
+Severe supply/economy threats can now temporarily recall a nearby ACTIVE Team selected through profile data. The borrowed Team remains structurally intact and uses normal `FROM_AI` commands while a dedicated ECONOMIC_DEFENSE Team remains a normal recruiting/production work order. When dedicated defenders are ready or the threat clears, strategic control returns to the original Team plan. This is intentionally closer to Generals' Team-oriented supply-guard responsibility than moving individual units between ad-hoc groups.

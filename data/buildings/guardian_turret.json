@@ -34,6 +34,13 @@
       "depth": 8
     },
     {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 4.0,
+      "minorRadius": 4.0,
+      "height": 4.9
+    },
+    {
       "type": "Construction",
       "credits": 600,
       "buildTimeSeconds": 6.0,

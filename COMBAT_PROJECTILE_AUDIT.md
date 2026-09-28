@@ -25,8 +25,13 @@ Aegis-X 120 mm and Guardian cannon use `DUMB_PROJECTILE`, launch lead, designate
 
 ## Deliberately deferred
 
-Full world-obstacle/intervening-object projectile collision, ballistic gravity/arcing artillery, penetration/ricochet, splash/area damage, terrain impact/deformation and guided missile content are separate combat layers. The v0.6.3 foundation was scoped to correct moving designated-target behavior first without inventing unsupported weapon semantics.
+v0.6.4 closes the ordinary world-obstruction gap: physical shells now choose the earliest eligible intervening hostile unit/building or terrain collision while keeping designated-target collision independent. Ballistic gravity/arcing artillery, penetration/ricochet, splash/area damage, terrain deformation and projectile-interception remain separate combat layers.
 
 ## Regression coverage
 
 Tests cover moving lateral HMMWV impact, real BOX Geometry hit/miss, unguided non-homing behavior, bounded guided turning, and deterministic in-flight snapshot/restore.
+
+
+## v0.6.4 world-collision extension
+
+Projectile definitions now expose data-driven `worldCollision` policy. The fixed-step solver evaluates designated-target collision, eligible intervening GameObject Geometry and terrain, then resolves the earliest deterministic hit. Production buildings now define BOX Geometry with gameplay footprints and explicit heights, so structure interception is a real 3D combat volume rather than the old tiny fallback. See `SKIRMISH_DEFENSE_COMBAT_AUDIT.md`.

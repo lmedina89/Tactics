@@ -17,6 +17,13 @@
       "depth": 24
     },
     {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 12.0,
+      "minorRadius": 15.0,
+      "height": 16.7
+    },
+    {
       "type": "Render",
       "asset": "aegis_grid_bastion_power_plant",
       "scale": 1.0,

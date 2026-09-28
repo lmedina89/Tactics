@@ -1,4 +1,17 @@
-# Changelog
+# ForgeRTS Changelog
+
+## v0.6.4 — Skirmish Defense + Combat Completion
+
+- Added timer-bounded, data-driven `EconomicDefenseManager` modeled on the Generals supply-source attacked/safe + guard-supply-center responsibility boundary.
+- Added light/mobile/heavy economic-response TeamPrototypes selected by generic threat-category weights.
+- Missing emergency defenders become ordinary high-priority factory work orders; no reinforcement spawn shortcut exists.
+- Repeated economic raids can extend a bounded Harvester/economy escort window; temporary response Teams release units after the area is safe.
+- Severe economic threats can temporarily recall a nearby data-allowed ACTIVE Team (currently ASSAULT) as immediate cover while the dedicated response Team recruits/produces. The borrowed Team keeps its membership/lifecycle intact and is released back to normal strategic duty as soon as dedicated defenders are ready or the threat clears.
+- Added full fixed-step projectile world collision against the earliest eligible intervening hostile unit/building and terrain while preserving separate designated-target collision.
+- Added data-driven projectile `worldCollision` policy and deterministic terrain segment intersection.
+- Added authoritative BOX `Geometry` to all production buildings so projectile collision is 3D rather than a legacy tiny fallback volume.
+- Snapshot schema advanced to v14; v8–v13 restore remains accepted.
+- Added regression coverage for threat-sized economic response, factory reinforcement demand, whole-Team emergency recall/return-to-duty, escort/snapshot determinism, moving and static intervening-object collision, terrain collision and building Geometry.
 
 ## v0.6.3 — Projectile Correctness + Strategic Intelligence
 

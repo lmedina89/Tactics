@@ -85,3 +85,67 @@ test('AI construction placement safety rejects positions inside an enemy combat 
   assert.equal(planner._locationSafe({x:225,z:-20}),false);
   assert.equal(planner._locationSafe({x:225,z:120}),true);
 });
+
+test('economic defense manager forms a threat-sized response Team and intercepts a Harvester attacker',async()=>{
+  const sim=await makeSim();run(sim,100);
+  const harvester=sim.entities.get('e_harvester'),attacker=sim.entities.get('p_tank');
+  attacker.x=harvester.x-24;attacker.z=harvester.z;attacker.health=100000;attacker.maxHealth=100000;
+  harvester.lastDamagedBy=attacker.id;harvester.lastDamagedTick=sim.tick;
+  run(sim,20);
+  const controller=sim.skirmishAI.controllers.get('enemy'),response=controller.economicDefense,team=sim.teams.team(response.activeTeamId);
+  assert.ok(team,'economic defense Team was not created');
+  assert.equal(team.prototypeId,'crimson_economic_defense_heavy','heavy armor raid should select heavy response data');
+  assert.equal(team.objective?.type,'ECONOMIC_INTERCEPT');assert.equal(team.objective?.protectedTargetId,harvester.id);assert.equal(team.objective?.targetId,attacker.id);
+  const members=sim.teams.members(team);assert.ok(members.some(e=>e.definitionId==='aegis_x'));assert.ok(members.some(e=>e.definitionId==='hmmwv50'));
+  for(const e of members){assert.equal(e.ai.order?.type,'ATTACK');assert.equal(e.ai.order?.targetId,attacker.id);}
+  attacker.alive=false;run(sim,320);
+  assert.equal(controller.economicDefense.activeTeamId,null,'temporary economic response should release after threat/hold window');
+});
+
+test('missing emergency defenders become normal high-priority factory demand instead of spawned reinforcements',async()=>{
+  const sim=await makeSim();run(sim,100);
+  sim.entities.get('e_tank').alive=false;sim.entities.get('e_hmmwv').alive=false;
+  const harvester=sim.entities.get('e_harvester'),attacker=sim.entities.get('p_tank');attacker.x=harvester.x-22;attacker.z=harvester.z;
+  harvester.lastDamagedBy=attacker.id;harvester.lastDamagedTick=sim.tick;
+  run(sim,45);
+  const controller=sim.skirmishAI.controllers.get('enemy'),team=sim.teams.team(controller.economicDefense.activeTeamId);assert.ok(team);assert.equal(team.state,TeamState.RECRUITING);
+  const factory=sim.entities.get('e_factory'),queued=(factory.production?.queue||[]).map(q=>q.definitionId);
+  assert.ok(queued.includes('aegis_x')||queued.includes('hmmwv50'),`expected emergency factory work order, got ${queued.join(',')}`);
+  assert.equal([...sim.entities.values()].filter(e=>e.alive&&e.playerId==='enemy'&&['aegis_x','hmmwv50'].includes(e.definitionId)).length,0,'defenders must not be spawned directly');
+});
+
+test('economic-defense incident/escort state survives v14 snapshot restore deterministically',async()=>{
+  const a=await makeSim();run(a,100);
+  const harvester=a.entities.get('e_harvester'),attacker=a.entities.get('p_hmmwv');attacker.x=harvester.x-18;attacker.z=harvester.z;
+  harvester.lastDamagedBy=attacker.id;harvester.lastDamagedTick=a.tick;run(a,20);
+  // A second distinct damage event enables the data-defined persistent escort window.
+  harvester.lastDamagedTick=a.tick;run(a,20);
+  const state=a.skirmishAI.controllers.get('enemy').economicDefense;assert.ok(state.escortUntilTick>a.tick);
+  const snap=a.snapshot(),b=await makeSim();b.restore(snap);assert.deepEqual(b.snapshot(),snap);
+  for(let i=0;i<120;i++){a.step(FIXED_DT);b.step(FIXED_DT);}assert.deepEqual(b.snapshot(),a.snapshot());
+});
+
+test('severe Harvester raid can temporarily recall an assault Team and release it back to normal duty',async()=>{
+  const sim=await makeSim();run(sim,850);
+  const assault=[...sim.teams.teams.values()].find(t=>t.planId==='first_assault'&&t.state===TeamState.ACTIVE);assert.ok(assault,'active assault Team required');
+  const harvester=sim.entities.get('e_harvester'),attacker=sim.entities.get('p_tank');assert.ok(harvester&&attacker);
+  const assaultMembers=sim.teams.members(assault);assert.ok(assaultMembers.some(e=>e.definitionId==='aegis_x'));assert.ok(assaultMembers.some(e=>e.definitionId==='hmmwv50'));
+  // Remove free armored responders so a severe raid must temporarily recall the existing assault Team.
+  for(const e of sim.entities.values())if(e.alive&&e.playerId==='enemy'&&['aegis_x','hmmwv50'].includes(e.definitionId)&&!assault.memberIds.includes(e.id))e.alive=false;
+  for(const e of assaultMembers){e.x=harvester.x+8;e.z=harvester.z+8;}
+  attacker.x=harvester.x-18;attacker.z=harvester.z;attacker.health=100000;attacker.maxHealth=100000;
+  harvester.lastDamagedBy=attacker.id;harvester.lastDamagedTick=sim.tick;
+  run(sim,20);
+  const controller=sim.skirmishAI.controllers.get('enemy'),response=sim.teams.team(controller.economicDefense.activeTeamId);assert.ok(response);
+  assert.equal(response.prototypeId,'crimson_economic_defense_heavy');
+  assert.ok(controller.economicDefense.borrowedTeamIds.includes(assault.id),'severe raid did not temporarily recall the assault Team');
+  const borrowedSnapshot=sim.snapshot(),restored=await makeSim();restored.restore(borrowedSnapshot);assert.deepEqual(restored.snapshot(),borrowedSnapshot,'temporary Team recall must survive snapshot/restore exactly');
+  assert.equal(sim.teams.team(assault.id).state,TeamState.ACTIVE,'temporary recall must preserve the assault Team lifecycle');
+  for(const e of assaultMembers){assert.equal(e.teamId,assault.id);assert.equal(e.ai.order?.type,'ATTACK');assert.equal(e.ai.order?.targetId,attacker.id);}
+  attacker.alive=false;run(sim,340);
+  assert.equal(controller.economicDefense.activeTeamId,null,'temporary economic response should release after the raid is safe');
+  assert.equal(controller.economicDefense.borrowedTeamIds.length,0,'recalled assault Team was not released');
+  run(sim,45);
+  const resumed=sim.teams.team(assault.id);assert.ok(resumed);assert.equal(resumed.state,TeamState.ACTIVE);
+  assert.equal(resumed.objective?.type,'ATTACK_PLAYER','released assault Team did not return to its normal strategic assignment');
+});

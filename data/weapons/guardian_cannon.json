@@ -28,7 +28,19 @@
     "maxLeadSeconds": 1.25,
     "designatedTargetCollision": true,
     "impactPadding": 0.08,
-    "targetHeightFactor": 0.5
+    "targetHeightFactor": 0.5,
+    "worldCollision": {
+      "enabled": true,
+      "relations": [
+        "ENEMY"
+      ],
+      "kinds": [
+        "unit",
+        "building"
+      ],
+      "terrain": true,
+      "terrainSampleStep": 2.5
+    }
   },
   "muzzleHeight": 4.0,
   "muzzleForwardOffset": 2.8

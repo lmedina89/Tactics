@@ -3,6 +3,7 @@ import {TeamState} from '../teams/team-manager.js';
 import {SkirmishEconomyPlanner} from './skirmish-economy-planner.js';
 import {TargetEvaluator,aiTargetCategories} from './target-evaluator.js';
 import {StrategicAIPlanner} from './strategic-ai-planner.js';
+import {EconomicDefenseManager} from './economic-defense-manager.js';
 
 const clone=v=>structuredClone(v);
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
@@ -15,6 +16,7 @@ export class SkirmishAIPlayer{
     const mp=map.players.find(p=>p.id===playerId)??{};this.mapConfig=mp.ai??{};
     this.strategyPlanner=new StrategicAIPlanner({playerId,profile,mapConfig:this.mapConfig,players,registry,entitiesProvider});
     this.economyPlanner=new SkirmishEconomyPlanner({playerId,profile,map,registry,players,teamManager,entitiesProvider,commandBus,economy,resources,construction,production});
+    this.economicDefense=new EconomicDefenseManager({playerId,profile,registry,teamManager,entityLookup:this.entityLookup,entitiesProvider,commandBus});
     this.currentEnemyPlayerId=null;this.nextThinkTick=this.profile.initialDelayTicks??0;this.nextEnemyAcquireTick=0;this.planRetryTicks={};
   }
 
@@ -143,16 +145,17 @@ export class SkirmishAIPlayer{
     const strategy=this.strategyPlanner.update(tick);
     if(tick<this.nextThinkTick)return;this.nextThinkTick=tick+Math.max(1,Math.round((this.profile.thinkIntervalTicks??15)*(strategy.teamIntervalScale??1)));this._acquireEnemy(tick);
     for(const plan of this.profile.teamPlans||[])this._startOrRecruitPlan(plan,tick,strategy);
+    this.economicDefense.update(tick);
     const enemyBase=this.currentEnemyPlayerId?this._baseCenter(this.currentEnemyPlayerId):null;
     const expansionResource=strategy.expansionResourceId?this.entityLookup(strategy.expansionResourceId):null;
     this.economyPlanner.update(tick,{home:this._baseCenter(),defense:this._defensePoint(),enemyBase,strategy,expansionResource});
     for(const team of this.teamManager.teams.values()){
-      if(team.playerId!==this.playerId)continue;if(team.state===TeamState.RALLYING)this._updateRallying(team,tick);else if(team.state===TeamState.REFORMING)this._updateReforming(team,tick);else if(team.state===TeamState.ACTIVE)this._updateActive(team,tick);
+      if(team.playerId!==this.playerId)continue;const proto=this.teamManager.prototype(team.prototypeId);if(proto?.role==='ECONOMIC_DEFENSE'||this.economicDefense.isBorrowedTeam(team.id))continue;if(team.state===TeamState.RALLYING)this._updateRallying(team,tick);else if(team.state===TeamState.REFORMING)this._updateReforming(team,tick);else if(team.state===TeamState.ACTIVE)this._updateActive(team,tick);
     }
   }
 
-  snapshot(){return {playerId:this.playerId,currentEnemyPlayerId:this.currentEnemyPlayerId,nextThinkTick:this.nextThinkTick,nextEnemyAcquireTick:this.nextEnemyAcquireTick,planRetryTicks:clone(this.planRetryTicks),strategyPlanner:this.strategyPlanner.snapshot(),economyPlanner:this.economyPlanner.snapshot()};}
-  restore(state={}){if('currentEnemyPlayerId' in state)this.currentEnemyPlayerId=state.currentEnemyPlayerId??null;if('nextThinkTick' in state)this.nextThinkTick=state.nextThinkTick??0;if('nextEnemyAcquireTick' in state)this.nextEnemyAcquireTick=state.nextEnemyAcquireTick??0;if('planRetryTicks' in state)this.planRetryTicks=clone(state.planRetryTicks??{});this.strategyPlanner.restore(state.strategyPlanner??{});this.economyPlanner.restore(state.economyPlanner??{});}
+  snapshot(){return {playerId:this.playerId,currentEnemyPlayerId:this.currentEnemyPlayerId,nextThinkTick:this.nextThinkTick,nextEnemyAcquireTick:this.nextEnemyAcquireTick,planRetryTicks:clone(this.planRetryTicks),strategyPlanner:this.strategyPlanner.snapshot(),economyPlanner:this.economyPlanner.snapshot(),economicDefense:this.economicDefense.snapshot()};}
+  restore(state={}){if('currentEnemyPlayerId' in state)this.currentEnemyPlayerId=state.currentEnemyPlayerId??null;if('nextThinkTick' in state)this.nextThinkTick=state.nextThinkTick??0;if('nextEnemyAcquireTick' in state)this.nextEnemyAcquireTick=state.nextEnemyAcquireTick??0;if('planRetryTicks' in state)this.planRetryTicks=clone(state.planRetryTicks??{});this.strategyPlanner.restore(state.strategyPlanner??{});this.economyPlanner.restore(state.economyPlanner??{});this.economicDefense.restore(state.economicDefense??{});}
 }
 
 export class SkirmishAISystem{

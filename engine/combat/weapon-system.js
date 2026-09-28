@@ -7,8 +7,8 @@ const headingTo=(a,b)=>Math.atan2(b.x-a.x,b.z-a.z);
 const ticks=(seconds)=>Math.max(0,Math.ceil((seconds??0)*30));
 
 export class CombatSystem{
-  constructor({registry,entityLookup,projectiles}){
-    this.registry=registry;this.entityLookup=entityLookup;this.projectiles=projectiles;this.events=[];this.eventSerial=0;
+  constructor({registry,entityLookup,projectiles,terrain=null}){
+    this.registry=registry;this.entityLookup=entityLookup;this.projectiles=projectiles;this.terrain=terrain;this.events=[];this.eventSerial=0;
   }
   _emit(event){this.events.push({serial:++this.eventSerial,...event});if(this.events.length>128)this.events.shift();}
   _enemy(a,b){return !!(a?.playerId&&b?.playerId&&a.playerId!==b.playerId&&b.alive);}
@@ -93,11 +93,12 @@ export class CombatSystem{
       const distance=Math.hypot(target.x-entity.x,target.z-entity.z),aimError=this._turnAim(entity,target,dt);
       if(this._canFireSlot(choice.slot,choice.weapon,target,tick,aimError,distance))this._fire(entity,target,choice,tick);
     }
-    this.projectiles.step(dt,{entityLookup:this.entityLookup,onImpact:(p,target,hit)=>{
+    this.projectiles.step(dt,{entityLookup:this.entityLookup,entitiesProvider:()=>this._allEntities(),terrain:this.terrain,onImpact:(p,target,hit,info={})=>{
       const weapon=this.registry.weapon(p.weaponId);let result={applied:0,destroyed:false};
       if(hit&&target?.alive)result=applyDamage({registry:this.registry,target,weapon,sourceId:p.sourceId,tick});
-      this._emit({type:'PROJECTILE_IMPACT',sourceId:p.sourceId,targetId:p.targetId,weaponId:p.weaponId,projectileId:p.id,x:p.x,y:p.y,z:p.z,hit,damage:result.applied,destroyed:result.destroyed});
-      if(result.destroyed)this._emit({type:'DESTROYED',sourceId:p.sourceId,targetId:p.targetId,weaponId:p.weaponId});
+      const actualTargetId=target?.id??null;
+      this._emit({type:'PROJECTILE_IMPACT',sourceId:p.sourceId,targetId:actualTargetId,intendedTargetId:p.targetId,weaponId:p.weaponId,projectileId:p.id,x:p.x,y:p.y,z:p.z,hit,impactType:info.type??(hit?'DESIGNATED_TARGET':'EXPIRED'),damage:result.applied,destroyed:result.destroyed});
+      if(result.destroyed)this._emit({type:'DESTROYED',sourceId:p.sourceId,targetId:actualTargetId,weaponId:p.weaponId});
     }});
   }
   snapshot(){return {eventSerial:this.eventSerial};}

@@ -129,7 +129,7 @@ export class SkirmishEconomyPlanner{
     const planPriority=new Map((this.profile.teamPlans||[]).map(p=>[p.id,p.productionPriority??500]));
     for(const team of this.teamManager.teams.values()){
       if(team.playerId!==this.playerId||![TeamState.RECRUITING,TeamState.REFORMING].includes(team.state))continue;const proto=this.teamManager.prototype(team.prototypeId);if(!proto)continue;
-      const members=this.teamManager.members(team);for(const entry of proto.composition||[]){const have=members.filter(e=>e.definitionId===entry.definition).length;add(entry.definition,Math.max(0,(entry.min??0)-have),planPriority.get(team.planId)??500,`TEAM:${team.planId??team.prototypeId}`);}
+      const members=this.teamManager.members(team),priority=planPriority.get(team.planId)??proto.productionPriority??500;for(const entry of proto.composition||[]){const have=members.filter(e=>e.definitionId===entry.definition).length;add(entry.definition,Math.max(0,(entry.min??0)-have),priority,`TEAM:${team.planId??team.prototypeId}`);}
     }
     for(const reserve of this.cfg.unitReserves||[]){const free=this._freeCount(reserve.definition);add(reserve.definition,Math.max(0,(reserve.desiredFree??0)-free),reserve.priority??250,'RESERVE');}
     return demand;

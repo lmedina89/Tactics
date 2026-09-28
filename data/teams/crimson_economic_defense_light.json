@@ -1,0 +1,14 @@
+{
+  "id": "crimson_economic_defense_light",
+  "name": "Crimson Light Economic Response",
+  "role": "ECONOMIC_DEFENSE",
+  "maxInstances": 1,
+  "recruitRadius": 180,
+  "recruitTimeoutTicks": 420,
+  "initialStance": "GUARD",
+  "attackPrioritySet": "crimson_defense_targets",
+  "productionPriority": 1350,
+  "composition": [
+    {"definition":"rifleman","min":1,"max":1}
+  ]
+}

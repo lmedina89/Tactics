@@ -1,0 +1,15 @@
+{
+  "id": "crimson_economic_defense_heavy",
+  "name": "Crimson Heavy Economic Response",
+  "role": "ECONOMIC_DEFENSE",
+  "maxInstances": 1,
+  "recruitRadius": 240,
+  "recruitTimeoutTicks": 720,
+  "initialStance": "AGGRESSIVE",
+  "attackPrioritySet": "crimson_defense_targets",
+  "productionPriority": 1550,
+  "composition": [
+    {"definition":"aegis_x","min":1,"max":1},
+    {"definition":"hmmwv50","min":1,"max":1}
+  ]
+}

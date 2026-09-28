@@ -17,6 +17,13 @@
       "depth": 26
     },
     {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 13.0,
+      "minorRadius": 15.0,
+      "height": 24.5
+    },
+    {
       "type": "Render",
       "asset": "aegis_command_nexus_hq",
       "scale": 1.0,

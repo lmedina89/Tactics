@@ -17,6 +17,13 @@
       "depth": 18
     },
     {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 9.0,
+      "minorRadius": 11.0,
+      "height": 18.6
+    },
+    {
       "type": "Builder",
       "style": "yard",
       "placementRadius": 155,

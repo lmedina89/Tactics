@@ -1,7 +1,8 @@
-import {geometryAimPoint,segmentEntityIntersection} from '../geometry/collision-geometry.js';
+import {collisionShape,geometryAimPoint,segmentEntityIntersection} from '../geometry/collision-geometry.js';
 
 const EPS=1e-8;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const clone=v=>structuredClone(v);
 
 function targetVelocity(target){
   if(Number.isFinite(target?.motionVX)&&Number.isFinite(target?.motionVZ))return {x:target.motionVX,y:target.motionVY??0,z:target.motionVZ};
@@ -40,19 +41,51 @@ function rotateVelocityToward(v,desired,speed,maxAngle){
   const dot=clamp(a.x*b.x+a.y*b.y+a.z*b.z,-1,1),angle=Math.acos(dot);
   if(angle<=maxAngle||angle<EPS)return {x:b.x*speed,y:b.y*speed,z:b.z*speed};
   const t=maxAngle/angle;
-  // Deterministic normalized linear blend is adequate at our small fixed timestep and avoids quaternion allocation.
   const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t,z=a.z+(b.z-a.z)*t,m=Math.hypot(x,y,z)||1;
   return {x:x/m*speed,y:y/m*speed,z:z/m*speed};
 }
 
 /**
- * Sweep the projectile against a target that moved during this simulation tick.
- * The relative-motion transform makes the target static at its end-of-tick pose while
- * preserving the projectile-vs-target motion over the whole fixed step.
+ * Sweep projectile against an entity that moved during this simulation tick.
+ * The target pose is the end-of-tick pose; relative motion reconstructs the swept interval.
  */
 function movingTargetIntersection(start,end,target,dt,options){
   const v=targetVelocity(target),relativeStart={x:start.x+v.x*dt,y:start.y+v.y*dt,z:start.z+v.z*dt};
   return segmentEntityIntersection(relativeStart,end,target,options);
+}
+
+function terrainClearance(point,terrain,radius){return point.y-Math.max(0,radius)-(terrain?.heightAt?.(point.x,point.z)??-Infinity);}
+
+/** Earliest normalized segment time where the swept projectile sphere meets terrain, or null. */
+function segmentTerrainIntersection(start,end,terrain,{projectileRadius=0,sampleStep=2.5,binaryIterations=8}={}){
+  if(!terrain?.heightAt)return null;
+  const dx=end.x-start.x,dy=end.y-start.y,dz=end.z-start.z,horizontal=Math.hypot(dx,dz);
+  const steps=Math.max(1,Math.min(96,Math.ceil(horizontal/Math.max(.5,sampleStep))));
+  let t0=0,c0=terrainClearance(start,terrain,projectileRadius);if(c0<=0)return 0;
+  for(let i=1;i<=steps;i++){
+    const t1=i/steps,p={x:start.x+dx*t1,y:start.y+dy*t1,z:start.z+dz*t1},c1=terrainClearance(p,terrain,projectileRadius);
+    if(c1<=0){let lo=t0,hi=t1;for(let j=0;j<binaryIterations;j++){const mid=(lo+hi)*.5,m={x:start.x+dx*mid,y:start.y+dy*mid,z:start.z+dz*mid};if(terrainClearance(m,terrain,projectileRadius)<=0)hi=mid;else lo=mid;}return hi;}
+    t0=t1;c0=c1;
+  }
+  return null;
+}
+
+function relationToProjectile(p,entity){if(entity.playerId==null)return 'NEUTRAL';if(entity.playerId===p.sourcePlayerId)return 'ALLY';return 'ENEMY';}
+function collisionKind(entity){if(entity.kind==='building')return 'building';if(entity.kind==='resource')return 'resource';return 'unit';}
+
+function broadphaseSegmentEntity(start,end,entity,dt,radius=0){
+  const shape=collisionShape(entity),r=(shape.boundingRadius??shape.radius??.5)+Math.max(0,radius),v=targetVelocity(entity);
+  // entity pose is end-of-tick; include its reconstructed start pose so a fast mover
+  // cannot cross a shell segment and escape the cheap broadphase before swept narrowphase.
+  const ex0=entity.x-v.x*dt,ez0=entity.z-v.z*dt,entityMinX=Math.min(ex0,entity.x)-r,entityMaxX=Math.max(ex0,entity.x)+r,entityMinZ=Math.min(ez0,entity.z)-r,entityMaxZ=Math.max(ez0,entity.z)+r;
+  const segMinX=Math.min(start.x,end.x),segMaxX=Math.max(start.x,end.x),segMinZ=Math.min(start.z,end.z),segMaxZ=Math.max(start.z,end.z);
+  return entityMaxX>=segMinX&&entityMinX<=segMaxX&&entityMaxZ>=segMinZ&&entityMinZ<=segMaxZ;
+}
+
+function worldCollisionAllows(p,entity){
+  const cfg=p.worldCollision;if(!cfg?.enabled||!entity?.alive||entity.id===p.sourceId||entity.id===p.targetId)return false;
+  const relations=cfg.relations??['ENEMY'],kinds=cfg.kinds??['unit','building'];
+  return relations.includes(relationToProjectile(p,entity))&&kinds.includes(collisionKind(entity));
 }
 
 export class ProjectileSystem{
@@ -62,8 +95,9 @@ export class ProjectileSystem{
     const pdef=weapon.projectile||{},speed=Math.max(0.01,pdef.speed??80),behavior=pdef.behavior??'DUMB_PROJECTILE';
     const aim=predictedTargetPoint(start,target,pdef,speed),v=velocityToward(start,aim,speed),id=`proj_${++this.serial}`;
     const maxLifetimeSeconds=pdef.maxLifetimeSeconds??Math.max(1,(weapon.range??80)/speed*2.25+0.5);
+    const worldCollision={enabled:pdef.worldCollision?.enabled===true,relations:[...(pdef.worldCollision?.relations??['ENEMY'])],kinds:[...(pdef.worldCollision?.kinds??['unit','building'])],terrain:pdef.worldCollision?.terrain===true,terrainSampleStep:pdef.worldCollision?.terrainSampleStep??2.5};
     const p={
-      id,sourceId:source.id,targetId:target.id,weaponId:weapon.id,behavior,
+      id,sourceId:source.id,sourcePlayerId:source.playerId??null,targetId:target.id,weaponId:weapon.id,behavior,
       x:start.x,y:start.y,z:start.z,vx:v.x,vy:v.y,vz:v.z,
       aimX:aim.x,aimY:aim.y,aimZ:aim.z,targetX:aim.x,targetY:aim.y,targetZ:aim.z,
       speed,age:0,maxLifetimeSeconds,
@@ -72,6 +106,7 @@ export class ProjectileSystem{
       leadTarget:pdef.leadTarget!==false,maxLeadSeconds:pdef.maxLeadSeconds??3,
       guidanceTurnRate:Math.max(0,pdef.guidanceTurnRate??0),
       targetHeightFactor:pdef.targetHeightFactor??0.5,targetHeight:pdef.targetHeight??null,
+      worldCollision,
       color:pdef.color??'#ffd27a',spawnTick:tick
     };
     this.projectiles.set(id,p);return p;
@@ -85,29 +120,44 @@ export class ProjectileSystem{
     p.vx=next.x;p.vy=next.y;p.vz=next.z;p.aimX=aim.x;p.aimY=aim.y;p.aimZ=aim.z;p.targetX=aim.x;p.targetY=aim.y;p.targetZ=aim.z;
   }
 
-  _finish(id,p,target,hit,onImpact){onImpact?.(p,target,hit);this.projectiles.delete(id);}
+  _finish(id,p,target,hit,onImpact,info={}){onImpact?.(p,target,hit,info);this.projectiles.delete(id);}
 
-  step(dt,{entityLookup,onImpact}){
-    for(const [id,p] of [...this.projectiles]){
-      p.age=(p.age??0)+dt;const target=entityLookup(p.targetId);
-      this._guide(p,target,dt);
-      const start={x:p.x,y:p.y,z:p.z},end={x:p.x+p.vx*dt,y:p.y+p.vy*dt,z:p.z+p.vz*dt};
-      if(target?.alive&&p.designatedTargetCollision!==false){
-        const t=movingTargetIntersection(start,end,target,dt,{projectileRadius:p.radius??0,padding:p.impactPadding??0});
-        if(t!=null){p.x=start.x+(end.x-start.x)*t;p.y=start.y+(end.y-start.y)*t;p.z=start.z+(end.z-start.z)*t;this._finish(id,p,target,true,onImpact);continue;}
+  _earliestCollision(p,start,end,dt,{entityLookup,entitiesProvider,terrain}){
+    let best=null;const consider=(t,target,type)=>{if(t==null||t<0||t>1)return;const key=target?.id??type;if(!best||t<best.t-EPS||(Math.abs(t-best.t)<=EPS&&String(key)<String(best.key))){best={t,target:type==='TERRAIN'?null:target,type,key};}};
+    const designated=entityLookup(p.targetId);
+    if(designated?.alive&&p.designatedTargetCollision!==false){
+      consider(movingTargetIntersection(start,end,designated,dt,{projectileRadius:p.radius??0,padding:p.impactPadding??0}),designated,'DESIGNATED_TARGET');
+    }
+    if(p.worldCollision?.enabled&&entitiesProvider){
+      for(const entity of entitiesProvider()){
+        if(!worldCollisionAllows(p,entity)||!broadphaseSegmentEntity(start,end,entity,dt,(p.radius??0)+(p.impactPadding??0)))continue;
+        consider(movingTargetIntersection(start,end,entity,dt,{projectileRadius:p.radius??0,padding:p.impactPadding??0}),entity,'WORLD_ENTITY');
       }
+    }
+    if(p.worldCollision?.terrain&&terrain){
+      consider(segmentTerrainIntersection(start,end,terrain,{projectileRadius:p.radius??0,sampleStep:p.worldCollision.terrainSampleStep??2.5}),null,'TERRAIN');
+    }
+    return best;
+  }
+
+  step(dt,{entityLookup,entitiesProvider=null,terrain=null,onImpact}){
+    for(const [id,p] of [...this.projectiles]){
+      p.age=(p.age??0)+dt;const target=entityLookup(p.targetId);this._guide(p,target,dt);
+      const start={x:p.x,y:p.y,z:p.z},end={x:p.x+p.vx*dt,y:p.y+p.vy*dt,z:p.z+p.vz*dt},collision=this._earliestCollision(p,start,end,dt,{entityLookup,entitiesProvider,terrain});
+      if(collision){p.x=start.x+(end.x-start.x)*collision.t;p.y=start.y+(end.y-start.y)*collision.t;p.z=start.z+(end.z-start.z)*collision.t;this._finish(id,p,collision.target,true,onImpact,{type:collision.type,intendedTargetId:p.targetId});continue;}
       p.x=end.x;p.y=end.y;p.z=end.z;
-      if(p.age>=(p.maxLifetimeSeconds??3))this._finish(id,p,target,false,onImpact);
+      if(p.age>=(p.maxLifetimeSeconds??3))this._finish(id,p,target,false,onImpact,{type:'EXPIRED',intendedTargetId:p.targetId});
     }
   }
 
-  snapshot(){return {serial:this.serial,projectiles:[...this.projectiles.values()].map(p=>structuredClone(p))};}
+  snapshot(){return {serial:this.serial,projectiles:[...this.projectiles.values()].map(p=>clone(p))};}
 
   restore(state){
     this.serial=state?.serial??0;this.projectiles=new Map();
     for(const raw of state?.projectiles||[]){
-      const p=structuredClone(raw);
-      p.behavior??='DUMB_PROJECTILE';p.age??=0;p.maxLifetimeSeconds??=4;p.radius??=0.18;p.impactPadding??=Math.max(0,(p.hitRadius??0)-p.radius);p.designatedTargetCollision??=true;p.leadTarget??=false;p.maxLeadSeconds??=3;p.guidanceTurnRate??=0;p.targetHeightFactor??=0.5;p.targetHeight??=null;
+      const p=clone(raw);
+      p.behavior??='DUMB_PROJECTILE';p.age??=0;p.maxLifetimeSeconds??=4;p.radius??=0.18;p.impactPadding??=Math.max(0,(p.hitRadius??0)-p.radius);p.designatedTargetCollision??=true;p.leadTarget??=false;p.maxLeadSeconds??=3;p.guidanceTurnRate??=0;p.targetHeightFactor??=0.5;p.targetHeight??=null;p.sourcePlayerId??=null;
+      p.worldCollision??={enabled:false,relations:['ENEMY'],kinds:['unit','building'],terrain:false,terrainSampleStep:2.5};
       p.aimX??=p.targetX??p.x;p.aimY??=p.targetY??p.y;p.aimZ??=p.targetZ??p.z;p.targetX=p.aimX;p.targetY=p.aimY;p.targetZ=p.aimZ;
       if(!Number.isFinite(p.vx)||!Number.isFinite(p.vy)||!Number.isFinite(p.vz)){const v=velocityToward({x:p.x,y:p.y,z:p.z},{x:p.aimX,y:p.aimY,z:p.aimZ},p.speed??80);p.vx=v.x;p.vy=v.y;p.vz=v.z;}
       this.projectiles.set(p.id,p);
