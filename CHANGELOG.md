@@ -1,3 +1,10 @@
+## v0.6.6.1 — Aegis Material Integration
+
+- Integrated approved textured Aegis Vehicle Factory v022 and Field Barracks v024 GLBs.
+- Updated the asset catalog to use the new visual assets while retaining previous GLBs for rollback/reference.
+- Preserved production geometry names, visual bounds, WorldForge marker nodes/root metadata, and original double-sided rendering behavior.
+- No gameplay/simulation data changes.
+
 # ForgeRTS Changelog
 
 ## v0.6.6 — Player Relations + Hostility Authority

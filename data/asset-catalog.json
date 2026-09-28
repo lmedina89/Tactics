@@ -1,5 +1,5 @@
 {
-  "version": "0.6.6",
+  "version": "0.6.6.1",
   "assets": {
     "aegis_x_mbt": {
       "kind": "vehicle",
@@ -32,7 +32,7 @@
     },
     "aegis_field_barracks": {
       "kind": "building",
-      "path": "assets/buildings/aegis_field_barracks_v023.glb"
+      "path": "assets/buildings/aegis_field_barracks_v024.glb"
     },
     "aegis_field_power_node": {
       "kind": "building",
@@ -56,7 +56,7 @@
     },
     "aegis_vehicle_factory": {
       "kind": "building",
-      "path": "assets/buildings/aegis_vehicle_factory_v021.glb"
+      "path": "assets/buildings/aegis_vehicle_factory_v022.glb"
     },
     "mineral_rich": {
       "kind": "resource",

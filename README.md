@@ -1,4 +1,15 @@
-# ForgeRTS v0.6.6 — Player Relations + Hostility Authority
+# ForgeRTS v0.6.6.1 — Aegis Material Integration
+
+## v0.6.6.1 — Aegis Material Integration
+
+This narrow visual-content patch is built directly on the validated v0.6.6 Player Relations + Hostility Authority release. It integrates the approved Aegis Vehicle Factory and Field Barracks material passes without changing gameplay definitions, footprints, production, health, AI, pathfinding, relationships, or simulation behavior.
+
+- `aegis_vehicle_factory` now resolves to `assets/buildings/aegis_vehicle_factory_v022.glb`.
+- `aegis_field_barracks` now resolves to `assets/buildings/aegis_field_barracks_v024.glb`.
+- The prior production GLBs remain in `assets/buildings/` as rollback/reference assets.
+- The new GLBs keep the original geometry names, bounds, WorldForge marker nodes, root metadata, and double-sided rendering semantics while embedding the shared Aegis military PBR material family.
+- Material textures are embedded in each GLB; ForgeRTS has no runtime dependency on WorldForge or on an external material-pack directory.
+
 
 ## v0.6.6 — Player Relations + Hostility Authority
 

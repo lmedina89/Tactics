@@ -123,7 +123,7 @@
     {
       "id": "aegis_field_barracks",
       "kind": "building",
-      "path": "assets/buildings/aegis_field_barracks_v023.glb",
+      "path": "assets/buildings/aegis_field_barracks_v024.glb",
       "status": "production",
       "bounds": {
         "min": [
@@ -466,20 +466,17 @@
         "side_door_light_5.72"
       ],
       "materials": [
-        "WF_BASE_ARMOR",
-        "WF_CONCRETE",
-        "WF_CONCRETE_DARK",
-        "WF_GLASS",
-        "WF_GRILLE",
-        "WF_HAZARD",
-        "WF_LIGHT",
-        "WF_RED",
-        "WF_RUBBER",
-        "WF_STEEL",
-        "WF_STEEL_DARK",
-        "WF_TEAM_ACCENT",
-        "WF_TEAM_PRIMARY",
-        "WF_TEAM_SECONDARY"
+        "Aegis Painted Olive Metal",
+        "Command Teal Glass",
+        "Dark Gunmetal Machinery",
+        "Dark Standing-Seam Roof",
+        "Galvanized Structural Steel",
+        "Precast Military Concrete",
+        "Safety Amber Paint",
+        "Segmented Bay Door Steel",
+        "Service Cool Gray Trim",
+        "Warm Sand Corrugated Cladding",
+        "Warm Service Light"
       ],
       "meshes": [
         "bollard_-2.1",
@@ -3128,7 +3125,7 @@
     {
       "id": "aegis_vehicle_factory",
       "kind": "building",
-      "path": "assets/buildings/aegis_vehicle_factory_v021.glb",
+      "path": "assets/buildings/aegis_vehicle_factory_v022.glb",
       "status": "production",
       "bounds": {
         "min": [
@@ -3294,16 +3291,17 @@
         "personnel_door_frame"
       ],
       "materials": [
-        "WF_BASE_ARMOR",
-        "WF_CONCRETE",
-        "WF_GLASS",
-        "WF_LIGHT",
-        "WF_ROOF",
-        "WF_STEEL",
-        "WF_STEEL_DARK",
-        "WF_TEAM_ACCENT",
-        "WF_TEAM_PRIMARY",
-        "WF_TEAM_SECONDARY"
+        "Aegis Painted Olive Metal",
+        "Command Teal Glass",
+        "Dark Gunmetal Machinery",
+        "Dark Standing-Seam Roof",
+        "Galvanized Structural Steel",
+        "Precast Military Concrete",
+        "Safety Amber Paint",
+        "Segmented Bay Door Steel",
+        "Service Cool Gray Trim",
+        "Warm Sand Corrugated Cladding",
+        "Warm Service Light"
       ],
       "meshes": [
         "antenna_base",
