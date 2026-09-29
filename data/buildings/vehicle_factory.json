@@ -91,6 +91,7 @@
       "queueLimit": 5,
       "buildable": [
         "hmmwv50",
+        "warder_ifv",
         "harvester",
         "aegis_x"
       ],

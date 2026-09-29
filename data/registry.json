@@ -17,6 +17,7 @@
     "data/units/hmmwv50.json",
     "data/units/rifleman.json",
     "data/units/harvester.json",
+    "data/units/warder_ifv.json",
     "data/units/talon_ahx.json",
     "data/buildings/command_post.json",
     "data/buildings/vehicle_factory.json",
@@ -53,7 +54,8 @@
     "data/weapons/rifleman_rifle.json",
     "data/weapons/hmmwv_50cal.json",
     "data/weapons/aegis_120mm.json",
-    "data/weapons/guardian_cannon.json"
+    "data/weapons/guardian_cannon.json",
+    "data/weapons/warder_30mm.json"
   ],
   "commandSets": [
     "data/commandsets/aegis_command_post.json",

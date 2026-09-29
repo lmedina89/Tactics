@@ -1,6 +1,16 @@
 # ForgeRTS v0.6.6.5 — Crimson Core Building Set
 
-## Current release — v0.6.6.6
+## Current release — v0.6.6.7
+
+### v0.6.6.7 — Crimson Vehicle Roster Integration
+
+- Crimson Breaker MBT routes from the existing heavy-tank gameplay role.
+- Crimson Raider Halftrack v002 routes from the existing light combat vehicle role.
+- Crimson Reclaimer Harvester routes from the existing authoritative Harvester role and economy/docking state machine.
+- Crimson Warder IFV is registered as a new data-driven combat vehicle definition using existing locomotion, combat, production and AI systems.
+- All four authored Crimson vehicles bypass the generic enemy-red tint.
+- No changes to `engine/`, `renderer/`, or `ui/`; integration is assets + data + tests only.
+- Warder rear-ramp articulation is present in the GLB but infantry transport/containment gameplay is intentionally not claimed or implemented yet.
 
 Crimson Directorate now uses the authored Command Citadel for its HQ and ships with the complete first-pass Crimson fortification kit: 8 m and 4 m wall runs, fortified corner, universal junction/end post, and Armored Gate. The active validation map includes a non-enclosing rear Crimson wall section for live visual/gameplay verification. The fortification pieces are registered as real GameObjects but are intentionally not exposed as separate player build buttons; the planned one-tool wall placement/autoconnection UX remains future work.
 

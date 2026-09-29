@@ -1,0 +1,35 @@
+{
+  "release": "0.6.6.7",
+  "integration": "Crimson Vehicle Roster",
+  "newAssets": [
+    "crimson_breaker_mbt",
+    "crimson_raider_halftrack",
+    "crimson_warder_ifv",
+    "crimson_reclaimer_harvester"
+  ],
+  "runtimeBoundary": {
+    "engineChanged": false,
+    "rendererChanged": false,
+    "uiChanged": false
+  },
+  "notes": [
+    "Three shared gameplay roles use data-driven faction asset routing.",
+    "Warder IFV adds a data definition only; no new runtime subsystem.",
+    "Reclaimer integrated GLB root orientation/namespacing is presentation-only."
+  ],
+  "verification": {
+    "testsPassed": 139,
+    "testsFailed": 0,
+    "contentErrors": 0,
+    "contentWarnings": 0,
+    "definitions": 24,
+    "assets": 31,
+    "maps": 3,
+    "jsonParsed": 90,
+    "jsMjsSyntaxChecked": 65,
+    "importModulesAudited": 42,
+    "importCycles": 0,
+    "previousAssetsPreserved": 38,
+    "trackedAssetHashes": 42
+  }
+}

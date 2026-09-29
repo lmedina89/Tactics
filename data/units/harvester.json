@@ -71,7 +71,13 @@
       "type": "Render",
       "asset": "aegis_field_harvester",
       "scale": 1.0,
-      "headingOffset": 0.0
+      "headingOffset": 0.0,
+      "assetByFaction": {
+        "crimson": "crimson_reclaimer_harvester"
+      },
+      "factionColorModeByFaction": {
+        "crimson": "AUTHORED"
+      }
     },
     {
       "type": "ProductionCost",
@@ -154,6 +160,84 @@
               "HARVESTING"
             ]
           }
+        },
+        {
+          "id": "crimson_wheels",
+          "driver": "WHEEL_SPIN",
+          "nodes": [
+            "CrimsonFrontLeftWheelSpinRoot",
+            "CrimsonFrontRightWheelSpinRoot",
+            "CrimsonMidLeftWheelSpinRoot",
+            "CrimsonMidRightWheelSpinRoot",
+            "CrimsonRearLeftWheelSpinRoot",
+            "CrimsonRearRightWheelSpinRoot"
+          ],
+          "axis": "z",
+          "radius": 0.58,
+          "optional": true
+        },
+        {
+          "id": "crimson_front_steer",
+          "driver": "STEERING",
+          "nodes": [
+            "CrimsonFrontLeftSteerRoot",
+            "CrimsonFrontRightSteerRoot"
+          ],
+          "axis": "y",
+          "multiplier": 1.0,
+          "optional": true
+        },
+        {
+          "id": "crimson_collector_drum",
+          "driver": "STATE_SPIN",
+          "nodes": [
+            "CrimsonCollectorDrumRoot"
+          ],
+          "axis": "z",
+          "radiansPerSecond": 8.0,
+          "activeWhen": {
+            "path": "collector.state",
+            "in": [
+              "HARVESTING"
+            ]
+          },
+          "optional": true
+        },
+        {
+          "id": "crimson_left_gather_arm",
+          "driver": "OSCILLATE",
+          "nodes": [
+            "CrimsonLeftGatheringArmRoot"
+          ],
+          "axis": "y",
+          "amplitudeRadians": 0.18,
+          "frequencyHz": 0.85,
+          "phase": 0.0,
+          "activeWhen": {
+            "path": "collector.state",
+            "in": [
+              "HARVESTING"
+            ]
+          },
+          "optional": true
+        },
+        {
+          "id": "crimson_right_gather_arm",
+          "driver": "OSCILLATE",
+          "nodes": [
+            "CrimsonRightGatheringArmRoot"
+          ],
+          "axis": "y",
+          "amplitudeRadians": 0.18,
+          "frequencyHz": 0.85,
+          "phase": 3.141592653589793,
+          "activeWhen": {
+            "path": "collector.state",
+            "in": [
+              "HARVESTING"
+            ]
+          },
+          "optional": true
         }
       ]
     },

@@ -9,11 +9,26 @@
   "rallyTimeoutTicks": 360,
   "initialStance": "AGGRESSIVE",
   "attackCommonTarget": true,
-  "formation": {"type":"LOOSE","spacing":8},
+  "formation": {
+    "type": "LOOSE",
+    "spacing": 8
+  },
   "composition": [
-    {"definition":"aegis_x","min":2,"max":2},
-    {"definition":"hmmwv50","min":1,"max":1}
+    {
+      "definition": "aegis_x",
+      "min": 2,
+      "max": 2
+    },
+    {
+      "definition": "warder_ifv",
+      "min": 1,
+      "max": 1
+    }
   ],
   "attackPrioritySet": "crimson_assault_targets",
-  "reinforcement": {"enabled":true,"retreatBelowStrength":0.6,"reformTimeoutTicks":1050}
+  "reinforcement": {
+    "enabled": true,
+    "retreatBelowStrength": 0.6,
+    "reformTimeoutTicks": 1050
+  }
 }

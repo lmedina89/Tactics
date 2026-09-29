@@ -1,5 +1,5 @@
 {
-  "version": "0.6.6.6",
+  "version": "0.6.6.7",
   "assets": {
     "aegis_x_mbt": {
       "kind": "vehicle",
@@ -109,6 +109,22 @@
     "crimson_armored_gate": {
       "kind": "building",
       "path": "assets/buildings/crimson_armored_gate_v001.glb"
+    },
+    "crimson_breaker_mbt": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/crimson_breaker_mbt_v001.glb"
+    },
+    "crimson_raider_halftrack": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/crimson_raider_halftrack_v002.glb"
+    },
+    "crimson_warder_ifv": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/crimson_warder_ifv_v001.glb"
+    },
+    "crimson_reclaimer_harvester": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/crimson_reclaimer_harvester_v001.glb"
     }
   }
 }

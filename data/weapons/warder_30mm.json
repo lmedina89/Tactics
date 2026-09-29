@@ -1,0 +1,47 @@
+{
+  "id": "warder_30mm",
+  "name": "30mm Autocannon",
+  "damageType": "CANNON",
+  "damage": 26,
+  "range": 68,
+  "minimumRange": 0,
+  "delayBetweenShots": 0.32,
+  "prefireDelay": 0.1,
+  "clipSize": 10,
+  "clipReloadTime": 2.2,
+  "delivery": "PROJECTILE",
+  "aimTolerance": 0.1,
+  "targetDomains": [
+    "GROUND"
+  ],
+  "targetKinds": [
+    "infantry",
+    "vehicle",
+    "building"
+  ],
+  "projectile": {
+    "speed": 240,
+    "radius": 0.1,
+    "color": "#ffbf6a",
+    "behavior": "DUMB_PROJECTILE",
+    "leadTarget": true,
+    "maxLeadSeconds": 1.1,
+    "designatedTargetCollision": true,
+    "impactPadding": 0.06,
+    "targetHeightFactor": 0.5,
+    "worldCollision": {
+      "enabled": true,
+      "relations": [
+        "ENEMY"
+      ],
+      "kinds": [
+        "unit",
+        "building"
+      ],
+      "terrain": true,
+      "terrainSampleStep": 2.0
+    }
+  },
+  "muzzleHeight": 2.75,
+  "muzzleForwardOffset": 2.0
+}

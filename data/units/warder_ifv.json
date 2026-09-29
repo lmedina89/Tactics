@@ -1,6 +1,6 @@
 {
-  "id": "hmmwv50",
-  "name": "HMMWV-50",
+  "id": "warder_ifv",
+  "name": "Warder IFV",
   "kind": "vehicle",
   "modules": [
     {
@@ -16,22 +16,22 @@
     },
     {
       "type": "Body",
-      "maxHealth": 450
+      "maxHealth": 850
     },
     {
       "type": "Geometry",
       "shape": "BOX",
-      "majorRadius": 2.65,
-      "minorRadius": 1.22,
-      "height": 2.3,
+      "majorRadius": 3.55,
+      "minorRadius": 1.82,
+      "height": 2.75,
       "isSmall": false
     },
     {
       "type": "TurretAI",
-      "turnRate": 2.9,
-      "aimTolerance": 0.12,
+      "turnRate": 2.35,
+      "aimTolerance": 0.1,
       "autoAcquire": false,
-      "acquisitionRange": 78,
+      "acquisitionRange": 82,
       "scanIntervalTicks": 8
     },
     {
@@ -39,13 +39,13 @@
       "slots": [
         {
           "slot": "PRIMARY",
-          "weapon": "hmmwv_50cal"
+          "weapon": "warder_30mm"
         }
       ]
     },
     {
       "type": "ArmorSet",
-      "armor": "light_vehicle"
+      "armor": "industrial_vehicle"
     },
     {
       "type": "Selectable",
@@ -55,26 +55,26 @@
       "type": "UnitAIUpdate",
       "autoAcquireEnemiesWhenIdle": true,
       "defaultStance": "GUARD",
-      "acquisitionRange": 78,
+      "acquisitionRange": 76,
       "idleScanIntervalTicks": 10,
-      "idleChaseDistance": 88,
+      "idleChaseDistance": 86,
       "aggressiveRangeMultiplier": 1.25,
-      "aggressiveChaseDistance": 132,
-      "attackMoveAcquisitionRange": 86,
+      "aggressiveChaseDistance": 126,
+      "attackMoveAcquisitionRange": 84,
       "attackMoveScanIntervalTicks": 6,
-      "attackMoveChaseDistance": 115,
-      "guardRange": 82,
+      "attackMoveChaseDistance": 110,
+      "guardRange": 80,
       "guardScanIntervalTicks": 8,
-      "guardChaseDistance": 100,
+      "guardChaseDistance": 96,
       "guardReturnRadius": 10
     },
     {
       "type": "Locomotor",
-      "locomotor": "wheeled_light"
+      "locomotor": "wheeled_heavy"
     },
     {
       "type": "Vision",
-      "range": 90
+      "range": 92
     },
     {
       "type": "InteractionEndpoint",
@@ -84,24 +84,19 @@
     },
     {
       "type": "Render",
-      "asset": "aegis_hmmwv50",
+      "asset": "crimson_warder_ifv",
       "scale": 1.0,
       "headingOffset": -1.5707963267948966,
       "turretNode": "TurretRoot",
       "gunPitchNode": "GunPitchRoot",
       "muzzleNode": "MuzzleSocket",
-      "assetByFaction": {
-        "crimson": "crimson_raider_halftrack"
-      },
-      "factionColorModeByFaction": {
-        "crimson": "AUTHORED"
-      }
+      "factionColorMode": "AUTHORED"
     },
     {
       "type": "ProductionCost",
       "queueType": "vehicle",
-      "credits": 450,
-      "buildTimeSeconds": 5.0
+      "credits": 750,
+      "buildTimeSeconds": 6.5
     },
     {
       "type": "CommandSet",
@@ -116,6 +111,8 @@
           "nodes": [
             "WheelSpinRoot_FL",
             "WheelSpinRoot_FR",
+            "WheelSpinRoot_ML",
+            "WheelSpinRoot_MR",
             "WheelSpinRoot_RL",
             "WheelSpinRoot_RR"
           ],
@@ -133,17 +130,16 @@
           "multiplier": 1.0
         },
         {
-          "id": "crimson_barrel_recoil",
+          "id": "barrel_recoil",
           "driver": "TRIGGER_TRANSLATE",
           "trigger": "WEAPON_FIRE",
           "nodes": [
             "BarrelRecoilRoot"
           ],
           "axis": "x",
-          "distance": -0.16,
-          "kickSeconds": 0.045,
-          "returnSeconds": 0.13,
-          "optional": true
+          "distance": -0.1,
+          "kickSeconds": 0.04,
+          "returnSeconds": 0.12
         }
       ]
     },

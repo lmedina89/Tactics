@@ -498,6 +498,14 @@
       "yaw": -1.5708
     },
     {
+      "id": "e_warder",
+      "definition": "warder_ifv",
+      "owner": "enemy",
+      "x": 154,
+      "z": 50,
+      "yaw": -1.5708
+    },
+    {
       "id": "e_rifle",
       "definition": "rifleman",
       "owner": "enemy",

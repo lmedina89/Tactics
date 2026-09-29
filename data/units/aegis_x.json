@@ -89,7 +89,13 @@
       "headingOffset": -1.5707963267948966,
       "turretNode": "TurretRoot",
       "gunPitchNode": "GunPitchRoot",
-      "muzzleNode": "MuzzleSocket"
+      "muzzleNode": "MuzzleSocket",
+      "assetByFaction": {
+        "crimson": "crimson_breaker_mbt"
+      },
+      "factionColorModeByFaction": {
+        "crimson": "AUTHORED"
+      }
     },
     {
       "type": "ProductionCost",
@@ -133,6 +139,19 @@
           ],
           "axis": "z",
           "radius": 0.54
+        },
+        {
+          "id": "crimson_barrel_recoil",
+          "driver": "TRIGGER_TRANSLATE",
+          "trigger": "WEAPON_FIRE",
+          "nodes": [
+            "BarrelRecoilRoot"
+          ],
+          "axis": "x",
+          "distance": -0.28,
+          "kickSeconds": 0.05,
+          "returnSeconds": 0.15,
+          "optional": true
         }
       ]
     },

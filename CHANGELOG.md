@@ -65,6 +65,16 @@ Validation target: 134/134 automated tests, 0 content errors/warnings, all JSON 
 
 # ForgeRTS Changelog
 
+## v0.6.6.7 — Crimson Vehicle Roster Integration
+
+- Added accepted Crimson Breaker MBT v001, Raider Halftrack v002, Warder IFV v001 and Reclaimer Harvester v001 to the active asset catalog.
+- Added faction-authored vehicle routing for the shared MBT, light-combat and Harvester gameplay roles.
+- Reclaimer keeps the existing authoritative Harvester economy/docking logic; its integrated GLB is root-oriented to the shared Harvester forward axis and its articulated animation nodes are namespaced so Aegis/Crimson presentation drivers cannot conflict.
+- Added `warder_ifv` plus `warder_30mm` using existing GameObject, combat, locomotion, production and AI modules; no new runtime subsystem was introduced.
+- Crimson AI mobile/armor response teams can field the Warder; one starts in the active validation map for immediate visual verification.
+- Added optional Crimson-only recoil/vehicle animation bindings without changing Aegis asset behavior.
+- No `engine/`, `renderer/`, or `ui/` changes.
+
 ## v0.6.6 — Player Relations + Hostility Authority
 
 - Added simulation-owned, deterministic `PlayerRelationMap` with implicit `SELF` and directional `ALLY` / `NEUTRAL` / `ENEMY` overrides.

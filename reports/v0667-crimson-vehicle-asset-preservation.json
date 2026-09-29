@@ -1,0 +1,16 @@
+{
+  "release": "0.6.6.7",
+  "acceptedSourceHashes": {
+    "crimson_breaker_mbt_v001.glb": "857e323fb34617d31669685a6d3fb43b2b1e818d55ae29a59cf1904c7414d55a",
+    "crimson_raider_halftrack_v002.glb": "11dce1e948201dfec9537c54111276e526c58f2e17a9f06c0b8e3e10a24b92ba",
+    "crimson_warder_ifv_v001.glb": "b883c4e667a1691cea98f7035bbd5793e5d736bd84ef2dad44122b54682bc4bb",
+    "crimson_reclaimer_harvester_v001.glb": "ea12f9685c06e4d1f761d16b2af8b7c0bfa4629728089d2e2e4e5ba5155f33e9"
+  },
+  "integratedHashes": {
+    "crimson_breaker_mbt_v001.glb": "857e323fb34617d31669685a6d3fb43b2b1e818d55ae29a59cf1904c7414d55a",
+    "crimson_raider_halftrack_v002.glb": "11dce1e948201dfec9537c54111276e526c58f2e17a9f06c0b8e3e10a24b92ba",
+    "crimson_reclaimer_harvester_v001.glb": "6db04e97a066465a883d6cc2625e9c714f42f4c4b46e7c2b8681d37e66ed0349",
+    "crimson_warder_ifv_v001.glb": "b883c4e667a1691cea98f7035bbd5793e5d736bd84ef2dad44122b54682bc4bb"
+  },
+  "reclaimerNote": "Integrated Reclaimer intentionally differs from accepted source only by VehicleRoot -90\u00b0 Y orientation and namespacing of articulated animation roots; geometry/material buffers are otherwise preserved."
+}
