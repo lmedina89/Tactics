@@ -12,7 +12,7 @@ async function glbJson(rel){
   throw new Error(`${rel} missing GLB JSON chunk`);
 }
 
-const drivers=new Set(['WHEEL_SPIN','STEERING','CONTINUOUS_SPIN','STATE_SPIN','OSCILLATE','GROUP_SPIN']);
+const drivers=new Set(['WHEEL_SPIN','STEERING','CONTINUOUS_SPIN','STATE_SPIN','OSCILLATE','GROUP_SPIN','TRIGGER_TRANSLATE']);
 const axes=new Set(['x','y','z']);
 
 test('all data-driven client animation bindings resolve to real GLB clips/nodes',async()=>{
@@ -24,10 +24,11 @@ test('all data-driven client animation bindings resolve to real GLB clips/nodes'
       const def=await readJson(`${dir}/${file}`),mods=def.modules||[],render=mods.find(m=>m.type==='Render'),anim=mods.find(m=>m.type==='ClientAnimation');if(!anim)continue;
       assert.ok(render?.asset,`${def.id}: ClientAnimation requires Render asset`);const asset=catalog.assets[render.asset];assert.ok(asset,`${def.id}: missing asset ${render.asset}`);
       const g=await glbJson(asset.path),nodes=new Set((g.nodes||[]).map(n=>n.name).filter(Boolean)),clips=new Set((g.animations||[]).map(a=>a.name).filter(Boolean));
+      const routedNodeSets=[nodes];for(const assetId of Object.values(render.assetByFaction||{})){const routed=catalog.assets[assetId];assert.ok(routed,`${def.id}: missing faction-routed asset ${assetId}`);const rg=await glbJson(routed.path);routedNodeSets.push(new Set((rg.nodes||[]).map(n=>n.name).filter(Boolean)));}
       for(const c of anim.clips||[])assert.ok(clips.has(c.clip),`${def.id}: missing clip ${c.clip}`);
       for(const p of anim.procedural||[]){
         assert.ok(drivers.has(p.driver),`${def.id}: unsupported client animation driver ${p.driver}`);assert.ok(axes.has(p.axis||'y'),`${def.id}: invalid axis ${p.axis}`);
-        for(const n of p.nodes||[])assert.ok(nodes.has(n),`${def.id}: missing animation node ${n}`);
+        for(const n of p.nodes||[]){if(p.optional)assert.ok(routedNodeSets.some(set=>set.has(n)),`${def.id}: optional animation node ${n} missing from all routed assets`);else assert.ok(nodes.has(n),`${def.id}: missing animation node ${n}`);}
         if(p.pivotNode)assert.ok(nodes.has(p.pivotNode),`${def.id}: missing pivot node ${p.pivotNode}`);
         if(p.parentNode)assert.ok(nodes.has(p.parentNode),`${def.id}: missing parent node ${p.parentNode}`);
         for(const prefix of p.nodePrefixes||[])assert.ok([...nodes].some(n=>n.startsWith(prefix)),`${def.id}: no nodes match prefix ${prefix}`);

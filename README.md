@@ -1,4 +1,20 @@
-# ForgeRTS v0.6.6.4 — Crimson Production Buildings
+# ForgeRTS v0.6.6.5 — Crimson Core Building Set
+
+
+## v0.6.6.5 — Crimson Thermal Plant + Ore Works + Bastion Gun Integration
+
+This patch completes the five currently authored Crimson Directorate gameplay-role replacements while preserving the shared authoritative ForgeRTS definitions. The three newly accepted visuals are selected by faction ownership rather than by duplicated Crimson-only gameplay IDs.
+
+- Crimson-owned `power_node` renders `assets/buildings/crimson_thermal_plant_v001.glb`.
+- Crimson-owned `refinery` renders `assets/buildings/crimson_ore_works_v001.glb`.
+- Crimson-owned `guardian_turret` renders `assets/buildings/crimson_bastion_gun_v002.glb`.
+- The previously integrated Crimson `barracks` and `vehicle_factory` continue using Garrison Block v003 and War Factory v001.
+- All five authored Crimson replacements use `factionColorModeByFaction.crimson = "AUTHORED"`; the old renderer-level red tint is not applied to these models.
+- Aegis continues using the existing Aegis visuals for the same gameplay definitions.
+- Crimson AI still requests the normal `power_node`, `refinery`, `barracks`, `vehicle_factory`, and `guardian_turret` role IDs, so economy, production, prerequisites, balance, placement, targeting and save-state behavior remain shared.
+- The construction-validation enemy is already faction `crimson` and contains all five roles, so the authored variants appear immediately in the field-test scenario; the AI also rebuilds/builds the same roles through its existing build list.
+- Bastion Gun v002 keeps the accepted geometry unchanged and uses its existing `TurretRoot` for yaw plus the new `BarrelRecoilRoot` hierarchy for presentation-only weapon recoil.
+- Recoil is driven by the generic client-animation system on `WEAPON_FIRE` and does not feed transforms back into authoritative simulation state.
 
 ## v0.6.6.4 — Crimson Garrison + War Factory Integration
 

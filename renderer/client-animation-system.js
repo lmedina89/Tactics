@@ -15,7 +15,9 @@ function findNodes(root,names=[],prefixes=[]){
   return out;
 }
 function rememberNodes(nodes){return nodes.map(node=>({node,baseQuaternion:node.quaternion.clone()}));}
+function rememberTranslationNodes(nodes){return nodes.map(node=>({node,basePosition:node.position.clone()}));}
 function applyLocalAxis(item,axis,angle,tempQ){tempQ.setFromAxisAngle(axis,angle);item.node.quaternion.copy(item.baseQuaternion).multiply(tempQ);}
+function applyLocalTranslation(item,axis,distance){item.node.position.copy(item.basePosition).addScaledVector(axis,distance);}
 function compileSpec(spec){return {...spec,_activePathParts:spec.activeWhen?.path?pathParts(spec.activeWhen.path):null};}
 function allowed(entity,spec){
   if(!entity?.alive)return false;
@@ -55,6 +57,10 @@ export class ClientAnimationSystem{
 
     for(const raw of config.procedural||[]){
       const spec=compileSpec(raw),driver=String(spec.driver||'').toUpperCase();
+      if(driver==='TRIGGER_TRANSLATE'){
+        const nodes=findNodes(view,spec.nodes||[],spec.nodePrefixes||[]);if(!nodes.length)continue;
+        runtime.procedural.push({spec,driver,axis:axisOf(spec.axis),items:rememberTranslationNodes(nodes),triggerStart:-Infinity,active:false});continue;
+      }
       if(driver==='GROUP_SPIN'){
         const pivotNode=spec.pivotNode?view.getObjectByName(spec.pivotNode):null,parent=(spec.parentNode?view.getObjectByName(spec.parentNode):null)||pivotNode?.parent||view,prefixes=spec.nodePrefixes||[],members=[];
         view.traverse(n=>{if(n===pivotNode)return;const name=n.name||'';if(prefixes.some(p=>name.startsWith(p)))members.push(n);});
@@ -80,8 +86,11 @@ export class ClientAnimationSystem{
   }
 
   trigger(view,trigger,nowMs=performance.now()){
-    const r=view?.userData?.clientAnimation;if(!r?.mixer)return;
-    const entry=r.triggerClips.get(String(trigger||'').toUpperCase());if(!entry)return;
+    const r=view?.userData?.clientAnimation;if(!r)return;
+    const triggerKey=String(trigger||'').toUpperCase();
+    for(const p of r.procedural){if(p.driver==='TRIGGER_TRANSLATE'&&String(p.spec.trigger||'WEAPON_FIRE').toUpperCase()===triggerKey){p.triggerStart=nowMs/1000;p.active=true;}}
+    if(!r.mixer)return;
+    const entry=r.triggerClips.get(triggerKey);if(!entry)return;
     const {key,spec,action}=entry;
     if(r.activeLoop&&r.activeLoop!==key)r.movingClip?.action?.fadeOut(spec.fadeSeconds??.06);
     if(r.oneShot&&r.oneShot.key!==key)r.oneShot.action.stop();
@@ -122,6 +131,18 @@ export class ClientAnimationSystem{
       if(p.driver==='OSCILLATE'){
         const a=active?Math.sin((elapsed*(s.frequencyHz??.25)+((s.phase??0)/TAU))*TAU)*(s.amplitudeRadians??.15):0;
         for(const item of p.items)applyLocalAxis(item,axis,a,this._q);
+        continue;
+      }
+      if(p.driver==='TRIGGER_TRANSLATE'){
+        const kick=Math.max(.001,s.kickSeconds??.05),ret=Math.max(.001,s.returnSeconds??.16),total=kick+ret;
+        let distance=0;
+        if(active&&p.active){
+          const t=Math.max(0,elapsed-p.triggerStart);
+          if(t<kick){const u=t/kick,ease=1-Math.pow(1-u,3);distance=(s.distance??-.25)*ease;}
+          else if(t<total){const u=(t-kick)/ret,ease=1-Math.pow(1-u,3);distance=(s.distance??-.25)*(1-ease);}
+          else p.active=false;
+        }else p.active=false;
+        for(const item of p.items)applyLocalTranslation(item,axis,distance);
       }
     }
   }

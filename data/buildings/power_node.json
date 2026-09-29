@@ -67,7 +67,13 @@
       "type": "Render",
       "asset": "aegis_field_power_node",
       "scale": 1.0,
-      "headingOffset": 0.0
+      "headingOffset": 0.0,
+      "assetByFaction": {
+        "crimson": "crimson_thermal_plant"
+      },
+      "factionColorModeByFaction": {
+        "crimson": "AUTHORED"
+      }
     },
     {
       "type": "Selectable",

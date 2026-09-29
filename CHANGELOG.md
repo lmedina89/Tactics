@@ -1,3 +1,15 @@
+## v0.6.6.5 — Crimson Core Building Set Integration
+
+- Integrated Crimson Thermal Plant v001 as the Crimson visual variant of `power_node`.
+- Integrated Crimson Ore Works v001 as the Crimson visual variant of `refinery`.
+- Integrated Crimson Bastion Gun v002 as the Crimson visual variant of `guardian_turret`.
+- Preserved the prior Garrison Block v003 / War Factory v001 mappings, giving the enemy five canonical Crimson building visuals.
+- Marked all three new faction routes `AUTHORED`, preventing the legacy global Crimson red tint from altering their embedded PBR materials.
+- Kept shared gameplay IDs and AI build-list roles unchanged; faction ownership alone selects the visual.
+- Added generic optional faction-routed animation-node validation.
+- Added generic `TRIGGER_TRANSLATE` client animation support and bound Bastion `BarrelRecoilRoot` to `WEAPON_FIRE` for a 0.30 m presentation-only recoil cycle.
+- Expanded Crimson visual regression tests to cover all five core role mappings, enemy-map ownership, authored tint policy, and Bastion articulation/recoil hierarchy.
+
 ## v0.6.6.4 — Crimson Garrison + War Factory Integration
 
 - Integrated the accepted Crimson Garrison Block v003 and Crimson War Factory v001 as faction-specific visual variants of the existing `barracks` and `vehicle_factory` gameplay roles.

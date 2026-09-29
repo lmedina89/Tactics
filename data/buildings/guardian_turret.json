@@ -90,7 +90,31 @@
       "turretNode": "TurretRoot",
       "gunPitchNode": "GunPitchRoot",
       "muzzleNode": "MuzzleSocket",
-      "turretHeadingOffset": -1.5707963267948966
+      "turretHeadingOffset": -1.5707963267948966,
+      "assetByFaction": {
+        "crimson": "crimson_bastion_gun"
+      },
+      "factionColorModeByFaction": {
+        "crimson": "AUTHORED"
+      }
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "barrel_recoil",
+          "driver": "TRIGGER_TRANSLATE",
+          "trigger": "WEAPON_FIRE",
+          "nodes": [
+            "BarrelRecoilRoot"
+          ],
+          "axis": "x",
+          "distance": -0.3,
+          "kickSeconds": 0.055,
+          "returnSeconds": 0.16,
+          "optional": true
+        }
+      ]
     },
     {
       "type": "Selectable",

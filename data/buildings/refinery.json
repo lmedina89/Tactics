@@ -70,7 +70,13 @@
       "type": "Render",
       "asset": "aegis_field_refinery",
       "scale": 1.0,
-      "headingOffset": 0.0
+      "headingOffset": 0.0,
+      "assetByFaction": {
+        "crimson": "crimson_ore_works"
+      },
+      "factionColorModeByFaction": {
+        "crimson": "AUTHORED"
+      }
     },
     {
       "type": "InteractionEndpoint",

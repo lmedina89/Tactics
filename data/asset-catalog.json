@@ -1,5 +1,5 @@
 {
-  "version": "0.6.6.4",
+  "version": "0.6.6.5",
   "assets": {
     "aegis_x_mbt": {
       "kind": "vehicle",
@@ -73,6 +73,18 @@
     "crimson_war_factory": {
       "kind": "building",
       "path": "assets/buildings/crimson_war_factory_v001.glb"
+    },
+    "crimson_thermal_plant": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_thermal_plant_v001.glb"
+    },
+    "crimson_ore_works": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_ore_works_v001.glb"
+    },
+    "crimson_bastion_gun": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_bastion_gun_v002.glb"
     }
   }
 }

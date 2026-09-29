@@ -20,8 +20,39 @@ async function main(){
 
   for(const def of registry.definitions.values()){
     const meta=moduleConfig(def,'ContentMeta'),render=moduleConfig(def,'Render'),anim=moduleConfig(def,'ClientAnimation'),fp=moduleConfig(def,'Footprint'),prod=moduleConfig(def,'Production'),targetable=moduleConfig(def,'AITargetable');
-    if(render?.asset){const asset=registry.asset(render.asset),audit=assetById.get(render.asset);if(!asset)issues.push(issue('ERROR','UNKNOWN_ASSET',`${def.id} references missing asset ${render.asset}`,{definitionId:def.id}));else{try{await fs.access(path.join(root,asset.path));}catch{issues.push(issue('ERROR','MISSING_ASSET_FILE',`${def.id} asset file does not exist: ${asset.path}`,{definitionId:def.id,assetId:render.asset}));}if(!audit)issues.push(issue('ERROR','UNAUDITED_ASSET',`${def.id} asset ${render.asset} is missing from GLB audit`,{definitionId:def.id,assetId:render.asset}));}}
-    if(anim&&render?.asset){const audit=assetById.get(render.asset);if(audit){const nodes=new Set(audit.nodes),clips=new Set(audit.animations);for(const c of anim.clips||[])if(!clips.has(c.clip))issues.push(issue('ERROR','MISSING_ANIMATION_CLIP',`${def.id} requests clip ${c.clip} not present in ${render.asset}`,{definitionId:def.id,assetId:render.asset}));for(const p of anim.procedural||[]){for(const n of p.nodes||[])if(!nodes.has(n))issues.push(issue('ERROR','MISSING_ANIMATION_NODE',`${def.id} requests node ${n} not present in ${render.asset}`,{definitionId:def.id,assetId:render.asset}));for(const prefix of p.nodePrefixes||[])if(!audit.nodes.some(n=>n.startsWith(prefix)))issues.push(issue('ERROR','MISSING_ANIMATION_PREFIX',`${def.id} prefix ${prefix} matches no nodes in ${render.asset}`,{definitionId:def.id,assetId:render.asset}));}}}
+    if(render?.asset){
+      const asset=registry.asset(render.asset),audit=assetById.get(render.asset);
+      if(!asset)issues.push(issue('ERROR','UNKNOWN_ASSET',`${def.id} references missing asset ${render.asset}`,{definitionId:def.id}));
+      else{
+        try{await fs.access(path.join(root,asset.path));}catch{issues.push(issue('ERROR','MISSING_ASSET_FILE',`${def.id} asset file does not exist: ${asset.path}`,{definitionId:def.id,assetId:render.asset}));}
+        if(!audit)issues.push(issue('ERROR','UNAUDITED_ASSET',`${def.id} asset ${render.asset} is missing from GLB audit`,{definitionId:def.id,assetId:render.asset}));
+      }
+    }
+    for(const [factionId,assetId] of Object.entries(render?.assetByFaction||{})){
+      const asset=registry.asset(assetId),audit=assetById.get(assetId);
+      if(!asset)issues.push(issue('ERROR','UNKNOWN_FACTION_ASSET',`${def.id} faction ${factionId} references missing asset ${assetId}`,{definitionId:def.id,factionId,assetId}));
+      else{
+        try{await fs.access(path.join(root,asset.path));}catch{issues.push(issue('ERROR','MISSING_FACTION_ASSET_FILE',`${def.id} faction ${factionId} asset file does not exist: ${asset.path}`,{definitionId:def.id,factionId,assetId}));}
+        if(!audit)issues.push(issue('ERROR','UNAUDITED_FACTION_ASSET',`${def.id} faction ${factionId} asset ${assetId} is missing from GLB audit`,{definitionId:def.id,factionId,assetId}));
+      }
+    }
+    if(anim&&render?.asset){
+      const audit=assetById.get(render.asset);
+      if(audit){
+        const nodes=new Set(audit.nodes),clips=new Set(audit.animations);
+        for(const c of anim.clips||[])if(!clips.has(c.clip))issues.push(issue('ERROR','MISSING_ANIMATION_CLIP',`${def.id} requests clip ${c.clip} not present in ${render.asset}`,{definitionId:def.id,assetId:render.asset}));
+        for(const p of anim.procedural||[]){
+          for(const n of p.nodes||[])if(!p.optional&&!nodes.has(n))issues.push(issue('ERROR','MISSING_ANIMATION_NODE',`${def.id} requests node ${n} not present in ${render.asset}`,{definitionId:def.id,assetId:render.asset}));
+          for(const prefix of p.nodePrefixes||[])if(!p.optional&&!audit.nodes.some(n=>n.startsWith(prefix)))issues.push(issue('ERROR','MISSING_ANIMATION_PREFIX',`${def.id} prefix ${prefix} matches no nodes in ${render.asset}`,{definitionId:def.id,assetId:render.asset}));
+        }
+      }
+      const routed=[render.asset,...Object.values(render.assetByFaction||{})].map(id=>assetById.get(id)).filter(Boolean);
+      for(const p of anim.procedural||[]){
+        if(!p.optional)continue;
+        for(const n of p.nodes||[])if(!routed.some(a=>a.nodes.includes(n)))issues.push(issue('ERROR','UNBOUND_OPTIONAL_ANIMATION_NODE',`${def.id} optional animation node ${n} is absent from all routed assets`,{definitionId:def.id,node:n}));
+        for(const prefix of p.nodePrefixes||[])if(!routed.some(a=>a.nodes.some(n=>n.startsWith(prefix))))issues.push(issue('ERROR','UNBOUND_OPTIONAL_ANIMATION_PREFIX',`${def.id} optional animation prefix ${prefix} matches no routed asset`,{definitionId:def.id,prefix}));
+      }
+    }
     if(prod&&fp){const half=Math.max(fp.width,fp.depth)/2;if((prod.exitDistance??0)<=half)issues.push(issue('ERROR','FACTORY_EXIT_INSIDE_FOOTPRINT',`${def.id} exitDistance ${prod.exitDistance??0} does not clear footprint half extent ${half}`,{definitionId:def.id}));if((prod.rallyDistance??0)<=(prod.exitDistance??0))issues.push(issue('ERROR','FACTORY_RALLY_BEFORE_EXIT',`${def.id} rallyDistance must exceed exitDistance`,{definitionId:def.id}));}
     if(meta?.affiliation==='FACTION'&&['vehicle','infantry','aircraft','building'].includes(def.kind)&&meta.validationOnly!==true&&!targetable)issues.push(issue('WARNING','NO_AI_CATEGORIES',`${def.id} has FACTION content but no AITargetable categories`,{definitionId:def.id}));
     if(render?.asset){const a=assetById.get(render.asset);if(a?.bounds?.size?.some(v=>v<=0||v>250))issues.push(issue('WARNING','SUSPICIOUS_VISUAL_BOUNDS',`${def.id}/${render.asset} has suspicious visual bounds`,{definitionId:def.id,assetId:render.asset,bounds:a.bounds.size}));}
