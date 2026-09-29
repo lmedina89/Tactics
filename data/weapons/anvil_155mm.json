@@ -1,0 +1,47 @@
+{
+  "id": "anvil_155mm",
+  "name": "Anvil 155mm Howitzer",
+  "damageType": "CANNON",
+  "damage": 410,
+  "range": 126,
+  "minimumRange": 20,
+  "delayBetweenShots": 4.6,
+  "prefireDelay": 0.55,
+  "clipSize": 1,
+  "clipReloadTime": 4.6,
+  "delivery": "PROJECTILE",
+  "aimTolerance": 0.065,
+  "targetDomains": [
+    "GROUND"
+  ],
+  "targetKinds": [
+    "infantry",
+    "vehicle",
+    "building"
+  ],
+  "projectile": {
+    "speed": 150,
+    "radius": 0.26,
+    "color": "#ffb65c",
+    "behavior": "DUMB_PROJECTILE",
+    "leadTarget": true,
+    "maxLeadSeconds": 1.6,
+    "designatedTargetCollision": true,
+    "impactPadding": 0.1,
+    "targetHeightFactor": 0.5,
+    "worldCollision": {
+      "enabled": true,
+      "relations": [
+        "ENEMY"
+      ],
+      "kinds": [
+        "unit",
+        "building"
+      ],
+      "terrain": true,
+      "terrainSampleStep": 2.0
+    }
+  },
+  "muzzleHeight": 3.0,
+  "muzzleForwardOffset": 4.0
+}

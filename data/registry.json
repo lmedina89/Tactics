@@ -10,7 +10,9 @@
     "data/locomotors/wheeled.json",
     "data/locomotors/wheeled_heavy.json",
     "data/locomotors/tracked.json",
-    "data/locomotors/rotary_air.json"
+    "data/locomotors/rotary_air.json",
+    "data/locomotors/infantry_heavy.json",
+    "data/locomotors/tracked_artillery.json"
   ],
   "definitions": [
     "data/units/aegis_x.json",
@@ -33,7 +35,9 @@
     "data/buildings/crimson_wall_straight_4m.json",
     "data/buildings/crimson_wall_corner.json",
     "data/buildings/crimson_wall_junction.json",
-    "data/buildings/crimson_armored_gate.json"
+    "data/buildings/crimson_armored_gate.json",
+    "data/units/praetorian_exosuit.json",
+    "data/units/anvil_spg.json"
   ],
   "interactions": [
     "data/interactions/resource_docking.json",
@@ -48,14 +52,17 @@
     "data/armors/aircraft_light.json",
     "data/armors/structure.json",
     "data/armors/heavy_structure.json",
-    "data/armors/fortified.json"
+    "data/armors/fortified.json",
+    "data/armors/heavy_infantry.json"
   ],
   "weapons": [
     "data/weapons/rifleman_rifle.json",
     "data/weapons/hmmwv_50cal.json",
     "data/weapons/aegis_120mm.json",
     "data/weapons/guardian_cannon.json",
-    "data/weapons/warder_30mm.json"
+    "data/weapons/warder_30mm.json",
+    "data/weapons/praetorian_heavy_rifle.json",
+    "data/weapons/anvil_155mm.json"
   ],
   "commandSets": [
     "data/commandsets/aegis_command_post.json",

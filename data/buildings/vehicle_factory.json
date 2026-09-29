@@ -93,7 +93,8 @@
         "hmmwv50",
         "warder_ifv",
         "harvester",
-        "aegis_x"
+        "aegis_x",
+        "anvil_spg"
       ],
       "exitDistance": 20,
       "rallyDistance": 34,

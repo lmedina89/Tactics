@@ -1,0 +1,136 @@
+{
+  "id": "anvil_spg",
+  "name": "Anvil SPG",
+  "kind": "vehicle",
+  "modules": [
+    {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "FACTION",
+      "categories": [
+        "MILITARY",
+        "UNIT",
+        "VEHICLE"
+      ],
+      "editorGroup": "VEHICLE",
+      "tags": [
+        "ARTILLERY"
+      ]
+    },
+    {
+      "type": "Body",
+      "maxHealth": 980
+    },
+    {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 4.4,
+      "minorRadius": 2.68,
+      "height": 3.65,
+      "isSmall": false
+    },
+    {
+      "type": "TurretAI",
+      "turnRate": 1.15,
+      "aimTolerance": 0.065,
+      "autoAcquire": false,
+      "acquisitionRange": 130,
+      "scanIntervalTicks": 10
+    },
+    {
+      "type": "WeaponSet",
+      "slots": [
+        {
+          "slot": "PRIMARY",
+          "weapon": "anvil_155mm"
+        }
+      ]
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "industrial_vehicle"
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "UnitAIUpdate",
+      "autoAcquireEnemiesWhenIdle": true,
+      "defaultStance": "GUARD",
+      "acquisitionRange": 118,
+      "idleScanIntervalTicks": 12,
+      "idleChaseDistance": 95,
+      "aggressiveRangeMultiplier": 1.15,
+      "aggressiveChaseDistance": 125,
+      "attackMoveAcquisitionRange": 122,
+      "attackMoveScanIntervalTicks": 8,
+      "attackMoveChaseDistance": 115,
+      "guardRange": 120,
+      "guardScanIntervalTicks": 10,
+      "guardChaseDistance": 110,
+      "guardReturnRadius": 12
+    },
+    {
+      "type": "Locomotor",
+      "locomotor": "tracked_artillery"
+    },
+    {
+      "type": "Vision",
+      "range": 132
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "production_unit"
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "crimson_anvil_spg",
+      "scale": 1.0,
+      "headingOffset": -1.5707963267948966,
+      "turretNode": "TurretRoot",
+      "gunPitchNode": "GunPitchRoot",
+      "muzzleNode": "MuzzleSocket",
+      "factionColorMode": "AUTHORED"
+    },
+    {
+      "type": "ProductionCost",
+      "queueType": "vehicle",
+      "credits": 1400,
+      "buildTimeSeconds": 12.0
+    },
+    {
+      "type": "CommandSet",
+      "id": "aegis_combat_unit"
+    },
+    {
+      "type": "ClientAnimation",
+      "procedural": [
+        {
+          "id": "barrel_recoil",
+          "driver": "TRIGGER_TRANSLATE",
+          "trigger": "WEAPON_FIRE",
+          "nodes": [
+            "BarrelRecoilRoot"
+          ],
+          "axis": "x",
+          "distance": -0.42,
+          "kickSeconds": 0.07,
+          "returnSeconds": 0.22
+        }
+      ]
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "COMBAT",
+        "VEHICLE",
+        "ARTILLERY",
+        "LIGHT_ARMOR"
+      ],
+      "significant": true
+    }
+  ]
+}

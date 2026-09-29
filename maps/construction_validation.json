@@ -592,6 +592,22 @@
       "x": 306.8,
       "z": -35.36,
       "yaw": 0.0
+    },
+    {
+      "id": "e_anvil",
+      "definition": "anvil_spg",
+      "owner": "enemy",
+      "x": 145,
+      "z": -76,
+      "yaw": -1.5708
+    },
+    {
+      "id": "e_praetorian",
+      "definition": "praetorian_exosuit",
+      "owner": "enemy",
+      "x": 146,
+      "z": 69,
+      "yaw": -1.5708
     }
   ],
   "environment": {

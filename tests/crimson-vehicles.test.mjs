@@ -13,7 +13,7 @@ async function fileFetch(input){const rel=String(input).replace(/^\.\//,'');try{
 function glbJSON(buffer){let off=12,g=null;while(off<buffer.length){const len=buffer.readUInt32LE(off),type=buffer.readUInt32LE(off+4);off+=8;if(type===0x4e4f534a)g=JSON.parse(buffer.subarray(off,off+len).toString('utf8').replace(/\0+$/,'').trim());off+=len;}return g;}
 
 test('accepted Crimson vehicle assets are registered and shared roles preserve Aegis defaults',async()=>{
-  const cat=await readJson('data/asset-catalog.json');assert.equal(cat.version,'0.6.6.7');
+  const cat=await readJson('data/asset-catalog.json');assert.equal(cat.version,'0.6.6.8');
   for(const id of ['crimson_breaker_mbt','crimson_raider_halftrack','crimson_warder_ifv','crimson_reclaimer_harvester']){assert.ok(cat.assets[id]);await fs.access(path.join(root,cat.assets[id].path));}
   const tank=await readJson('data/units/aegis_x.json'),light=await readJson('data/units/hmmwv50.json'),harv=await readJson('data/units/harvester.json');
   const tr=tank.modules.find(m=>m.type==='Render'),lr=light.modules.find(m=>m.type==='Render'),hr=harv.modules.find(m=>m.type==='Render');

@@ -338,3 +338,7 @@ Serve the folder with any static HTTP server or deploy it directly to GitHub Pag
 6. Fire across a ridge/terrain obstruction and confirm the shell terminates on terrain rather than passing through the hill.
 7. Re-check moving-target cannon hits, harvesting, construction, production, assault reform and strategic personality behavior for regressions.
 8. Save/restore during an active economic response and while projectiles are in flight; v14 state should continue deterministically.
+
+## v0.6.6.8 Crimson artillery + infantry
+
+Adds the accepted Crimson Anvil SPG v002, Praetorian Exosuit v002, and Line Trooper v001 through the existing data-driven content systems. The Line Trooper is the Crimson visual for the shared rifleman role; Praetorian and Anvil are new enemy-production definitions. See `CRIMSON_ARTILLERY_INFANTRY_INTEGRATION.md` for the deliberate stabilizer/animation safety boundaries.

@@ -33,6 +33,11 @@
       "definition": "rifleman",
       "min": 1,
       "max": 1
+    },
+    {
+      "definition": "praetorian_exosuit",
+      "min": 1,
+      "max": 1
     }
   ],
   "attackPrioritySet": "crimson_assault_targets",

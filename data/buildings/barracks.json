@@ -89,7 +89,8 @@
       "queueType": "infantry",
       "queueLimit": 5,
       "buildable": [
-        "rifleman"
+        "rifleman",
+        "praetorian_exosuit"
       ],
       "rolloutProtocol": "infantry_rollout",
       "exitDistance": 15,

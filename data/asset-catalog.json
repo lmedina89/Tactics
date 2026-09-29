@@ -1,5 +1,5 @@
 {
-  "version": "0.6.6.7",
+  "version": "0.6.6.8",
   "assets": {
     "aegis_x_mbt": {
       "kind": "vehicle",
@@ -125,6 +125,18 @@
     "crimson_reclaimer_harvester": {
       "kind": "vehicle",
       "path": "assets/vehicles/crimson_reclaimer_harvester_v001.glb"
+    },
+    "crimson_anvil_spg": {
+      "kind": "vehicle",
+      "path": "assets/vehicles/crimson_anvil_spg_v002.glb"
+    },
+    "crimson_praetorian_exosuit": {
+      "kind": "infantry",
+      "path": "assets/infantry/crimson_praetorian_exosuit_v002.glb"
+    },
+    "crimson_line_trooper": {
+      "kind": "infantry",
+      "path": "assets/infantry/crimson_line_trooper_v001.glb"
     }
   }
 }

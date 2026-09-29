@@ -1,0 +1,113 @@
+{
+  "id": "praetorian_exosuit",
+  "name": "Praetorian Exosuit",
+  "kind": "infantry",
+  "modules": [
+    {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "FACTION",
+      "categories": [
+        "MILITARY",
+        "UNIT",
+        "INFANTRY"
+      ],
+      "editorGroup": "INFANTRY",
+      "tags": [
+        "HEAVY_INFANTRY"
+      ]
+    },
+    {
+      "type": "Body",
+      "maxHealth": 360
+    },
+    {
+      "type": "Geometry",
+      "shape": "CYLINDER",
+      "majorRadius": 0.58,
+      "minorRadius": 0.58,
+      "height": 2.5,
+      "isSmall": true
+    },
+    {
+      "type": "BodyAim",
+      "turnRate": 6.2,
+      "aimTolerance": 0.14
+    },
+    {
+      "type": "WeaponSet",
+      "slots": [
+        {
+          "slot": "PRIMARY",
+          "weapon": "praetorian_heavy_rifle"
+        }
+      ]
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "heavy_infantry"
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "UnitAIUpdate",
+      "autoAcquireEnemiesWhenIdle": true,
+      "defaultStance": "GUARD",
+      "acquisitionRange": 70,
+      "idleScanIntervalTicks": 9,
+      "idleChaseDistance": 78,
+      "aggressiveRangeMultiplier": 1.25,
+      "aggressiveChaseDistance": 120,
+      "attackMoveAcquisitionRange": 76,
+      "attackMoveScanIntervalTicks": 6,
+      "attackMoveChaseDistance": 105,
+      "guardRange": 72,
+      "guardScanIntervalTicks": 8,
+      "guardChaseDistance": 94,
+      "guardReturnRadius": 10
+    },
+    {
+      "type": "Locomotor",
+      "locomotor": "infantry_heavy"
+    },
+    {
+      "type": "Vision",
+      "range": 80
+    },
+    {
+      "type": "InteractionEndpoint",
+      "roles": [
+        "production_unit"
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "crimson_praetorian_exosuit",
+      "scale": 1.0,
+      "headingOffset": -1.5707963267948966,
+      "muzzleNode": "MuzzleSocket",
+      "factionColorMode": "AUTHORED"
+    },
+    {
+      "type": "ProductionCost",
+      "queueType": "infantry",
+      "credits": 600,
+      "buildTimeSeconds": 7.0
+    },
+    {
+      "type": "CommandSet",
+      "id": "aegis_combat_unit"
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "COMBAT",
+        "INFANTRY",
+        "HEAVY_INFANTRY"
+      ],
+      "significant": true
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "praetorian_heavy_rifle",
+  "name": "Praetorian Heavy Rifle",
+  "damageType": "HEAVY_MACHINE_GUN",
+  "damage": 18,
+  "range": 54,
+  "minimumRange": 0,
+  "delayBetweenShots": 0.28,
+  "prefireDelay": 0.1,
+  "clipSize": 30,
+  "clipReloadTime": 2.2,
+  "delivery": "HITSCAN",
+  "aimTolerance": 0.14,
+  "targetDomains": [
+    "GROUND"
+  ],
+  "targetKinds": [
+    "infantry",
+    "vehicle",
+    "building"
+  ],
+  "muzzleHeight": 1.75,
+  "muzzleForwardOffset": 0.95,
+  "tracerColor": "#ffbf73"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "heavy_infantry",
+  "name": "Powered Infantry Armor",
+  "multipliers": {
+    "SMALL_ARMS": 0.48,
+    "HEAVY_MACHINE_GUN": 0.72,
+    "CANNON": 1.18
+  }
+}

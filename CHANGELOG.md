@@ -1,5 +1,14 @@
 ## v0.6.6.5 — Crimson Core Building Set Integration
 
+## v0.6.6.8 — Crimson Artillery + Infantry
+
+- Integrated accepted Crimson Anvil SPG v002, Praetorian Exosuit v002, and Line Trooper v001 assets.
+- Crimson-owned shared `rifleman` units now render the authored Line Trooper while Aegis keeps the existing Rifleman asset.
+- Added data-defined Anvil artillery and Praetorian elite infantry definitions, weapons, armor/locomotor support, production access for Crimson AI, and Team composition hooks.
+- Added immediate validation-map spawns for the Anvil and Praetorian; the existing enemy rifleman validates Line Trooper routing.
+- Preserved the engine/render/UI safety boundary; stabilizer deployment and baked infantry motion clips remain intentionally deferred rather than adding unsourced runtime behavior.
+
+
 ## v0.6.6.6 — Crimson Command Citadel + Fortification Integration
 
 This release integrates the newly accepted Crimson command/fortification art without changing ForgeRTS engine, renderer, UI-engine, economy, production, combat, locomotion, player-relations, or AI runtime code.
