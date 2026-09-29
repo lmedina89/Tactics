@@ -1,0 +1,90 @@
+{
+  "id": "crimson_wall_junction",
+  "name": "Crimson Wall Junction",
+  "kind": "building",
+  "modules": [
+    {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "FACTION",
+      "categories": [
+        "MILITARY",
+        "BUILDING",
+        "DEFENSE",
+        "WALL"
+      ],
+      "editorGroup": "WALLS"
+    },
+    {
+      "type": "Body",
+      "maxHealth": 780
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "fortified"
+    },
+    {
+      "type": "Footprint",
+      "width": 2.9,
+      "depth": 2.9
+    },
+    {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 1.45,
+      "minorRadius": 1.45,
+      "height": 5.19
+    },
+    {
+      "type": "WallConnection",
+      "connectionGroup": "crimson_perimeter",
+      "role": "ENDCAP",
+      "snapDistance": 1.25,
+      "sockets": [
+        {
+          "id": "POS_X",
+          "x": 1.28,
+          "z": 0,
+          "facing": 1.5707963267948966
+        },
+        {
+          "id": "NEG_X",
+          "x": -1.28,
+          "z": 0,
+          "facing": -1.5707963267948966
+        },
+        {
+          "id": "POS_Z",
+          "x": 0,
+          "z": 1.28,
+          "facing": 0
+        },
+        {
+          "id": "NEG_Z",
+          "x": 0,
+          "z": -1.28,
+          "facing": 3.141592653589793
+        }
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "crimson_wall_junction",
+      "scale": 1.0,
+      "headingOffset": 0.0,
+      "factionColorMode": "AUTHORED"
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "DEFENSE",
+        "STRUCTURE"
+      ],
+      "significant": false
+    }
+  ]
+}

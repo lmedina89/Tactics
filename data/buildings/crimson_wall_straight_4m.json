@@ -1,0 +1,78 @@
+{
+  "id": "crimson_wall_straight_4m",
+  "name": "Crimson Wall \u2014 4m",
+  "kind": "building",
+  "modules": [
+    {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "FACTION",
+      "categories": [
+        "MILITARY",
+        "BUILDING",
+        "DEFENSE",
+        "WALL"
+      ],
+      "editorGroup": "WALLS"
+    },
+    {
+      "type": "Body",
+      "maxHealth": 520
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "fortified"
+    },
+    {
+      "type": "Footprint",
+      "width": 4.0,
+      "depth": 2.35
+    },
+    {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 1.175,
+      "minorRadius": 2.0,
+      "height": 4.35
+    },
+    {
+      "type": "WallConnection",
+      "connectionGroup": "crimson_perimeter",
+      "role": "SEGMENT",
+      "snapDistance": 1.25,
+      "sockets": [
+        {
+          "id": "A",
+          "x": -2.0,
+          "z": 0,
+          "facing": -1.5707963267948966
+        },
+        {
+          "id": "B",
+          "x": 2.0,
+          "z": 0,
+          "facing": 1.5707963267948966
+        }
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "crimson_wall_straight_4m",
+      "scale": 1.0,
+      "headingOffset": 0.0,
+      "factionColorMode": "AUTHORED"
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "DEFENSE",
+        "STRUCTURE"
+      ],
+      "significant": false
+    }
+  ]
+}

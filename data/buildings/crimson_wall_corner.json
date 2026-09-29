@@ -1,0 +1,90 @@
+{
+  "id": "crimson_wall_corner",
+  "name": "Crimson Wall Corner",
+  "kind": "building",
+  "modules": [
+    {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "FACTION",
+      "categories": [
+        "MILITARY",
+        "BUILDING",
+        "DEFENSE",
+        "WALL"
+      ],
+      "editorGroup": "WALLS"
+    },
+    {
+      "type": "Body",
+      "maxHealth": 1050
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "fortified"
+    },
+    {
+      "type": "Footprint",
+      "width": 6.25,
+      "depth": 6.25
+    },
+    {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 3.125,
+      "minorRadius": 3.125,
+      "height": 5.16
+    },
+    {
+      "type": "WallConnection",
+      "connectionGroup": "crimson_perimeter",
+      "role": "CORNER",
+      "snapDistance": 1.25,
+      "sockets": [
+        {
+          "id": "X",
+          "x": 4.8,
+          "z": 0,
+          "facing": 1.5707963267948966
+        },
+        {
+          "id": "Z",
+          "x": 0,
+          "z": 4.8,
+          "facing": 0
+        },
+        {
+          "id": "BACK_X",
+          "x": -1.28,
+          "z": 0,
+          "facing": -1.5707963267948966
+        },
+        {
+          "id": "BACK_Z",
+          "x": 0,
+          "z": -1.28,
+          "facing": 3.141592653589793
+        }
+      ]
+    },
+    {
+      "type": "Render",
+      "asset": "crimson_wall_corner",
+      "scale": 1.0,
+      "headingOffset": 0.0,
+      "factionColorMode": "AUTHORED"
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "DEFENSE",
+        "STRUCTURE"
+      ],
+      "significant": false
+    }
+  ]
+}

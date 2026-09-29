@@ -1,5 +1,5 @@
 {
-  "version": "0.6.6.5",
+  "version": "0.6.6.6",
   "assets": {
     "aegis_x_mbt": {
       "kind": "vehicle",
@@ -85,6 +85,30 @@
     "crimson_bastion_gun": {
       "kind": "building",
       "path": "assets/buildings/crimson_bastion_gun_v002.glb"
+    },
+    "crimson_command_citadel": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_command_citadel_v001.glb"
+    },
+    "crimson_wall_straight_8m": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_wall_straight_8m_v001.glb"
+    },
+    "crimson_wall_straight_4m": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_wall_straight_4m_v001.glb"
+    },
+    "crimson_wall_corner": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_wall_corner_v001.glb"
+    },
+    "crimson_wall_junction": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_wall_junction_v001.glb"
+    },
+    "crimson_armored_gate": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_armored_gate_v001.glb"
     }
   }
 }

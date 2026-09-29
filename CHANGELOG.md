@@ -1,5 +1,23 @@
 ## v0.6.6.5 — Crimson Core Building Set Integration
 
+## v0.6.6.6 — Crimson Command Citadel + Fortification Integration
+
+This release integrates the newly accepted Crimson command/fortification art without changing ForgeRTS engine, renderer, UI-engine, economy, production, combat, locomotion, player-relations, or AI runtime code.
+
+- Crimson-owned `command_post` now routes to `crimson_command_citadel_v001.glb` through the existing faction-specific Render path.
+- The Crimson Citadel uses `AUTHORED` faction color mode, so the legacy global Crimson red tint is not applied.
+- Added the full Crimson wall kit as registered authoritative building content: 8 m straight, 4 m straight, fortified corner, and universal junction/end post.
+- Added the Crimson Armored Gate as registered authoritative gate content with the same `crimson_perimeter` WallConnection group and matching 1.8 m wall-system thickness.
+- Added an intentionally non-enclosing rear/east Crimson fortification section to the construction-validation map so every wall module and the gate are visible in the live game without trapping the Skirmish AI behind a closed gate.
+- Wall/gate content is **not** added as four/five separate player build buttons. The planned normal UX remains one Wall tool plus Gate; drag/autoconnection and authoritative gate open/close pathing are separate gameplay work.
+- The gate remains a real closed pathing obstacle in this release; it is placed on the rear defensive section rather than across the AI's active exit/resource/combat routes.
+- The existing Aegis Command Post visual and radar presentation are preserved. A Crimson-only data-driven `RadarYawRoot` spin binding drives the Citadel radar.
+- Existing Crimson Garrison, War Factory, Thermal Plant, Ore Works, and Bastion Gun routes remain unchanged.
+- All six new GLBs are copied byte-for-byte from their accepted production assets.
+- Engine, renderer and UI-engine directories are byte-for-byte unchanged from v0.6.6.5.
+
+Validation target: 134/134 automated tests, 0 content errors/warnings, all JSON parsed, all JS/MJS syntax checked, and exact packaged ZIP re-verification.
+
 - Integrated Crimson Thermal Plant v001 as the Crimson visual variant of `power_node`.
 - Integrated Crimson Ore Works v001 as the Crimson visual variant of `refinery`.
 - Integrated Crimson Bastion Gun v002 as the Crimson visual variant of `guardian_turret`.

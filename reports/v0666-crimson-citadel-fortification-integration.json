@@ -1,0 +1,36 @@
+{
+  "release": "0.6.6.6",
+  "scope": "Crimson Command Citadel + wall system + armored gate integration",
+  "engineSourceChanged": false,
+  "rendererSourceChanged": false,
+  "uiEngineSourceChanged": false,
+  "newAssets": [
+    "crimson_command_citadel",
+    "crimson_wall_straight_8m",
+    "crimson_wall_straight_4m",
+    "crimson_wall_corner",
+    "crimson_wall_junction",
+    "crimson_armored_gate"
+  ],
+  "crimsonHQ": {
+    "definition": "command_post",
+    "asset": "crimson_command_citadel",
+    "colorMode": "AUTHORED"
+  },
+  "wallConnectionGroup": "crimson_perimeter",
+  "buildMenuExposure": false,
+  "reasonBuildMenuDeferred": "Preserve agreed one-wall-tool UX; drag/autoconnection and gate pathing are separate gameplay systems.",
+  "activeMapFortification": {
+    "map": "construction_validation",
+    "nonEnclosing": true,
+    "objects": [
+      "e_wall_rear_long_a",
+      "e_wall_rear_short_a",
+      "e_wall_rear_gate",
+      "e_wall_rear_junction",
+      "e_wall_rear_long_b",
+      "e_wall_rear_corner",
+      "e_wall_rear_turn_short"
+    ]
+  }
+}

@@ -1,5 +1,10 @@
 # ForgeRTS v0.6.6.5 — Crimson Core Building Set
 
+## Current release — v0.6.6.6
+
+Crimson Directorate now uses the authored Command Citadel for its HQ and ships with the complete first-pass Crimson fortification kit: 8 m and 4 m wall runs, fortified corner, universal junction/end post, and Armored Gate. The active validation map includes a non-enclosing rear Crimson wall section for live visual/gameplay verification. The fortification pieces are registered as real GameObjects but are intentionally not exposed as separate player build buttons; the planned one-tool wall placement/autoconnection UX remains future work.
+
+
 
 ## v0.6.6.5 — Crimson Thermal Plant + Ore Works + Bastion Gun Integration
 

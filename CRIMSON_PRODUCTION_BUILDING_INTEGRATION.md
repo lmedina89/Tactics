@@ -35,3 +35,7 @@ The Crimson skirmish AI build list already requests all five shared roles. The c
 - `assets/buildings/crimson_thermal_plant_v001.glb`
 - `assets/buildings/crimson_ore_works_v001.glb`
 - `assets/buildings/crimson_bastion_gun_v002.glb`
+
+## v0.6.6.6 continuation
+
+The Crimson Command Citadel now completes the shared HQ visual routing: `command_post` remains the gameplay ID and selects `crimson_command_citadel` for Crimson ownership with `AUTHORED` color mode. The separate Crimson Wall System and Armored Gate are registered as real fortification GameObjects under the stable WallConnection contract. They are not added to the normal build menu yet; future one-tool wall drawing remains intentionally separate from this safe content integration.

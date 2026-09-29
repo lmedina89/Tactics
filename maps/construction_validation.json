@@ -3,7 +3,7 @@
   "contentContractVersion": 1,
   "id": "construction_validation",
   "name": "Construction Validation Range",
-  "version": 11,
+  "version": 12,
   "seed": 731904,
   "region": {
     "id": "construction_validation_region",
@@ -528,6 +528,62 @@
       "x": 166,
       "z": 88,
       "yaw": -1.5708
+    },
+    {
+      "id": "e_wall_rear_long_a",
+      "definition": "crimson_wall_straight_8m",
+      "owner": "enemy",
+      "x": 300.0,
+      "z": -66.0,
+      "yaw": 1.5707963267948966
+    },
+    {
+      "id": "e_wall_rear_short_a",
+      "definition": "crimson_wall_straight_4m",
+      "owner": "enemy",
+      "x": 300.0,
+      "z": -60.0,
+      "yaw": 1.5707963267948966
+    },
+    {
+      "id": "e_wall_rear_gate",
+      "definition": "crimson_armored_gate",
+      "owner": "enemy",
+      "x": 300.0,
+      "z": -52.6,
+      "yaw": 1.5707963267948966
+    },
+    {
+      "id": "e_wall_rear_junction",
+      "definition": "crimson_wall_junction",
+      "owner": "enemy",
+      "x": 300.0,
+      "z": -45.92,
+      "yaw": 0.0
+    },
+    {
+      "id": "e_wall_rear_long_b",
+      "definition": "crimson_wall_straight_8m",
+      "owner": "enemy",
+      "x": 300.0,
+      "z": -40.64,
+      "yaw": 1.5707963267948966
+    },
+    {
+      "id": "e_wall_rear_corner",
+      "definition": "crimson_wall_corner",
+      "owner": "enemy",
+      "x": 300.0,
+      "z": -35.36,
+      "yaw": 0.0
+    },
+    {
+      "id": "e_wall_rear_turn_short",
+      "definition": "crimson_wall_straight_4m",
+      "owner": "enemy",
+      "x": 306.8,
+      "z": -35.36,
+      "yaw": 0.0
     }
   ],
   "environment": {

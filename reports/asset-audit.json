@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "generatedBy": "tools/audit-assets.mjs",
-  "assetCount": 21,
+  "assetCount": 27,
   "assets": [
     {
       "id": "aegis_command_nexus_hq",
@@ -3838,6 +3838,161 @@
       }
     },
     {
+      "id": "crimson_armored_gate",
+      "kind": "building",
+      "path": "assets/buildings/crimson_armored_gate_v001.glb",
+      "status": "production",
+      "bounds": {
+        "min": [
+          -5.460000038146973,
+          0,
+          -1.2200000286102295
+        ],
+        "max": [
+          5.460000038146973,
+          5.559999942779541,
+          1.2200000286102295
+        ],
+        "size": [
+          10.920000076293945,
+          5.559999942779541,
+          2.440000057220459
+        ]
+      },
+      "animations": [],
+      "nodes": [
+        "BuildOriginSocket",
+        "ControlSocket_Left",
+        "ControlSocket_Right",
+        "CrimsonArmoredGateRoot",
+        "DamageFX_LeftDoor",
+        "DamageFX_LeftPost",
+        "DamageFX_Lintel",
+        "DamageFX_RightDoor",
+        "DamageFX_RightPost",
+        "GateApproachA",
+        "GateApproachB",
+        "GateClearanceCenter",
+        "GateDoorLeftClosed",
+        "GateDoorLeftOpen",
+        "GateDoorRightClosed",
+        "GateDoorRightOpen",
+        "GateLeftDoorRoot",
+        "GatePassageCenter",
+        "GateRightDoorRoot",
+        "LEFT_LEAF_CRIMSON_BLACK_GRATING",
+        "LEFT_LEAF_CRIMSON_CHARCOAL_STEEL",
+        "LEFT_LEAF_CRIMSON_DEEP_ARMOR",
+        "LEFT_LEAF_CRIMSON_GUNMETAL",
+        "LEFT_LEAF_CRIMSON_INDUSTRIAL_AMBER",
+        "LEFT_LEAF_CRIMSON_OXIDE_ARMOR",
+        "LEFT_LEAF_CRIMSON_SERVICE_METAL",
+        "LEFT_LEAF_CRIMSON_SMOKED_GLASS",
+        "PowerInputSocket",
+        "RIGHT_LEAF_CRIMSON_BLACK_GRATING",
+        "RIGHT_LEAF_CRIMSON_CHARCOAL_STEEL",
+        "RIGHT_LEAF_CRIMSON_DEEP_ARMOR",
+        "RIGHT_LEAF_CRIMSON_GUNMETAL",
+        "RIGHT_LEAF_CRIMSON_INDUSTRIAL_AMBER",
+        "RIGHT_LEAF_CRIMSON_OXIDE_ARMOR",
+        "RIGHT_LEAF_CRIMSON_SERVICE_METAL",
+        "RIGHT_LEAF_CRIMSON_SMOKED_GLASS",
+        "STATIC_CRIMSON_BLACK_GRATING",
+        "STATIC_CRIMSON_CHARCOAL_STEEL",
+        "STATIC_CRIMSON_DEEP_ARMOR",
+        "STATIC_CRIMSON_GUNMETAL",
+        "STATIC_CRIMSON_INDUSTRIAL_AMBER",
+        "STATIC_CRIMSON_OXIDE_ARMOR",
+        "STATIC_CRIMSON_REINFORCED_CONCRETE",
+        "STATIC_CRIMSON_SERVICE_METAL",
+        "STATIC_CRIMSON_SIGNAL_RED",
+        "STATIC_CRIMSON_SOOT_CONCRETE",
+        "STATIC_CRIMSON_UTILITY_COPPER",
+        "WF_ROOT",
+        "WallConnector_Left",
+        "WallConnector_Right",
+        "world"
+      ],
+      "pivotHints": [
+        "BuildOriginSocket",
+        "ControlSocket_Left",
+        "ControlSocket_Right",
+        "CrimsonArmoredGateRoot",
+        "DamageFX_LeftDoor",
+        "DamageFX_RightDoor",
+        "GateApproachA",
+        "GateApproachB",
+        "GateClearanceCenter",
+        "GateDoorLeftClosed",
+        "GateDoorLeftOpen",
+        "GateDoorRightClosed",
+        "GateDoorRightOpen",
+        "GateLeftDoorRoot",
+        "GatePassageCenter",
+        "GateRightDoorRoot",
+        "LEFT_LEAF_CRIMSON_DEEP_ARMOR",
+        "LEFT_LEAF_CRIMSON_GUNMETAL",
+        "LEFT_LEAF_CRIMSON_OXIDE_ARMOR",
+        "PowerInputSocket",
+        "RIGHT_LEAF_CRIMSON_DEEP_ARMOR",
+        "RIGHT_LEAF_CRIMSON_GUNMETAL",
+        "RIGHT_LEAF_CRIMSON_OXIDE_ARMOR",
+        "STATIC_CRIMSON_DEEP_ARMOR",
+        "STATIC_CRIMSON_GUNMETAL",
+        "STATIC_CRIMSON_OXIDE_ARMOR"
+      ],
+      "materials": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Oxide Utility Metal",
+        "Crimson Reinforced Concrete",
+        "Crimson Signal Red",
+        "Crimson Smoked Command Glass",
+        "Crimson Soot Concrete",
+        "Crimson Weathered Gunmetal"
+      ],
+      "meshes": [
+        "LEFT_LEAF_CRIMSON_BLACK_GRATING",
+        "LEFT_LEAF_CRIMSON_CHARCOAL_STEEL",
+        "LEFT_LEAF_CRIMSON_DEEP_ARMOR",
+        "LEFT_LEAF_CRIMSON_GUNMETAL",
+        "LEFT_LEAF_CRIMSON_INDUSTRIAL_AMBER",
+        "LEFT_LEAF_CRIMSON_OXIDE_ARMOR",
+        "LEFT_LEAF_CRIMSON_SERVICE_METAL",
+        "LEFT_LEAF_CRIMSON_SMOKED_GLASS",
+        "RIGHT_LEAF_CRIMSON_BLACK_GRATING",
+        "RIGHT_LEAF_CRIMSON_CHARCOAL_STEEL",
+        "RIGHT_LEAF_CRIMSON_DEEP_ARMOR",
+        "RIGHT_LEAF_CRIMSON_GUNMETAL",
+        "RIGHT_LEAF_CRIMSON_INDUSTRIAL_AMBER",
+        "RIGHT_LEAF_CRIMSON_OXIDE_ARMOR",
+        "RIGHT_LEAF_CRIMSON_SERVICE_METAL",
+        "RIGHT_LEAF_CRIMSON_SMOKED_GLASS",
+        "STATIC_CRIMSON_BLACK_GRATING",
+        "STATIC_CRIMSON_CHARCOAL_STEEL",
+        "STATIC_CRIMSON_DEEP_ARMOR",
+        "STATIC_CRIMSON_GUNMETAL",
+        "STATIC_CRIMSON_INDUSTRIAL_AMBER",
+        "STATIC_CRIMSON_OXIDE_ARMOR",
+        "STATIC_CRIMSON_REINFORCED_CONCRETE",
+        "STATIC_CRIMSON_SERVICE_METAL",
+        "STATIC_CRIMSON_SIGNAL_RED",
+        "STATIC_CRIMSON_SOOT_CONCRETE",
+        "STATIC_CRIMSON_UTILITY_COPPER"
+      ],
+      "suggestedGeometry": {
+        "shape": "BOX",
+        "majorRadius": 5.46,
+        "minorRadius": 1.22,
+        "height": 5.56,
+        "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
+      }
+    },
+    {
       "id": "crimson_bastion_gun",
       "kind": "building",
       "path": "assets/buildings/crimson_bastion_gun_v002.glb",
@@ -3996,6 +4151,145 @@
         "majorRadius": 4.846,
         "minorRadius": 4.6,
         "height": 5.94,
+        "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
+      }
+    },
+    {
+      "id": "crimson_command_citadel",
+      "kind": "building",
+      "path": "assets/buildings/crimson_command_citadel_v001.glb",
+      "status": "production",
+      "bounds": {
+        "min": [
+          -16.399999618530273,
+          0,
+          -13.336000442504883
+        ],
+        "max": [
+          18,
+          16.559999966621398,
+          13.336000442504883
+        ],
+        "size": [
+          34.39999961853027,
+          16.559999966621398,
+          26.672000885009766
+        ]
+      },
+      "animations": [],
+      "nodes": [
+        "BuildOriginSocket",
+        "BuildingRoot",
+        "CommandSensorSocket",
+        "ConstructionStageAnchor_1",
+        "ConstructionStageAnchor_2",
+        "ConstructionStageAnchor_3",
+        "CrimsonCommandCitadelRoot",
+        "DamageFX_CommandTower",
+        "DamageFX_Core",
+        "DamageFX_LeftWing",
+        "DamageFX_RightWing",
+        "DefenseHardpoint_Left",
+        "DefenseHardpoint_Right",
+        "MainEntranceSocket",
+        "PowerInputSocket",
+        "PowerSocket",
+        "RADAR_PITCH_CRIMSON_CHARCOAL_STEEL",
+        "RADAR_PITCH_CRIMSON_SERVICE_METAL",
+        "RADAR_PITCH_CRIMSON_WARM_CERAMIC",
+        "RADAR_YAW_CRIMSON_CHARCOAL_STEEL",
+        "RADAR_YAW_CRIMSON_GUNMETAL",
+        "RadarDishPitchRoot",
+        "RadarFXSocket",
+        "RadarYawRoot",
+        "RallySocket",
+        "SERVICE_DOOR_CRIMSON_CHARCOAL_STEEL",
+        "SERVICE_DOOR_CRIMSON_INDUSTRIAL_AMBER",
+        "SERVICE_DOOR_CRIMSON_SERVICE_METAL",
+        "STATIC_CRIMSON_BLACK_GRATING",
+        "STATIC_CRIMSON_CHARCOAL_STEEL",
+        "STATIC_CRIMSON_DEEP_ARMOR",
+        "STATIC_CRIMSON_GUNMETAL",
+        "STATIC_CRIMSON_INDUSTRIAL_AMBER",
+        "STATIC_CRIMSON_OXIDE_ARMOR",
+        "STATIC_CRIMSON_REINFORCED_CONCRETE",
+        "STATIC_CRIMSON_SERVICE_METAL",
+        "STATIC_CRIMSON_SMOKED_GLASS",
+        "STATIC_CRIMSON_SOOT_CONCRETE",
+        "STATIC_CRIMSON_UTILITY_COPPER",
+        "STATIC_CRIMSON_WARM_CERAMIC",
+        "ServiceBayDoorRoot",
+        "ServiceBayExitSocket",
+        "WF_CONSTRUCTION",
+        "WF_ROOT",
+        "world"
+      ],
+      "pivotHints": [
+        "BuildOriginSocket",
+        "CommandSensorSocket",
+        "MainEntranceSocket",
+        "PowerInputSocket",
+        "PowerSocket",
+        "RADAR_PITCH_CRIMSON_CHARCOAL_STEEL",
+        "RADAR_PITCH_CRIMSON_SERVICE_METAL",
+        "RADAR_PITCH_CRIMSON_WARM_CERAMIC",
+        "RADAR_YAW_CRIMSON_CHARCOAL_STEEL",
+        "RADAR_YAW_CRIMSON_GUNMETAL",
+        "RadarDishPitchRoot",
+        "RadarFXSocket",
+        "RadarYawRoot",
+        "RallySocket",
+        "SERVICE_DOOR_CRIMSON_CHARCOAL_STEEL",
+        "SERVICE_DOOR_CRIMSON_INDUSTRIAL_AMBER",
+        "SERVICE_DOOR_CRIMSON_SERVICE_METAL",
+        "STATIC_CRIMSON_DEEP_ARMOR",
+        "STATIC_CRIMSON_GUNMETAL",
+        "STATIC_CRIMSON_OXIDE_ARMOR",
+        "STATIC_CRIMSON_WARM_CERAMIC",
+        "ServiceBayDoorRoot",
+        "ServiceBayExitSocket"
+      ],
+      "materials": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Oxide Utility Metal",
+        "Crimson Reinforced Concrete",
+        "Crimson Smoked Command Glass",
+        "Crimson Soot Concrete",
+        "Crimson Warm Ceramic",
+        "Crimson Weathered Gunmetal"
+      ],
+      "meshes": [
+        "RADAR_PITCH_CRIMSON_CHARCOAL_STEEL",
+        "RADAR_PITCH_CRIMSON_SERVICE_METAL",
+        "RADAR_PITCH_CRIMSON_WARM_CERAMIC",
+        "RADAR_YAW_CRIMSON_CHARCOAL_STEEL",
+        "RADAR_YAW_CRIMSON_GUNMETAL",
+        "SERVICE_DOOR_CRIMSON_CHARCOAL_STEEL",
+        "SERVICE_DOOR_CRIMSON_INDUSTRIAL_AMBER",
+        "SERVICE_DOOR_CRIMSON_SERVICE_METAL",
+        "STATIC_CRIMSON_BLACK_GRATING",
+        "STATIC_CRIMSON_CHARCOAL_STEEL",
+        "STATIC_CRIMSON_DEEP_ARMOR",
+        "STATIC_CRIMSON_GUNMETAL",
+        "STATIC_CRIMSON_INDUSTRIAL_AMBER",
+        "STATIC_CRIMSON_OXIDE_ARMOR",
+        "STATIC_CRIMSON_REINFORCED_CONCRETE",
+        "STATIC_CRIMSON_SERVICE_METAL",
+        "STATIC_CRIMSON_SMOKED_GLASS",
+        "STATIC_CRIMSON_SOOT_CONCRETE",
+        "STATIC_CRIMSON_UTILITY_COPPER",
+        "STATIC_CRIMSON_WARM_CERAMIC"
+      ],
+      "suggestedGeometry": {
+        "shape": "BOX",
+        "majorRadius": 17.2,
+        "minorRadius": 13.336,
+        "height": 16.56,
         "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
       }
     },
@@ -4365,6 +4659,333 @@
         "majorRadius": 11.4,
         "minorRadius": 9.3,
         "height": 11.86,
+        "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
+      }
+    },
+    {
+      "id": "crimson_wall_corner",
+      "kind": "building",
+      "path": "assets/buildings/crimson_wall_corner_v001.glb",
+      "status": "production",
+      "bounds": {
+        "min": [
+          -1.350000023841858,
+          0,
+          -1.350000023841858
+        ],
+        "max": [
+          4.900000095367432,
+          5.159999847412109,
+          4.900000095367432
+        ],
+        "size": [
+          6.2500001192092896,
+          5.159999847412109,
+          6.2500001192092896
+        ]
+      },
+      "animations": [],
+      "nodes": [
+        "BuildOriginSocket",
+        "CrimsonWallCornerRoot",
+        "DamageFX_Corner",
+        "DamageFX_XArm",
+        "DamageFX_ZArm",
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "WF_ROOT",
+        "WallConnector_BackX",
+        "WallConnector_BackZ",
+        "WallConnector_X",
+        "WallConnector_Z",
+        "WallTopSocket",
+        "world"
+      ],
+      "pivotHints": [
+        "BuildOriginSocket",
+        "DamageFX_XArm",
+        "DamageFX_ZArm",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "WallTopSocket"
+      ],
+      "materials": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Reinforced Concrete",
+        "Crimson Soot Concrete"
+      ],
+      "meshes": [
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SOOT_CONCRETE"
+      ],
+      "suggestedGeometry": {
+        "shape": "BOX",
+        "majorRadius": 3.125,
+        "minorRadius": 3.125,
+        "height": 5.16,
+        "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
+      }
+    },
+    {
+      "id": "crimson_wall_junction",
+      "kind": "building",
+      "path": "assets/buildings/crimson_wall_junction_v001.glb",
+      "status": "production",
+      "bounds": {
+        "min": [
+          -1.4600000381469727,
+          0,
+          -1.4249999523162842
+        ],
+        "max": [
+          1.4249999523162842,
+          5.190000057220459,
+          1.4249999523162842
+        ],
+        "size": [
+          2.884999990463257,
+          5.190000057220459,
+          2.8499999046325684
+        ]
+      },
+      "animations": [],
+      "nodes": [
+        "BuildOriginSocket",
+        "CrimsonWallJunctionRoot",
+        "DamageFX_Center",
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "WF_ROOT",
+        "WallConnector_NegX",
+        "WallConnector_NegZ",
+        "WallConnector_PosX",
+        "WallConnector_PosZ",
+        "WallTopSocket",
+        "world"
+      ],
+      "pivotHints": [
+        "BuildOriginSocket",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "WallTopSocket"
+      ],
+      "materials": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Reinforced Concrete",
+        "Crimson Soot Concrete",
+        "Crimson Weathered Gunmetal"
+      ],
+      "meshes": [
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SOOT_CONCRETE"
+      ],
+      "suggestedGeometry": {
+        "shape": "BOX",
+        "majorRadius": 1.442,
+        "minorRadius": 1.425,
+        "height": 5.19,
+        "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
+      }
+    },
+    {
+      "id": "crimson_wall_straight_4m",
+      "kind": "building",
+      "path": "assets/buildings/crimson_wall_straight_4m_v001.glb",
+      "status": "production",
+      "bounds": {
+        "min": [
+          -2,
+          0,
+          -1.1799999475479126
+        ],
+        "max": [
+          2,
+          4.349999904632568,
+          1.1449999809265137
+        ],
+        "size": [
+          4,
+          4.349999904632568,
+          2.3249999284744263
+        ]
+      },
+      "animations": [],
+      "nodes": [
+        "BuildOriginSocket",
+        "CrimsonWallStraight4MRoot",
+        "DamageFX_Center",
+        "DamageFX_Left",
+        "DamageFX_Right",
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "Static_CRIMSON_UTILITY_COPPER",
+        "WF_ROOT",
+        "WallConnector_A",
+        "WallConnector_B",
+        "WallTopSocket",
+        "world"
+      ],
+      "pivotHints": [
+        "BuildOriginSocket",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "WallTopSocket"
+      ],
+      "materials": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Oxide Utility Metal",
+        "Crimson Reinforced Concrete",
+        "Crimson Soot Concrete",
+        "Crimson Weathered Gunmetal"
+      ],
+      "meshes": [
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "Static_CRIMSON_UTILITY_COPPER"
+      ],
+      "suggestedGeometry": {
+        "shape": "BOX",
+        "majorRadius": 2,
+        "minorRadius": 1.162,
+        "height": 4.35,
+        "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
+      }
+    },
+    {
+      "id": "crimson_wall_straight_8m",
+      "kind": "building",
+      "path": "assets/buildings/crimson_wall_straight_8m_v001.glb",
+      "status": "production",
+      "bounds": {
+        "min": [
+          -4,
+          0,
+          -1.1799999475479126
+        ],
+        "max": [
+          4,
+          4.349999904632568,
+          1.1449999809265137
+        ],
+        "size": [
+          8,
+          4.349999904632568,
+          2.3249999284744263
+        ]
+      },
+      "animations": [],
+      "nodes": [
+        "BuildOriginSocket",
+        "CrimsonWallStraight8MRoot",
+        "DamageFX_Center",
+        "DamageFX_Left",
+        "DamageFX_Right",
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "Static_CRIMSON_UTILITY_COPPER",
+        "WF_ROOT",
+        "WallConnector_A",
+        "WallConnector_B",
+        "WallTopSocket",
+        "world"
+      ],
+      "pivotHints": [
+        "BuildOriginSocket",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "WallTopSocket"
+      ],
+      "materials": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Oxide Utility Metal",
+        "Crimson Reinforced Concrete",
+        "Crimson Soot Concrete",
+        "Crimson Weathered Gunmetal"
+      ],
+      "meshes": [
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "Static_CRIMSON_UTILITY_COPPER"
+      ],
+      "suggestedGeometry": {
+        "shape": "BOX",
+        "majorRadius": 4,
+        "minorRadius": 1.162,
+        "height": 4.35,
         "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
       }
     },

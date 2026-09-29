@@ -1,0 +1,29 @@
+{
+  "release": "0.6.6.6",
+  "previousRelease": "0.6.6.5",
+  "previousTrackedAssets": 32,
+  "currentTrackedAssets": 38,
+  "previousAssetsMissing": 0,
+  "previousAssetsChanged": 0,
+  "newAssets": 6,
+  "engineDirectoryByteIdentical": true,
+  "rendererDirectoryByteIdentical": true,
+  "uiDirectoryByteIdentical": true,
+  "tests": {
+    "passed": 134,
+    "failed": 0
+  },
+  "contentValidation": {
+    "errors": 0,
+    "warnings": 0,
+    "definitions": 23,
+    "assets": 27,
+    "maps": 3
+  },
+  "staticValidation": {
+    "jsonParsed": 86,
+    "jsMjsSyntaxPassed": 64,
+    "runtimeToolModules": 42,
+    "importCycles": 0
+  }
+}

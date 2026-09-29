@@ -56,7 +56,13 @@
       "type": "Render",
       "asset": "aegis_tactical_command_post",
       "scale": 1.0,
-      "headingOffset": 0.0
+      "headingOffset": 0.0,
+      "assetByFaction": {
+        "crimson": "crimson_command_citadel"
+      },
+      "factionColorModeByFaction": {
+        "crimson": "AUTHORED"
+      }
     },
     {
       "type": "Selectable",
@@ -83,6 +89,19 @@
           },
           "axis": "y",
           "radiansPerSecond": 0.44
+        },
+        {
+          "id": "crimson_radar_yaw",
+          "driver": "CONTINUOUS_SPIN",
+          "nodes": [
+            "RadarYawRoot"
+          ],
+          "axis": "y",
+          "radiansPerSecond": 0.44,
+          "activeWhen": {
+            "path": "factionId",
+            "equals": "crimson"
+          }
         }
       ]
     },

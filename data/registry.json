@@ -27,7 +27,12 @@
     "data/buildings/command_nexus.json",
     "data/buildings/grid_bastion.json",
     "data/resources/mineral_rich.json",
-    "data/resources/mineral_dense.json"
+    "data/resources/mineral_dense.json",
+    "data/buildings/crimson_wall_straight_8m.json",
+    "data/buildings/crimson_wall_straight_4m.json",
+    "data/buildings/crimson_wall_corner.json",
+    "data/buildings/crimson_wall_junction.json",
+    "data/buildings/crimson_armored_gate.json"
   ],
   "interactions": [
     "data/interactions/resource_docking.json",

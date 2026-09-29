@@ -1,0 +1,83 @@
+{
+  "id": "crimson_armored_gate",
+  "name": "Crimson Armored Gate",
+  "kind": "building",
+  "modules": [
+    {
+      "type": "ContentMeta",
+      "contractVersion": 1,
+      "affiliation": "FACTION",
+      "categories": [
+        "MILITARY",
+        "BUILDING",
+        "DEFENSE",
+        "WALL",
+        "GATE"
+      ],
+      "editorGroup": "WALLS"
+    },
+    {
+      "type": "Body",
+      "maxHealth": 1400
+    },
+    {
+      "type": "ArmorSet",
+      "armor": "fortified"
+    },
+    {
+      "type": "Footprint",
+      "width": 10.92,
+      "depth": 2.44
+    },
+    {
+      "type": "Geometry",
+      "shape": "BOX",
+      "majorRadius": 1.22,
+      "minorRadius": 5.46,
+      "height": 5.56
+    },
+    {
+      "type": "WallConnection",
+      "connectionGroup": "crimson_perimeter",
+      "role": "GATE",
+      "snapDistance": 1.25,
+      "sockets": [
+        {
+          "id": "A",
+          "x": -5.4,
+          "z": 0,
+          "facing": -1.5707963267948966
+        },
+        {
+          "id": "B",
+          "x": 5.4,
+          "z": 0,
+          "facing": 1.5707963267948966
+        }
+      ],
+      "gate": {
+        "openState": "CLOSED",
+        "blocksGroundWhenClosed": true
+      }
+    },
+    {
+      "type": "Render",
+      "asset": "crimson_armored_gate",
+      "scale": 1.0,
+      "headingOffset": 0.0,
+      "factionColorMode": "AUTHORED"
+    },
+    {
+      "type": "Selectable",
+      "enabled": true
+    },
+    {
+      "type": "AITargetable",
+      "categories": [
+        "DEFENSE",
+        "STRUCTURE"
+      ],
+      "significant": false
+    }
+  ]
+}
