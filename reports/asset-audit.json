@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "generatedBy": "tools/audit-assets.mjs",
-  "assetCount": 16,
+  "assetCount": 18,
   "assets": [
     {
       "id": "aegis_command_nexus_hq",
@@ -1012,7 +1012,7 @@
     {
       "id": "aegis_field_power_node",
       "kind": "building",
-      "path": "assets/buildings/aegis_field_power_node_v1.glb",
+      "path": "assets/buildings/aegis_field_power_node_v2.glb",
       "status": "production",
       "bounds": {
         "min": [
@@ -1085,20 +1085,20 @@
         "ServiceVehicleSocket"
       ],
       "materials": [
-        "Control_Glass",
-        "Coolant_Pipe",
-        "Electrical_Copper",
-        "Hazard_Black",
-        "Industrial_Steel",
-        "Industrial_Steel_Dark",
-        "Insulator_Ceramic",
-        "Military_Concrete",
-        "Military_Concrete_Dark",
-        "Safety_Yellow",
-        "Service_Light",
-        "WF_TEAM_ACCENT",
-        "WF_TEAM_PRIMARY",
-        "WF_TEAM_SECONDARY"
+        "Aegis Painted Olive Metal",
+        "Command Teal Glass",
+        "Coolant Teal Pipe",
+        "Dark Gunmetal Machinery",
+        "Dark Industrial Concrete",
+        "Electrical Ceramic",
+        "Power Hazard Amber",
+        "Precast Military Concrete",
+        "Service Cool Gray Trim",
+        "Utility Copper",
+        "Warm Sand Corrugated Cladding",
+        "Warm Service Light",
+        "Weathered Industrial Gunmetal",
+        "Weathered Industrial Steel"
       ],
       "meshes": [
         "CoolingFan_1",
@@ -1129,7 +1129,7 @@
     {
       "id": "aegis_field_refinery",
       "kind": "building",
-      "path": "assets/buildings/aegis_field_refinery_v2.glb",
+      "path": "assets/buildings/aegis_field_refinery_v3.glb",
       "status": "production",
       "bounds": {
         "min": [
@@ -1225,20 +1225,20 @@
         "TransferConveyorRoot"
       ],
       "materials": [
-        "Control_Glass",
-        "Dust_Filter",
-        "Electrical_Copper",
-        "Hazard_Black",
-        "Industrial_Steel",
-        "Industrial_Steel_Dark",
-        "Military_Concrete",
-        "Military_Concrete_Dark",
-        "Ore_Residue",
-        "Safety_Yellow",
-        "Service_Light",
-        "WF_TEAM_ACCENT",
-        "WF_TEAM_PRIMARY",
-        "WF_TEAM_SECONDARY"
+        "Aegis Painted Olive Metal",
+        "Command Teal Glass",
+        "Dark Gunmetal Machinery",
+        "Dark Industrial Concrete",
+        "Dust Filter Fabric",
+        "Ore Residue",
+        "Precast Military Concrete",
+        "Safety Amber Paint",
+        "Service Cool Gray Trim",
+        "Utility Copper",
+        "Warm Sand Corrugated Cladding",
+        "Warm Service Light",
+        "Weathered Industrial Gunmetal",
+        "Weathered Industrial Steel"
       ],
       "meshes": [
         "ApronFeederPans",
@@ -1406,7 +1406,7 @@
     {
       "id": "aegis_guardian_turret",
       "kind": "building",
-      "path": "assets/buildings/aegis_guardian_turret_v031.glb",
+      "path": "assets/buildings/aegis_guardian_turret_v032.glb",
       "status": "production",
       "bounds": {
         "min": [
@@ -1555,15 +1555,18 @@
         "turret_top_armor"
       ],
       "materials": [
-        "WF_BASE_ARMOR",
-        "WF_CONCRETE",
-        "WF_LIGHT",
-        "WF_SENSOR",
-        "WF_STEEL",
-        "WF_STEEL_DARK",
-        "WF_TEAM_ACCENT",
-        "WF_TEAM_PRIMARY",
-        "WF_TEAM_SECONDARY"
+        "Aegis Painted Olive Metal",
+        "Alert Beacon Red",
+        "Command Teal Glass",
+        "Dark Gunmetal Machinery",
+        "Galvanized Structural Steel",
+        "Precast Military Concrete",
+        "Safety Amber Paint",
+        "Service Cool Gray Trim",
+        "Utility Copper",
+        "Warm Service Light",
+        "Weathered Industrial Gunmetal",
+        "Weathered Industrial Steel"
       ],
       "meshes": [
         "ammo_box_-1.32",
@@ -2623,7 +2626,7 @@
     {
       "id": "aegis_tactical_command_post",
       "kind": "building",
-      "path": "assets/buildings/aegis_tactical_command_post_v21.glb",
+      "path": "assets/buildings/aegis_tactical_command_post_v22.glb",
       "status": "production",
       "bounds": {
         "min": [
@@ -2702,21 +2705,18 @@
         "Static_WF_NEUTRAL_ARMOR_LIGHT"
       ],
       "materials": [
-        "WF_GLASS_COMMAND",
-        "WF_HAZARD_BLACK",
-        "WF_HAZARD_YELLOW",
-        "WF_LIGHT_RED",
-        "WF_LIGHT_WHITE",
-        "WF_NEUTRAL_ARMOR",
-        "WF_NEUTRAL_ARMOR_LIGHT",
-        "WF_NEUTRAL_BLACK",
-        "WF_NEUTRAL_CONCRETE",
-        "WF_NEUTRAL_CONCRETE_DARK",
-        "WF_NEUTRAL_COPPER",
-        "WF_NEUTRAL_STEEL",
-        "WF_TEAM_ACCENT",
-        "WF_TEAM_PRIMARY",
-        "WF_TEAM_SECONDARY"
+        "Aegis Painted Olive Metal",
+        "Alert Beacon Red",
+        "Command Teal Glass",
+        "Dark Gunmetal Machinery",
+        "Galvanized Structural Steel",
+        "Precast Military Concrete",
+        "Safety Amber Paint",
+        "Segmented Bay Door Steel",
+        "Service Cool Gray Trim",
+        "Utility Copper",
+        "Warm Sand Corrugated Cladding",
+        "Warm Service Light"
       ],
       "meshes": [
         "RadarDishPitchRoot_WF_NEUTRAL_ARMOR_LIGHT",
@@ -3834,6 +3834,225 @@
         "majorRadius": 5.855,
         "minorRadius": 1.99,
         "height": 4.066,
+        "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
+      }
+    },
+    {
+      "id": "crimson_garrison_block",
+      "kind": "building",
+      "path": "assets/buildings/crimson_garrison_block_v003.glb",
+      "status": "production",
+      "bounds": {
+        "min": [
+          -9,
+          0,
+          -7
+        ],
+        "max": [
+          10.850000381469727,
+          8.800000190734863,
+          7
+        ],
+        "size": [
+          19.850000381469727,
+          8.800000190734863,
+          14
+        ]
+      },
+      "animations": [],
+      "nodes": [
+        "BuildOriginSocket",
+        "CrimsonGarrisonRoot",
+        "DamageFX_Core",
+        "DamageFX_LeftWing",
+        "DamageFX_RightWing",
+        "MainEntranceSocket",
+        "ProductionExitSocket",
+        "RallySocket",
+        "RepairSocket",
+        "ServiceSocket",
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SIGNAL_RED",
+        "Static_CRIMSON_SMOKED_GLASS",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "Static_CRIMSON_UTILITY_COPPER",
+        "Static_CRIMSON_WARM_CERAMIC",
+        "WF_CONSTRUCTION",
+        "WF_DAMAGE_CENTER",
+        "WF_ENTRY",
+        "WF_EXIT_PATH_0",
+        "WF_EXIT_PATH_1",
+        "WF_EXIT_PATH_2",
+        "WF_RALLY",
+        "WF_ROOT",
+        "WF_SERVICE",
+        "WF_SPAWN_INFANTRY",
+        "world"
+      ],
+      "pivotHints": [
+        "BuildOriginSocket",
+        "MainEntranceSocket",
+        "ProductionExitSocket",
+        "RallySocket",
+        "RepairSocket",
+        "ServiceSocket",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_WARM_CERAMIC",
+        "WF_SPAWN_INFANTRY"
+      ],
+      "materials": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Oxide Utility Metal",
+        "Crimson Reinforced Concrete",
+        "Crimson Signal Red",
+        "Crimson Smoked Command Glass",
+        "Crimson Soot Concrete",
+        "Crimson Warm Ceramic",
+        "Crimson Weathered Gunmetal"
+      ],
+      "meshes": [
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SIGNAL_RED",
+        "Static_CRIMSON_SMOKED_GLASS",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "Static_CRIMSON_UTILITY_COPPER",
+        "Static_CRIMSON_WARM_CERAMIC"
+      ],
+      "suggestedGeometry": {
+        "shape": "BOX",
+        "majorRadius": 9.925,
+        "minorRadius": 7,
+        "height": 8.8,
+        "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
+      }
+    },
+    {
+      "id": "crimson_war_factory",
+      "kind": "building",
+      "path": "assets/buildings/crimson_war_factory_v001.glb",
+      "status": "production",
+      "bounds": {
+        "min": [
+          -15,
+          0,
+          -12
+        ],
+        "max": [
+          17.700000762939453,
+          9.5600004196167,
+          12
+        ],
+        "size": [
+          32.70000076293945,
+          9.5600004196167,
+          24
+        ]
+      },
+      "animations": [],
+      "nodes": [
+        "BuildOriginSocket",
+        "CrimsonWarFactoryRoot",
+        "DamageFX_Core",
+        "DamageFX_FrontPortal",
+        "DamageFX_RearPlant",
+        "MainEntranceSocket",
+        "ProductionExitSocket",
+        "RallySocket",
+        "RepairSocket",
+        "ServiceSocket",
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SIGNAL_RED",
+        "Static_CRIMSON_SMOKED_GLASS",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "Static_CRIMSON_UTILITY_COPPER",
+        "Static_CRIMSON_WARM_CERAMIC",
+        "WF_CONSTRUCTION",
+        "WF_ENTRY",
+        "WF_EXIT_PATH_0",
+        "WF_EXIT_PATH_1",
+        "WF_EXIT_PATH_2",
+        "WF_EXIT_PATH_3",
+        "WF_RALLY",
+        "WF_ROOT",
+        "WF_SERVICE",
+        "WF_SPAWN_VEHICLE",
+        "world"
+      ],
+      "pivotHints": [
+        "BuildOriginSocket",
+        "MainEntranceSocket",
+        "ProductionExitSocket",
+        "RallySocket",
+        "RepairSocket",
+        "ServiceSocket",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_WARM_CERAMIC"
+      ],
+      "materials": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Oxide Utility Metal",
+        "Crimson Reinforced Concrete",
+        "Crimson Signal Red",
+        "Crimson Smoked Command Glass",
+        "Crimson Soot Concrete",
+        "Crimson Warm Ceramic",
+        "Crimson Weathered Gunmetal"
+      ],
+      "meshes": [
+        "Static_CRIMSON_BLACK_GRATING",
+        "Static_CRIMSON_CHARCOAL_STEEL",
+        "Static_CRIMSON_DEEP_ARMOR",
+        "Static_CRIMSON_GUNMETAL",
+        "Static_CRIMSON_INDUSTRIAL_AMBER",
+        "Static_CRIMSON_OXIDE_ARMOR",
+        "Static_CRIMSON_REINFORCED_CONCRETE",
+        "Static_CRIMSON_SERVICE_METAL",
+        "Static_CRIMSON_SIGNAL_RED",
+        "Static_CRIMSON_SMOKED_GLASS",
+        "Static_CRIMSON_SOOT_CONCRETE",
+        "Static_CRIMSON_UTILITY_COPPER",
+        "Static_CRIMSON_WARM_CERAMIC"
+      ],
+      "suggestedGeometry": {
+        "shape": "BOX",
+        "majorRadius": 16.35,
+        "minorRadius": 12,
+        "height": 9.56,
         "note": "Visual-bounds suggestion only; gameplay Geometry must be authored/verified separately."
       }
     },

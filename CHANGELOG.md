@@ -1,3 +1,31 @@
+## v0.6.6.4 — Crimson Garrison + War Factory Integration
+
+- Integrated the accepted Crimson Garrison Block v003 and Crimson War Factory v001 as faction-specific visual variants of the existing `barracks` and `vehicle_factory` gameplay roles.
+- Added generic `Render.assetByFaction` routing so ownership/faction can select authored faction art without duplicating simulation definitions.
+- Added `Render.factionColorModeByFaction` and marked the two canonical Crimson buildings `AUTHORED`, preventing the legacy Crimson red tint from altering their embedded PBR colors.
+- Existing Crimson placeholder buildings keep the legacy tint until their canonical authored replacements are available.
+- Crimson AI build-list IDs remain `barracks` / `vehicle_factory`; production, tech prerequisites, costs, power, footprints and AI logic are unchanged.
+- Canonicalized faction display name to **Crimson Directorate**.
+- Added focused faction-visual regression tests. Full automated suite passes **128/128**.
+
+## v0.6.6.3 — Aegis Power Node + Guardian Turret Material Integration
+
+- Integrated the accepted Aegis Field Power Node material pass as `aegis_field_power_node_v2.glb`.
+- Integrated the accepted Guardian Turret v007 appearance as `aegis_guardian_turret_v032.glb`.
+- Preserved the Power Node authored root/socket hierarchy and all node transforms.
+- Restored the Guardian Turret production articulation/root/socket hierarchy (`GuardianTurretRoot`, `TurretRoot`, `GunPitchRoot`, `MuzzleSocket`, `SensorSocket`, and WorldForge markers) around the accepted visual geometry.
+- Kept prior Power Node v1 and Guardian Turret v031 GLBs for rollback/reference.
+- No authoritative gameplay, power, combat, AI, economy, navigation, relationship, or simulation behavior changed.
+
+## v0.6.6.2 — Aegis Command Post + Refinery Material Integration
+
+- Integrated the accepted Aegis Tactical Command Post material pass as `aegis_tactical_command_post_v22.glb`.
+- Integrated the accepted Aegis Field Refinery material pass as `aegis_field_refinery_v3.glb`.
+- Updated the active asset catalog to select the new production GLBs while retaining v21/v2 rollback copies.
+- Preserved Command Post root/socket hierarchy, radar/service-bay roots, node transforms, geometry names, bounds, face counts, and original double-sided semantics.
+- Preserved Refinery harvester docking/unload/queue/rally sockets, processing/storage roots, FX sockets, construction anchors, node transforms, geometry names, bounds, face counts, and double-sided semantics.
+- No gameplay, balance, simulation, AI, pathfinding, economy, diplomacy, or production behavior changed.
+
 ## v0.6.6.1 — Aegis Material Integration
 
 - Integrated approved textured Aegis Vehicle Factory v022 and Field Barracks v024 GLBs.

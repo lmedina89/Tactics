@@ -1,0 +1,17 @@
+{
+  "power_node": {
+    "source_nodes": 38,
+    "production_nodes": 38,
+    "source_geometry": 16,
+    "production_geometry": 16,
+    "bounds_match": true
+  },
+  "guardian_turret": {
+    "source_nodes": 107,
+    "production_nodes": 107,
+    "source_geometry": 98,
+    "production_geometry": 98,
+    "bounds_match": true,
+    "approved_geometry_exact": true
+  }
+}

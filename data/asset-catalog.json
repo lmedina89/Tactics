@@ -1,5 +1,5 @@
 {
-  "version": "0.6.6.1",
+  "version": "0.6.6.4",
   "assets": {
     "aegis_x_mbt": {
       "kind": "vehicle",
@@ -36,11 +36,11 @@
     },
     "aegis_field_power_node": {
       "kind": "building",
-      "path": "assets/buildings/aegis_field_power_node_v1.glb"
+      "path": "assets/buildings/aegis_field_power_node_v2.glb"
     },
     "aegis_field_refinery": {
       "kind": "building",
-      "path": "assets/buildings/aegis_field_refinery_v2.glb"
+      "path": "assets/buildings/aegis_field_refinery_v3.glb"
     },
     "aegis_grid_bastion_power_plant": {
       "kind": "building",
@@ -48,11 +48,11 @@
     },
     "aegis_guardian_turret": {
       "kind": "building",
-      "path": "assets/buildings/aegis_guardian_turret_v031.glb"
+      "path": "assets/buildings/aegis_guardian_turret_v032.glb"
     },
     "aegis_tactical_command_post": {
       "kind": "building",
-      "path": "assets/buildings/aegis_tactical_command_post_v21.glb"
+      "path": "assets/buildings/aegis_tactical_command_post_v22.glb"
     },
     "aegis_vehicle_factory": {
       "kind": "building",
@@ -65,6 +65,14 @@
     "mineral_dense": {
       "kind": "resource",
       "path": "assets/resources/worldforge_mineral_dense_crystal_cluster_v0.1.glb"
+    },
+    "crimson_garrison_block": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_garrison_block_v003.glb"
+    },
+    "crimson_war_factory": {
+      "kind": "building",
+      "path": "assets/buildings/crimson_war_factory_v001.glb"
     }
   }
 }

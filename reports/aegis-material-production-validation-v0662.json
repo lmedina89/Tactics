@@ -1,0 +1,40 @@
+{
+  "command_post": {
+    "source": "/mnt/data/forgerts_v0661_aegis_material_integration/assets/buildings/aegis_tactical_command_post_v21.glb",
+    "output": "/mnt/data/aegis_tactical_command_post_v22.glb",
+    "source_geometry_count": 22,
+    "output_geometry_count": 22,
+    "geometry_names_match": true,
+    "source_graph_node_count": 37,
+    "output_graph_node_count": 37,
+    "graph_node_names_match": true,
+    "non_geometry_nodes_match": true,
+    "node_transforms_match": true,
+    "node_geometry_bindings_match": true,
+    "face_counts_match": true,
+    "bounds_match": true,
+    "source_double_sided_count": 1,
+    "output_double_sided_count": 1,
+    "output_textured_geometries": 22,
+    "sha256": "e8e46b98386ad8c6c10870387ab7a6be84ab7fc1168ef7055f2b5509001f56fd"
+  },
+  "refinery": {
+    "source": "/mnt/data/forgerts_v0661_aegis_material_integration/assets/buildings/aegis_field_refinery_v2.glb",
+    "output": "/mnt/data/aegis_field_refinery_v3.glb",
+    "source_geometry_count": 17,
+    "output_geometry_count": 17,
+    "geometry_names_match": true,
+    "source_graph_node_count": 50,
+    "output_graph_node_count": 50,
+    "graph_node_names_match": true,
+    "non_geometry_nodes_match": true,
+    "node_transforms_match": true,
+    "node_geometry_bindings_match": true,
+    "face_counts_match": true,
+    "bounds_match": true,
+    "source_double_sided_count": 0,
+    "output_double_sided_count": 0,
+    "output_textured_geometries": 17,
+    "sha256": "f236b9426b00af3e1ce2ef44380c5258a679036b01f0094ac21992dfb0ccdc9d"
+  }
+}

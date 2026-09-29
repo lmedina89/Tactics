@@ -1,4 +1,40 @@
-# ForgeRTS v0.6.6.1 — Aegis Material Integration
+# ForgeRTS v0.6.6.4 — Crimson Production Buildings
+
+## v0.6.6.4 — Crimson Garrison + War Factory Integration
+
+This visual/content patch adds the first two canonical Crimson Directorate production structures without duplicating authoritative gameplay definitions. `barracks` and `vehicle_factory` remain the shared gameplay roles; their `Render` modules now resolve faction-specific assets for Crimson owners.
+
+- Crimson-owned `barracks` renders `assets/buildings/crimson_garrison_block_v003.glb`.
+- Crimson-owned `vehicle_factory` renders `assets/buildings/crimson_war_factory_v001.glb`.
+- Aegis-owned instances continue to render the existing Aegis Barracks and Vehicle Factory assets.
+- Both Crimson authored assets use `factionColorModeByFaction.crimson = "AUTHORED"`, so the legacy renderer-level red tint is **not** applied to their embedded PBR palette.
+- Other Crimson placeholder buildings retain the legacy tint until their canonical authored replacements exist.
+- Crimson AI continues using the standard `barracks` / `vehicle_factory` gameplay definitions, so production, prerequisites, AI queries, tech logic and balance remain unchanged.
+- Existing preplaced enemy buildings automatically receive the Crimson models from their owner faction; maps do not need faction-specific definition IDs.
+- The Crimson faction display name is canonicalized to **Crimson Directorate**.
+
+## v0.6.6.3 — Aegis Power Node + Guardian Turret Material Integration
+
+This narrow visual-content patch is built directly on the validated v0.6.6.2 release. It integrates the accepted Field Power Node and Guardian Turret material passes without changing authoritative gameplay definitions, power output, turret weapon behavior, footprints, health, AI, pathfinding, player relationships, economy, production, or simulation behavior.
+
+- `aegis_field_power_node` now resolves to `assets/buildings/aegis_field_power_node_v2.glb`.
+- `aegis_guardian_turret` now resolves to `assets/buildings/aegis_guardian_turret_v032.glb`.
+- The prior Power Node v1 and Guardian Turret v031 files remain in `assets/buildings/` as rollback/reference assets.
+- Power Node v2 preserves all authored root/socket nodes and transforms, including generator/transformer/fuel/cooling roots, cooling fan roots, power/service/repair/build sockets, damage-FX sockets, and construction anchors.
+- Guardian Turret v032 preserves the original `GuardianTurretRoot`, `TurretRoot`, `GunPitchRoot`, `MuzzleSocket`, `SensorSocket`, WorldForge markers, transforms, and runtime articulation hierarchy while using the accepted v007 material/geometry appearance.
+- Material textures are embedded in the GLBs; ForgeRTS has no runtime dependency on the external Aegis material-pack working directory.
+
+
+## v0.6.6.2 — Aegis Command Post + Refinery Material Integration
+
+This narrow visual-content patch is built directly on the validated v0.6.6.1 Aegis Material Integration release. It adds the approved Tactical Command Post and Field Refinery material passes without changing authoritative gameplay definitions, footprints, production, health, AI, pathfinding, player relationships, economy, docking logic, or simulation behavior.
+
+- `aegis_tactical_command_post` now resolves to `assets/buildings/aegis_tactical_command_post_v22.glb`.
+- `aegis_field_refinery` now resolves to `assets/buildings/aegis_field_refinery_v3.glb`.
+- The prior Command Post v21 and Refinery v2 files remain in `assets/buildings/` as rollback/reference assets.
+- The Command Post v22 production GLB restores and preserves every original root/socket node while embedding the accepted material appearance.
+- The Refinery v3 production GLB preserves all harvester docking sockets, FX sockets, construction anchors, articulated roots, node transforms, geometry names, bounds, and authored hierarchy.
+- Material textures are embedded in the GLBs; ForgeRTS still has no runtime dependency on WorldForge or the external Aegis material-pack working directory.
 
 ## v0.6.6.1 — Aegis Material Integration
 

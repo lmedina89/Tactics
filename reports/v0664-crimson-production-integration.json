@@ -1,0 +1,100 @@
+{
+  "release": "0.6.6.4",
+  "testsPassed": 128,
+  "testsTotal": 128,
+  "contentValidation": {
+    "formatVersion": 1,
+    "contractVersion": 1,
+    "definitions": 18,
+    "assets": 18,
+    "contentPacks": 1,
+    "contentTemplates": 8,
+    "maps": 3,
+    "errorCount": 0,
+    "warningCount": 0,
+    "issues": []
+  },
+  "assetFilesTracked": 29,
+  "jsonFiles": 78,
+  "jsonErrors": [],
+  "jsMjsFiles": 63,
+  "jsSyntaxErrors": 0,
+  "runtimeToolModules": 42,
+  "circularImports": 0,
+  "crimsonAssets": [
+    {
+      "asset": "assets/buildings/crimson_garrison_block_v003.glb",
+      "geometryGroups": 13,
+      "triangles": 10520,
+      "graphNodes": 34,
+      "bounds": [
+        [
+          -9.0,
+          0.0,
+          -7.0
+        ],
+        [
+          10.850000381469727,
+          8.800000190734863,
+          7.0
+        ]
+      ],
+      "allDoubleSided": true,
+      "materialNames": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Oxide Utility Metal",
+        "Crimson Reinforced Concrete",
+        "Crimson Signal Red",
+        "Crimson Smoked Command Glass",
+        "Crimson Soot Concrete",
+        "Crimson Warm Ceramic",
+        "Crimson Weathered Gunmetal"
+      ]
+    },
+    {
+      "asset": "assets/buildings/crimson_war_factory_v001.glb",
+      "geometryGroups": 13,
+      "triangles": 18496,
+      "graphNodes": 34,
+      "bounds": [
+        [
+          -15.0,
+          0.0,
+          -12.0
+        ],
+        [
+          17.700000762939453,
+          9.5600004196167,
+          12.0
+        ]
+      ],
+      "allDoubleSided": true,
+      "materialNames": [
+        "Crimson Blackened Grating",
+        "Crimson Charcoal Structural Steel",
+        "Crimson Deep Armor",
+        "Crimson Faded Service Metal",
+        "Crimson Industrial Amber",
+        "Crimson Oxide Armor",
+        "Crimson Oxide Utility Metal",
+        "Crimson Reinforced Concrete",
+        "Crimson Signal Red",
+        "Crimson Smoked Command Glass",
+        "Crimson Soot Concrete",
+        "Crimson Warm Ceramic",
+        "Crimson Weathered Gunmetal"
+      ]
+    }
+  ],
+  "rendererPolicy": {
+    "assetRouting": "Render.assetByFaction",
+    "colorModeRouting": "Render.factionColorModeByFaction",
+    "crimsonCanonicalColorMode": "AUTHORED",
+    "legacyTintRetainedForUnreplacedCrimsonAssets": true
+  }
+}
