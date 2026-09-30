@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "defaults": {
+    "muzzle": {"color":"#ffd37a","scale":0.65,"durationMs":80,"smokeScale":0.75,"smokeDurationMs":420},
+    "tracer": {"radius":0.045,"durationMs":115,"opacity":0.95,"frequency":1},
+    "projectile": {"coreRadius":0.30,"trailLength":2.4,"trailRadius":0.07,"opacity":0.92},
+    "impact": {"color":"#ffb768","scale":0.70,"durationMs":220,"dustScale":1.05,"dustDurationMs":620},
+    "destroy": {"color":"#ff9b55","scale":1.8,"durationMs":900,"smokeScale":2.2,"smokeDurationMs":1450},
+    "audio": {"firePreset":"rifle","fireGain":0.65,"impactPreset":"impact_light","impactGain":0.55,"destroyPreset":"destroy","destroyGain":0.95,"maxDistance":340,"group":"weapons"}
+  },
+  "weapons": {
+    "rifleman_rifle": {
+      "muzzle":{"scale":0.34,"durationMs":55,"smokeScale":0.25,"smokeDurationMs":220},
+      "tracer":{"radius":0.035,"durationMs":105,"frequency":3},
+      "impact":{"scale":0.34,"durationMs":130,"dustScale":0.45,"dustDurationMs":300},
+      "audio":{"firePreset":"rifle","fireGain":0.52,"impactPreset":"impact_light","impactGain":0.32,"maxDistance":220,"group":"small_arms"}
+    },
+    "praetorian_heavy_rifle": {
+      "muzzle":{"color":"#ffb35f","scale":0.48,"durationMs":65,"smokeScale":0.34,"smokeDurationMs":260},
+      "tracer":{"radius":0.045,"durationMs":110,"frequency":2},
+      "impact":{"color":"#ffad63","scale":0.45,"durationMs":150,"dustScale":0.58,"dustDurationMs":340},
+      "audio":{"firePreset":"hmg","fireGain":0.62,"impactPreset":"impact_light","impactGain":0.38,"maxDistance":260,"group":"small_arms"}
+    },
+    "hmmwv_50cal": {
+      "muzzle":{"color":"#ffe09b","scale":0.58,"durationMs":62,"smokeScale":0.42,"smokeDurationMs":300},
+      "tracer":{"radius":0.055,"durationMs":120,"frequency":2},
+      "impact":{"scale":0.52,"durationMs":170,"dustScale":0.72,"dustDurationMs":390},
+      "audio":{"firePreset":"hmg","fireGain":0.76,"impactPreset":"impact_medium","impactGain":0.38,"maxDistance":310,"group":"heavy_mg"}
+    },
+    "warder_30mm": {
+      "muzzle":{"color":"#ffb35f","scale":0.78,"durationMs":75,"smokeScale":0.62,"smokeDurationMs":380},
+      "projectile":{"coreRadius":0.24,"trailLength":3.2,"trailRadius":0.065,"opacity":0.95},
+      "impact":{"color":"#ff9e55","scale":0.82,"durationMs":210,"dustScale":1.0,"dustDurationMs":520},
+      "audio":{"firePreset":"autocannon","fireGain":0.78,"impactPreset":"impact_medium","impactGain":0.56,"maxDistance":340,"group":"autocannon"}
+    },
+    "guardian_cannon": {
+      "muzzle":{"color":"#ffbd72","scale":1.0,"durationMs":88,"smokeScale":0.85,"smokeDurationMs":500},
+      "projectile":{"coreRadius":0.34,"trailLength":4.2,"trailRadius":0.085,"opacity":0.96},
+      "impact":{"color":"#ff9a50","scale":1.15,"durationMs":260,"dustScale":1.45,"dustDurationMs":760},
+      "audio":{"firePreset":"cannon","fireGain":0.88,"impactPreset":"impact_heavy","impactGain":0.72,"maxDistance":420,"group":"cannon"}
+    },
+    "aegis_120mm": {
+      "muzzle":{"color":"#ffd48b","scale":1.35,"durationMs":105,"smokeScale":1.15,"smokeDurationMs":620},
+      "projectile":{"coreRadius":0.42,"trailLength":5.4,"trailRadius":0.10,"opacity":1.0},
+      "impact":{"color":"#ff9b4b","scale":1.55,"durationMs":330,"dustScale":2.0,"dustDurationMs":950},
+      "destroy":{"scale":2.2,"smokeScale":2.6,"smokeDurationMs":1600},
+      "audio":{"firePreset":"cannon","fireGain":1.0,"impactPreset":"impact_heavy","impactGain":0.88,"destroyPreset":"destroy","destroyGain":1.0,"maxDistance":480,"group":"cannon"}
+    },
+    "anvil_155mm": {
+      "muzzle":{"color":"#ffb965","scale":1.8,"durationMs":130,"smokeScale":1.65,"smokeDurationMs":850},
+      "projectile":{"coreRadius":0.50,"trailLength":7.5,"trailRadius":0.13,"opacity":1.0},
+      "impact":{"color":"#ff8f42","scale":2.25,"durationMs":430,"dustScale":3.0,"dustDurationMs":1350},
+      "destroy":{"scale":2.7,"smokeScale":3.3,"smokeDurationMs":1900},
+      "audio":{"firePreset":"artillery","fireGain":1.0,"impactPreset":"impact_heavy","impactGain":1.0,"destroyPreset":"destroy","destroyGain":1.0,"maxDistance":620,"group":"artillery"}
+    }
+  }
+}

@@ -225,3 +225,14 @@ Mission logic is an **optional authoritative layer over the existing world simul
 - Mission runtime is snapshot state. Snapshot v17 stores script state, timers, objectives, outcome, and trigger occupancy.
 - The persistent world is still primary. A mission references stable map/player/entity/team/area/waypoint IDs; it does not own terrain, maps, content definitions, or region lifetime.
 - New condition/action vocabulary should be added only for concrete mission requirements and backed by deterministic tests.
+
+## v0.7.2 combat-presentation rule
+
+Combat presentation is GameClient state. Authoritative WeaponSystem / ProjectileSystem / DamageSystem continue to decide firing cadence, projectile motion, collision, damage and destruction. The renderer consumes existing `HITSCAN`, `PROJECTILE_FIRED`, `PROJECTILE_IMPACT`, and `DESTROYED` events to create disposable visual/audio feedback.
+
+- Presentation scale may exceed simulation scale for RTS-camera readability; it must never feed back into collision or damage.
+- Per-weapon presentation lives in `data/presentation/combat.json`, separate from gameplay weapon balance data.
+- Web Audio is client-only and unlocked from a user gesture for mobile-browser policy compliance.
+- Audio concurrency, distance attenuation, panning and FX caps are presentation/performance policy, not gameplay state.
+- Client effects are intentionally omitted from snapshots and determinism checks.
+- No external sound sample is required for this foundation; the first sound library is procedurally synthesized by the client.

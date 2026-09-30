@@ -1,10 +1,20 @@
-# ForgeRTS v0.7.1 — Mission Guidance + Training Ground Reachability
+# ForgeRTS v0.7.2 — Combat Presentation Foundation
 
-## Current release — v0.7.1
-
-
+## Current release — v0.7.2
 
 
+
+
+
+
+### v0.7.2 — Combat Presentation Foundation
+
+- Added a client-only combat presentation layer driven from existing authoritative combat events.
+- Added data-driven per-weapon muzzle flash, tracer/projectile readability, impact dust/flash, and destruction effects in `data/presentation/combat.json`.
+- Added procedural Web Audio weapon/impact/destruction sound presets with distance attenuation, stereo panning, concurrency limits, and iPhone-safe user-gesture unlock.
+- Projectile simulation radius, damage, weapon cadence, targeting, collision and all other gameplay behavior are unchanged. Visual projectile cores/trails are deliberately larger than simulation collision radii for RTS-camera readability.
+- No external audio samples are required in this foundation; sounds are synthesized client-side so the release adds no third-party audio licensing surface.
+- v0.7.1 mission guidance/resource reachability behavior and snapshot v17 remain unchanged.
 
 ### v0.7.1 — Mission Guidance + Training Ground Reachability
 

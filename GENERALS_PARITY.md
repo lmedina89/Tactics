@@ -149,3 +149,9 @@ The official Generals/ZH `Object` architecture remains the runtime reference for
 EA's released FinalSun/FinalAlert2 editor source and modern OpenRA-style data tooling are cross-checks for future editor/content authoring. ForgeRTS establishes stable content-pack, category, wall-socket and map-placement formats now so a future WorldForge exporter/editor can generate runtime data without requiring a new engine format.
 
 No EA/OpenRA content-pipeline implementation was copied line-for-line. v0.6.5 is original JavaScript/data built around the existing ForgeRTS DataRegistry/GameObject architecture.
+
+## v0.7.2 combat FX / audio reference boundary
+
+The released Generals / Zero Hour architecture is used here for its GameLogic/GameClient separation: authoritative weapon behavior remains in GameLogic while firing FX, projectile presentation, particle effects and audio are presentation concerns. ForgeRTS maps that boundary to existing combat events consumed by `CombatFxSystem` and `CombatAudioSystem`.
+
+No Generals FX, particle or audio implementation was copied line-for-line. ForgeRTS uses original Three.js effects and an original procedural Web Audio sound layer. The simulation does not import renderer/audio code, and presentation-only projectile size/trails never influence projectile collision, damage, targeting or deterministic snapshots.

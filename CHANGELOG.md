@@ -1,3 +1,12 @@
+## v0.7.2 — Combat Presentation Foundation
+
+- Added client-only, event-driven combat FX for muzzle flashes, readable tracers, enlarged projectile presentation, impact flash/dust, smoke and destruction bursts.
+- Added `data/presentation/combat.json` with per-weapon presentation profiles for all seven current weapons. Presentation scale is independent from authoritative projectile/collision scale.
+- Added procedural Web Audio presets for rifles, heavy machine guns, autocannon, tank cannon, artillery, impacts and destruction. Audio uses distance attenuation, stereo pan, voice/concurrency caps and unlocks on user interaction for iPhone Safari compatibility.
+- Existing `HITSCAN`, `PROJECTILE_FIRED`, `PROJECTILE_IMPACT`, and `DESTROYED` simulation events are consumed by the renderer/audio layer; authoritative combat code remains untouched.
+- Added combat-presentation regression tests covering weapon-profile completeness, audio preset validity, GameLogic/GameClient separation and browser-safe module import.
+- Preserved v0.7.1 mission behavior, Training Ground reachability fix, production queue/rollout recovery, maps and all gameplay data. Snapshot remains v17.
+
 ## v0.7.1 — Mission Guidance + Training Ground Reachability Hotfix
 
 - Added objective-authored trigger-area markers so the active center-zone validation objective is visible in-world as a gold terrain-following ring and beacon.
