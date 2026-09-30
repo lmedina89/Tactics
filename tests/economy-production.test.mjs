@@ -154,3 +154,9 @@ test('Vehicle Factory accepts five queued units while slot one is actively build
   s.issueCancelProduction(factory.id);s.step(FIXED_DT);
   assert.equal(factory.production.queue.length,4);assert.equal(s.players.get('player').credits,start-1800,'cancel-last did not refund the final queued vehicle');
 });
+
+test('every Training Ground mineral field has a deterministic reachable harvester approach',async()=>{
+  const s=await sim(),harvesters=[s.entities.get('p_harvester'),s.entities.get('e_harvester')],fields=['rich_w','dense_w','rich_e','dense_e'];
+  for(const h of harvesters)for(const id of fields){const resource=s.entities.get(id),approach=s.resources.findHarvestApproach(h,resource);assert.ok(approach,`${h.id} cannot reach ${id}`);}
+  assert.equal(s.entities.get('dense_w').z,98,'west dense field regressed onto its unreachable shelf');
+});

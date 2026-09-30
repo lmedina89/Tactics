@@ -16,12 +16,26 @@ export class ThreeRenderer{
     this.renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));this.renderer.shadowMap.enabled=false;
     this.loader=new GLTFLoader();this.assetPromises=new Map();this.clientAnimations=new ClientAnimationSystem();this.entityViews=new Map();this.projectileViews=new Map();this.effectViews=[];this.lastCombatEventSerial=0;this.terrain=null;this.ground=null;this.placementGhost=null;this.placementDefinitionId=null;
     this.selectionRings=[];this.destinationRing=this._makeRing(0xf1d35d);this.attackRing=this._makeRing(0xff665c);this.resourceRing=this._makeRing(0xffcf5b);this.destinationRing.visible=false;this.attackRing.visible=false;this.resourceRing.visible=false;this.scene.add(this.destinationRing,this.attackRing,this.resourceRing);
+    this.missionAreaMarker=new THREE.Group();this.missionAreaMarker.visible=false;this.missionAreaMarkerKey=null;this.scene.add(this.missionAreaMarker);
     this.projectileGeometry=new THREE.SphereGeometry(1,8,6);this._setupLights();this.resize();addEventListener('resize',()=>this.resize());
   }
 
   _setupLights(){const e=this.map.environment||{};this.scene.add(new THREE.HemisphereLight(e.hemisphereSky||0xc8d8e8,e.hemisphereGround||0x3c4437,e.hemisphereIntensity??1.7));const d=e.sunDirection||{x:-.55,y:1,z:.32};const sun=new THREE.DirectionalLight(e.sunColor||0xffffff,e.sunIntensity??2.2);sun.position.set(d.x*220,d.y*220,d.z*220);this.scene.add(sun);}
   async buildWorld(terrain){this.terrain=terrain;this.terrainRenderer=new TerrainRenderer({scene:this.scene,map:this.map,terrain});this.ground=await this.terrainRenderer.build();}
   _makeRing(color){const m=new THREE.Mesh(new THREE.RingGeometry(1.2,1.6,40),new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,transparent:true,opacity:.9,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.y=.12;return m;}
+  _clearMissionAreaMarker(){for(const child of [...this.missionAreaMarker.children]){this.missionAreaMarker.remove(child);child.geometry?.dispose?.();child.material?.dispose?.();}}
+  setMissionAreaMarker(area){
+    if(!area){this.missionAreaMarker.visible=false;this.missionAreaMarkerKey=null;this._clearMissionAreaMarker();return;}
+    const key=JSON.stringify(area);if(this.missionAreaMarkerKey===key){this.missionAreaMarker.visible=true;return;}
+    this._clearMissionAreaMarker();this.missionAreaMarkerKey=key;const pts=[];const yAt=(x,z)=>(this.terrain?.heightAt(x,z)??0)+.34;
+    if(area.shape==='circle')for(let i=0;i<80;i++){const a=i/80*Math.PI*2,x=area.x+Math.sin(a)*area.radius,z=area.z+Math.cos(a)*area.radius;pts.push(new THREE.Vector3(x,yAt(x,z),z));}
+    else if(area.shape==='rect'){const hw=area.width/2,hd=area.depth/2,c=Math.cos(area.yaw||0),sn=Math.sin(area.yaw||0),corners=[[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]];for(const [lx,lz] of corners){const x=area.x+lx*c+lz*sn,z=area.z-lx*sn+lz*c;pts.push(new THREE.Vector3(x,yAt(x,z),z));}}
+    else if(area.shape==='polygon')for(const p of area.points||[])pts.push(new THREE.Vector3(p.x,yAt(p.x,p.z),p.z));
+    if(pts.length>=3){const g=new THREE.BufferGeometry().setFromPoints(pts),m=new THREE.LineBasicMaterial({color:0xffd65c,transparent:true,opacity:.98,depthTest:false,depthWrite:false}),line=new THREE.LineLoop(g,m);line.renderOrder=50;this.missionAreaMarker.add(line);}
+    const cx=area.x??((area.points||[]).reduce((a,p)=>a+p.x,0)/Math.max(1,(area.points||[]).length)),cz=area.z??((area.points||[]).reduce((a,p)=>a+p.z,0)/Math.max(1,(area.points||[]).length)),cy=yAt(cx,cz);
+    const beacon=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,18,8),new THREE.MeshBasicMaterial({color:0xffd65c,transparent:true,opacity:.5,depthTest:false,depthWrite:false}));beacon.position.set(cx,cy+9,cz);beacon.renderOrder=51;this.missionAreaMarker.add(beacon);
+    const center=this._makeRing(0xffd65c);center.position.set(cx,cy+.08,cz);center.scale.setScalar(4.2);center.material.depthTest=false;center.renderOrder=51;this.missionAreaMarker.add(center);this.missionAreaMarker.visible=true;
+  }
   async _loadAsset(assetId){if(this.assetPromises.has(assetId))return this.assetPromises.get(assetId);const info=this.registry.asset(assetId);if(!info)throw new Error(`Unknown asset ${assetId}`);const p=this.loader.loadAsync(info.path);this.assetPromises.set(assetId,p);return p;}
 
   _decorateMaterial(material,faction,fieldVisual,factionColorMode='TINT'){

@@ -8,7 +8,7 @@ export class ObjectiveManager{
     for(const raw of objectives||[]){
       const state=raw.initialState??ObjectiveState.INACTIVE;
       if(!VALID_STATES.has(state))throw new Error(`Objective ${raw.id} has invalid initialState ${state}`);
-      this.objectives.set(raw.id,{id:raw.id,text:raw.text??raw.id,kind:raw.kind??'PRIMARY',optional:raw.optional===true,state,activatedTick:state===ObjectiveState.ACTIVE?0:null,completedTick:null,failedTick:null});
+      this.objectives.set(raw.id,{id:raw.id,text:raw.text??raw.id,kind:raw.kind??'PRIMARY',optional:raw.optional===true,marker:raw.marker?clone(raw.marker):null,state,activatedTick:state===ObjectiveState.ACTIVE?0:null,completedTick:null,failedTick:null});
     }
   }
   objective(id){return this.objectives.get(id)??null;}

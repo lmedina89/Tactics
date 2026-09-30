@@ -1,3 +1,7 @@
+# v0.7.1 Mission Guidance Hotfix
+
+The v0.7.0 mission runtime remains unchanged in behavior. v0.7.1 adds optional objective marker metadata and browser rendering for active `TRIGGER_AREA` markers so mission destinations are visible without exposing debug geometry. Snapshot format remains v17.
+
 # ForgeRTS v0.7.0 — Mission / Trigger / Objective Foundation Audit
 
 ## Reference boundary

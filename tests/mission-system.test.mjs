@@ -66,3 +66,14 @@ test('browser keeps normal field test while exposing an opt-in mission validatio
   const main=await fs.readFile(path.join(root,'main.js'),'utf8'),html=await fs.readFile(path.join(root,'index.html'),'utf8');
   assert.match(main,/missionMode=params\.get\('mission'\)==='first_contact'/);assert.match(main,/missions\/first_contact_validation\.json/);assert.match(main,/maps\/construction_validation\.json/);assert.match(main,/maps\/training_ground\.json/);assert.match(html,/id="mission-test"/);
 });
+
+test('active objective may reference a validated authored trigger-area world marker',async()=>{
+  const map=validateMapManifest(await read('maps/training_ground.json')),mission=validateMissionDefinition(await read('missions/first_contact_validation.json'),{map}),reach=mission.objectives.find(o=>o.id==='reach_center');
+  assert.deepEqual(reach.marker,{type:'TRIGGER_AREA',areaId:'center_zone'});
+  assert.throws(()=>validateMissionDefinition({...mission,objectives:mission.objectives.map(o=>o.id==='reach_center'?{...o,marker:{type:'TRIGGER_AREA',areaId:'missing'}}:o)},{map}),/marker references unknown trigger area/);
+});
+
+test('browser mission mode renders the active trigger-area objective marker instead of relying on hidden map coordinates',async()=>{
+  const main=await fs.readFile(path.join(root,'main.js'),'utf8'),renderer=await fs.readFile(path.join(root,'renderer/three-renderer.js'),'utf8');
+  assert.match(main,/syncMissionObjectiveMarker/);assert.match(main,/GOLD CENTER-ZONE RING\/BEACON/);assert.match(renderer,/setMissionAreaMarker\(area\)/);assert.match(renderer,/0xffd65c/);
+});

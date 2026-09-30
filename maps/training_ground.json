@@ -3,7 +3,7 @@
   "contentContractVersion": 1,
   "id": "training_ground",
   "name": "Training Ground 02",
-  "version": 5,
+  "version": 6,
   "seed": 731904,
   "region": {
     "id": "training_ground_region",
@@ -360,7 +360,7 @@
       "id": "dense_w",
       "definition": "mineral_dense",
       "x": -58,
-      "z": 102,
+      "z": 98,
       "capacity": 3000
     },
     {

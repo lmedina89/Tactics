@@ -1,3 +1,10 @@
+## v0.7.1 — Mission Guidance + Training Ground Reachability Hotfix
+
+- Added objective-authored trigger-area markers so the active center-zone validation objective is visible in-world as a gold terrain-following ring and beacon.
+- Corrected the west dense mineral field on Training Ground from z=102 to z=98 after pathfinding proved the previous placement had no valid harvester approach.
+- Added regression coverage for objective marker references and resource-field reachability.
+- Mission/runtime architecture from v0.7.0 remains intact; snapshot format stays v17.
+
 ## v0.7.0 — Mission / Trigger / Objective Foundation
 
 - Added `engine/missions/` with trigger-area runtime, mission definition validation, typed condition evaluation, typed action execution, objective state, flags/counters/timers, script runtime state, and victory/defeat outcome.

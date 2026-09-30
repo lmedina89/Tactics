@@ -1,9 +1,17 @@
-# ForgeRTS v0.7.0 — Mission / Trigger / Objective Foundation
+# ForgeRTS v0.7.1 — Mission Guidance + Training Ground Reachability
 
-## Current release — v0.7.0
+## Current release — v0.7.1
 
 
 
+
+
+### v0.7.1 — Mission Guidance + Training Ground Reachability
+
+- Active trigger-area objectives may expose a data-authored world marker.
+- `first_contact_validation` now marks `center_zone` with a gold terrain-following ring/beacon.
+- Training Ground `dense_w` moved 4 m south to a verified reachable point; no resource-system algorithm changes were required.
+- Snapshot format remains v17 and v0.7.0 mission semantics are unchanged.
 
 ### v0.7.0 — Mission / Trigger / Objective Foundation
 
