@@ -138,3 +138,19 @@ test('rollout timeout releases factory bookkeeping without erasing a later playe
 });
 
 function distForTest(a,b){return Math.hypot(a.x-b.x,a.z-b.z);}
+
+test('Vehicle Factory accepts five queued units while slot one is actively building and rejects only slot six',async()=>{
+  const s=await sim(),factory=s.entities.get('p_factory'),start=s.players.get('player').credits;
+  s.issueProduce(factory.id,'hmmwv50');s.step(FIXED_DT);
+  assert.equal(factory.production.queue.length,1);assert.equal(factory.production.queue[0].state,'BUILDING');
+  for(let i=0;i<4;i++)s.issueProduce(factory.id,'hmmwv50');
+  s.step(FIXED_DT);
+  assert.equal(factory.production.queue.length,5);assert.deepEqual(factory.production.queue.map(x=>x.definitionId),Array(5).fill('hmmwv50'));
+  assert.equal(s.players.get('player').credits,start-2250);
+  const snap=s.snapshot(),s2=await sim();s2.restore(snap);assert.deepEqual(s2.snapshot(),snap);
+  s.issueProduce(factory.id,'hmmwv50');s.step(FIXED_DT);
+  assert.equal(factory.production.queue.length,5);assert.equal(s.lastPlayerCommandResult?.reason,'QUEUE_FULL');
+  assert.equal(s.players.get('player').credits,start-2250,'rejected sixth slot charged credits');
+  s.issueCancelProduction(factory.id);s.step(FIXED_DT);
+  assert.equal(factory.production.queue.length,4);assert.equal(s.players.get('player').credits,start-1800,'cancel-last did not refund the final queued vehicle');
+});

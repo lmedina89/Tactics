@@ -1,3 +1,12 @@
+## v0.6.6.10 — Production Queue Reliability + Mobile UI
+
+- Fixed mobile production controls being rebuilt as `progressTicks` advanced. On iPhone Safari this could remove a button between touch-down and click, making additional queue taps appear unresponsive while a unit was building.
+- Production controls now stay mounted while the selected producer remains selected; dynamic queue/progress/affordability state updates in place.
+- Added an explicit five-slot production strip. Slot 1 reports `BUILDING`, `WAITING EXIT`, or `EXIT BLOCKED`; later accepted entries report `QUEUED`; commands waiting for the next simulation tick report `ORDER SENT`.
+- Pending player `PRODUCE` commands now count toward projected UI queue capacity and projected available credits, preventing the mobile UI from advertising a sixth slot during rapid taps.
+- Added regression coverage for 5-slot queueing during an active build, sixth-slot rejection, cancel/refund, snapshot restore, pending-command projection, and stable mobile controls.
+- Preserved the authoritative v0.6.6.9 ProductionSystem rollout recovery byte-for-byte.
+
 ## v0.6.6.9 — Production Rollout Recovery
 
 - Fixed an intermittent production deadlock where a completed HMMWV/Aegis-X or other produced unit could leave a factory queue permanently stuck at `WAITING_EXIT`.

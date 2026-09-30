@@ -1,7 +1,16 @@
 # ForgeRTS v0.6.6.5 — Crimson Core Building Set
 
-## Current release — v0.6.6.9
+## Current release — v0.6.6.10
 
+
+### v0.6.6.10 — Production Queue Reliability + Mobile UI
+
+- Fixes the iPhone/touch production UI bug that made it difficult or impossible to add queue slots while slot 1 was actively building. The command buttons are no longer destroyed/recreated as production progress advances.
+- Vehicle Factory and Barracks expose the intended five-slot queue directly in the command dock. Slot 1 shows live build/exit state; slots 2–5 show `QUEUED`, immediate pre-tick taps show `ORDER SENT`, and empty capacity remains visible.
+- Pending `PRODUCE` commands are projected into the UI before the next 30 Hz simulation tick so rapid taps reserve visible slots and projected credits immediately. The authoritative ProductionSystem remains the final arbiter.
+- `CANCEL LAST` stays mounted and becomes available whenever an actual or pending production order exists.
+- Adds engine regressions proving five HMMWVs may be queued while slot 1 is already building, slot 6 is rejected without charging credits, cancellation refunds correctly, and a five-slot queue survives snapshot/restore.
+- v0.6.6.9 rollout/deadlock recovery is preserved unchanged. No production timing, price, AI, combat, movement, map, terrain, or asset changes.
 
 ### v0.6.6.9 — Production Rollout Recovery
 
