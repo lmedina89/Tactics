@@ -1,3 +1,14 @@
+## v0.6.6.9 — Production Rollout Recovery
+
+- Fixed an intermittent production deadlock where a completed HMMWV/Aegis-X or other produced unit could leave a factory queue permanently stuck at `WAITING_EXIT`.
+- Exit reservation now belongs only to the `CLEARING` stage. Once `CLEAR_BUILDING` is reached, the next completed unit may leave the producer even while the previous unit is still travelling to its rally point.
+- Added deterministic alternate exit candidates when the authored forward exit is occupied or cannot produce a valid clear route.
+- Added bounded rollout progress watchdogs and auditable `EXIT_RECOVERY_TIMEOUT` / `RALLY_RECOVERY_TIMEOUT` cleanup so stale rollout state cannot brick a producer forever.
+- Queue entries stop accumulating progress once complete and expose `WAITING EXIT` / `EXIT BLOCKED` in the HUD.
+- Timeout cleanup preserves any newer player/AI order that replaced the internal negative-serial rollout move.
+- Added regression coverage for rally-stage blockage, deliberately stalled factory clearing, v16 snapshot/restore while waiting on a blocked exit, and command preservation during timeout cleanup.
+- No build prices/times, tech tree, combat, locomotor tuning, AI policy, maps, terrain, WorldForge data, or production assets changed.
+
 ## v0.6.6.5 — Crimson Core Building Set Integration
 
 ## v0.6.6.8 — Crimson Artillery + Infantry

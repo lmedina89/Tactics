@@ -1,6 +1,16 @@
 # ForgeRTS v0.6.6.5 — Crimson Core Building Set
 
-## Current release — v0.6.6.7
+## Current release — v0.6.6.9
+
+
+### v0.6.6.9 — Production Rollout Recovery
+
+- Fixes an intermittent production deadlock where a completed vehicle could leave the factory queue permanently stuck at `WAITING_EXIT`.
+- Factory exit ownership now ends when the produced unit physically clears the building; travelling to the rally point no longer monopolizes the factory exit.
+- Added deterministic alternate exit placement when the primary exit point is occupied, plus bounded CLEARING/RALLYING watchdog recovery so stale rollout state cannot brick a producer forever.
+- Completed queue entries stop accumulating build progress while they wait for an exit and expose `WAITING EXIT` / `EXIT BLOCKED` status in the HUD.
+- Production/rollout recovery remains snapshot-compatible with v16 and is covered by blocked-rollout and restore determinism regressions.
+- No combat, economy pricing, build times, AI policy, terrain, WorldForge, faction content, or asset behavior changed.
 
 ### v0.6.6.7 — Crimson Vehicle Roster Integration
 

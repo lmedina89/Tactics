@@ -61,3 +61,80 @@ test('v12 snapshot restores dynamically produced entities, queues, cargo, factio
   const snap=s.snapshot(),s2=await sim();s2.restore(snap);assert.deepEqual(s2.snapshot(),snap);
   for(let i=0;i<180;i++){s.step(FIXED_DT);s2.step(FIXED_DT);}assert.deepEqual(s2.snapshot(),s.snapshot());
 });
+
+test('factory exit reservation ends at CLEAR_BUILDING even if the produced unit never reaches its rally point',async()=>{
+  const s=await sim(),factory=s.entities.get('p_factory'),initial=new Set(s.entities.keys());
+  s.issueProduce(factory.id,'hmmwv50');s.issueProduce(factory.id,'hmmwv50');
+  let firstRollout=null;
+  for(let i=0;i<500;i++){
+    s.step(FIXED_DT);
+    firstRollout=[...s.production.rollouts.values()].find(r=>r.producerId===factory.id&&r.stage==='RALLYING');
+    if(firstRollout)break;
+  }
+  assert.ok(firstRollout,'first vehicle never reached RALLYING');
+  const first=s.entities.get(firstRollout.unitId);first.locomotorId=null;first.ai.route=null;first.ai.goal=null;first.ai.nextRepathTick=s.tick+10000;first.speed=0;
+  let secondSpawnedWhileFirstStillRallying=false;
+  for(let i=0;i<240;i++){
+    s.step(FIXED_DT);
+    const created=[...s.entities.values()].filter(e=>!initial.has(e.id)&&e.definitionId==='hmmwv50'&&e.playerId==='player');
+    if(created.length>=2&&factory.production.queue.length===0&&s.production.rollouts.has(first.id)){secondSpawnedWhileFirstStillRallying=true;break;}
+  }
+  assert.equal(secondSpawnedWhileFirstStillRallying,true,'rallying unit still monopolized the factory exit');
+});
+
+test('stalled CLEARING rollout is deterministically recovered and cannot brick later production',async()=>{
+  const s=await sim(),factory=s.entities.get('p_factory'),initial=new Set(s.entities.keys());
+  s.registry.definition('vehicle_factory').modules.find(m=>m.type==='Production').rolloutClearStallTicks=10000;
+  s.issueProduce(factory.id,'hmmwv50');s.issueProduce(factory.id,'aegis_x');
+  let stuckRollout=null;
+  for(let i=0;i<500;i++){
+    s.step(FIXED_DT);
+    stuckRollout=[...s.production.rollouts.values()].find(r=>r.producerId===factory.id&&r.stage==='CLEARING');
+    if(stuckRollout)break;
+  }
+  assert.ok(stuckRollout,'first rollout never entered CLEARING');
+  const stuck=s.entities.get(stuckRollout.unitId);stuck.locomotorId=null;stuck.ai.route=null;stuck.ai.goal=null;stuck.ai.nextRepathTick=s.tick+10000;stuck.speed=0;
+  let sawWaiting=false;
+  for(let i=0;i<900&&factory.production.queue.length;i++){
+    s.step(FIXED_DT);
+    if(factory.production.queue[0]?.state==='WAITING_EXIT')sawWaiting=true;
+  }
+  const created=[...s.entities.values()].filter(e=>!initial.has(e.id)&&e.playerId==='player');
+  assert.equal(sawWaiting,true,'second build never exercised WAITING_EXIT');
+  assert.equal(factory.production.queue.length,0,'factory queue remained deadlocked');
+  assert.ok(created.some(e=>e.definitionId==='aegis_x'),'later queued vehicle never spawned');
+  assert.equal(s.production.rollouts.has(stuck.id),false,'stalled rollout watchdog did not release stale reservation');
+  assert.equal(stuck.productionExit,null,'stalled produced unit remained owned by the factory rollout');
+  const timedOut=[...s.interactions.sessions.values()].find(x=>x.requesterId===stuck.id&&x.state==='EXIT_RECOVERY_TIMEOUT');
+  assert.ok(timedOut?.complete,'stalled rollout did not leave an auditable terminal interaction state');
+});
+
+test('WAITING_EXIT and stalled-rollout recovery remain deterministic through v16 snapshot restore',async()=>{
+  const s=await sim(),factory=s.entities.get('p_factory');s.registry.definition('vehicle_factory').modules.find(m=>m.type==='Production').rolloutClearStallTicks=10000;s.issueProduce(factory.id,'hmmwv50');s.issueProduce(factory.id,'aegis_x');
+  let stuckRollout=null;
+  for(let i=0;i<500;i++){
+    s.step(FIXED_DT);
+    stuckRollout=[...s.production.rollouts.values()].find(r=>r.producerId===factory.id&&r.stage==='CLEARING');
+    if(stuckRollout)break;
+  }
+  assert.ok(stuckRollout);
+  const stuck=s.entities.get(stuckRollout.unitId);stuck.locomotorId=null;stuck.ai.route=null;stuck.ai.goal=null;stuck.ai.nextRepathTick=s.tick+10000;stuck.speed=0;
+  for(let i=0;i<400&&factory.production.queue[0]?.state!=='WAITING_EXIT';i++)s.step(FIXED_DT);
+  assert.equal(factory.production.queue[0]?.state,'WAITING_EXIT');assert.equal(factory.production.queue[0]?.waitReason,'EXIT_RESERVED');
+  const snap=s.snapshot(),s2=await sim();s2.restore(snap);assert.deepEqual(s2.snapshot(),snap);s2.entities.get(stuck.id).locomotorId=null;
+  for(let i=0;i<500;i++){s.step(FIXED_DT);s2.step(FIXED_DT);}assert.deepEqual(s2.snapshot(),s.snapshot());
+  assert.equal(s.entities.get('p_factory').production.queue.length,0);
+});
+
+test('rollout timeout releases factory bookkeeping without erasing a later player command',async()=>{
+  const s=await sim(),factory=s.entities.get('p_factory');s.issueProduce(factory.id,'hmmwv50');
+  let rollout=null;
+  for(let i=0;i<500;i++){s.step(FIXED_DT);rollout=[...s.production.rollouts.values()].find(r=>r.producerId===factory.id&&r.stage==='RALLYING');if(rollout)break;}
+  assert.ok(rollout);
+  const unit=s.entities.get(rollout.unitId);unit.ai.order={type:'MOVE',serial:777,requested:{x:unit.x+40,z:unit.z}};unit.ai.route=null;unit.ai.goal=null;unit.speed=0;
+  rollout.lastProgressTick=s.tick-301;rollout.lastDistance=distForTest(unit,rollout.rallyPoint);
+  s.production.step(s.tick);
+  assert.equal(s.production.rollouts.has(unit.id),false);assert.equal(unit.productionExit,null);assert.equal(unit.ai.order?.serial,777);
+});
+
+function distForTest(a,b){return Math.hypot(a.x-b.x,a.z-b.z);}

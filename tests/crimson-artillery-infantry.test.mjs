@@ -14,7 +14,7 @@ function glbJSON(buffer){let off=12,g=null;while(off<buffer.length){const len=bu
 function mod(def,type){return def.modules.find(m=>m.type===type);}
 
 test('accepted Crimson artillery and infantry assets are registered with authored materials',async()=>{
-  const cat=await readJson('data/asset-catalog.json');assert.equal(cat.version,'0.6.6.8');
+  const cat=await readJson('data/asset-catalog.json'),pkg=await readJson('package.json');assert.equal(cat.version,pkg.version);
   for(const id of ['crimson_anvil_spg','crimson_praetorian_exosuit','crimson_line_trooper']){assert.ok(cat.assets[id]);await fs.access(path.join(root,cat.assets[id].path));}
   const rifle=await readJson('data/units/rifleman.json'),r=mod(rifle,'Render');
   assert.equal(r.asset,'aegis_rifleman');assert.equal(r.assetByFaction.crimson,'crimson_line_trooper');assert.equal(r.factionColorModeByFaction.crimson,'AUTHORED');
