@@ -1,3 +1,14 @@
+## v0.7.0 — Mission / Trigger / Objective Foundation
+
+- Added `engine/missions/` with trigger-area runtime, mission definition validation, typed condition evaluation, typed action execution, objective state, flags/counters/timers, script runtime state, and victory/defeat outcome.
+- Added circle, rotated-rectangle, and polygon trigger membership plus deterministic ENTERED/INSIDE/EXITED transitions.
+- Added map-manifest validation for duplicate/malformed trigger areas.
+- Script movement actions route through the existing `CommandBus` as `FROM_SCRIPT`; player ownership checks and normal simulation execution remain authoritative.
+- Snapshot advanced from v16 to v17 with trigger + mission runtime state; legacy v16 snapshots remain loadable in non-mission simulations.
+- Added `missions/first_contact_validation.json` and an opt-in `MISSION` validation mode in the browser.
+- Added mission regression coverage for validation, trigger geometry/transitions, objective progression, victory, script-issued commands, timers/counters/flags/relations, deterministic snapshot restore, and legacy v16 migration.
+- Existing v0.6.6.10 production queue reliability and v0.6.6.9 rollout recovery remain intact.
+
 ## v0.6.6.10 — Production Queue Reliability + Mobile UI
 
 - Fixed mobile production controls being rebuilt as `progressTicks` advanced. On iPhone Safari this could remove a button between touch-down and click, making additional queue taps appear unresponsive while a unit was building.

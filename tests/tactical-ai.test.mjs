@@ -114,7 +114,7 @@ test('missing emergency defenders become normal high-priority factory demand ins
   assert.equal([...sim.entities.values()].filter(e=>e.alive&&e.playerId==='enemy'&&['aegis_x','hmmwv50'].includes(e.definitionId)).length,0,'defenders must not be spawned directly');
 });
 
-test('economic-defense incident/escort state survives v16 snapshot restore deterministically',async()=>{
+test('economic-defense incident/escort state survives v17 snapshot restore deterministically',async()=>{
   const a=await makeSim();run(a,100);
   const harvester=a.entities.get('e_harvester'),attacker=a.entities.get('p_hmmwv');attacker.x=harvester.x-18;attacker.z=harvester.z;
   harvester.lastDamagedBy=attacker.id;harvester.lastDamagedTick=a.tick;run(a,20);

@@ -52,6 +52,14 @@ export function validateMapManifest(raw) {
   }
   const waypointIds=new Set();
   for(const w of map.waypoints){if(!w.id)throw new Error('Each waypoint needs id');if(waypointIds.has(w.id))throw new Error(`Duplicate waypoint id ${w.id}`);waypointIds.add(w.id);}
+  const triggerAreaIds=new Set();
+  for(const a of map.triggerAreas){
+    if(!a.id)throw new Error('Each trigger area needs id');if(triggerAreaIds.has(a.id))throw new Error(`Duplicate trigger area id ${a.id}`);triggerAreaIds.add(a.id);
+    if(a.shape==='circle'){if(!Number.isFinite(a.x)||!Number.isFinite(a.z)||!(a.radius>0))throw new Error(`Trigger area ${a.id} has invalid circle geometry`);}
+    else if(a.shape==='rect'||a.shape==='rectangle'){if(!Number.isFinite(a.x)||!Number.isFinite(a.z)||!(a.width>0)||!(a.depth>0))throw new Error(`Trigger area ${a.id} has invalid rectangle geometry`);}
+    else if(a.shape==='polygon'){if(!Array.isArray(a.points)||a.points.length<3||a.points.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.z)))throw new Error(`Trigger area ${a.id} has invalid polygon geometry`);}
+    else throw new Error(`Trigger area ${a.id} has unsupported shape ${a.shape}`);
+  }
   const anchorIds=new Set();
   for(const a of map.aiAnchors){if(!a.id)throw new Error('Each AI anchor needs id');if(anchorIds.has(a.id))throw new Error(`Duplicate AI anchor id ${a.id}`);anchorIds.add(a.id);}
   for(const p of map.players){

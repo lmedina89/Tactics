@@ -46,7 +46,7 @@ ForgeRTS uses three C&C generations as complementary engineering references whil
 | Group/queued tactical orders | grouped orders | attack-move / guard / appended user paths | generic behavior command data | InputController + UnitAIUpdate | **Multi-select, box/add, ATTACK_MOVE, GUARD, serialized appended order queue** |
 | Teams/attack groups | teams/groups | `TeamTemplateInfo` / `TeamPrototype` / runtime `Team` | invariant team data + runtime instances | `engine/teams/team-manager.js` | **TeamPrototype composition, stable runtime membership, recruit/rally/active lifecycle + snapshot implemented** |
 | Strategic AI | house AI | `AIPlayer` / `AISkirmishPlayer` | AI policy/profile data | `engine/ai/skirmish-ai-player.js` + `skirmish-economy-planner.js` | **Timer-bounded Teams/economy plus distance-weighted target priorities, economic defense, common targets and casualty reform through normal CommandBus** |
-| Mission conditions/actions | triggers/actions | Scripts / Conditions / Actions | script data | `MissionSystem` | Planned; never owns world lifetime |
+| Mission conditions/actions | triggers/actions | Scripts / Conditions / Actions | script data | `MissionSystem` | **Foundation implemented v0.7.0**: typed conditions/actions, trigger occupancy, objectives, timers/flags/counters, snapshot v17; world lifetime remains outside missions |
 | Fog/shroud/radar | map visibility | shroud/radar systems | client/game visibility split | `VisibilitySystem` | Planned |
 | Veterancy/upgrades/sciences | veteran/unit upgrades | experience / upgrades | upgrade modules | data modules | Planned |
 | Bridges/path layers | cell/bridge movement | terrain/path layers | layered traversal | navigation layers | Planned |

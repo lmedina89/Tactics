@@ -1,0 +1,33 @@
+{
+  "missionVersion": 1,
+  "id": "first_contact_validation",
+  "name": "First Contact Validation",
+  "mapId": "training_ground",
+  "objectives": [
+    {"id":"reach_center","text":"Advance into the center zone","kind":"PRIMARY","initialState":"ACTIVE"},
+    {"id":"destroy_enemy_tank","text":"Destroy the Crimson tank","kind":"PRIMARY","initialState":"INACTIVE"}
+  ],
+  "scripts": [
+    {
+      "id":"reach_center",
+      "oneShot":true,
+      "condition":{"type":"PLAYER_ENTERED_AREA","playerId":"player","areaId":"center_zone"},
+      "actions":[
+        {"type":"COMPLETE_OBJECTIVE","objectiveId":"reach_center"},
+        {"type":"ACTIVATE_OBJECTIVE","objectiveId":"destroy_enemy_tank"}
+      ]
+    },
+    {
+      "id":"enemy_tank_destroyed",
+      "oneShot":true,
+      "condition":{"all":[
+        {"type":"OBJECTIVE_STATE","objectiveId":"destroy_enemy_tank","state":"ACTIVE"},
+        {"type":"ENTITY_DESTROYED","entityId":"e_tank"}
+      ]},
+      "actions":[
+        {"type":"COMPLETE_OBJECTIVE","objectiveId":"destroy_enemy_tank"},
+        {"type":"VICTORY","playerId":"player","reason":"VALIDATION_COMPLETE"}
+      ]
+    }
+  ]
+}

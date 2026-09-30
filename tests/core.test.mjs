@@ -41,7 +41,7 @@ test('snapshot/restore preserves deterministic world state and pending AI intent
 });
 
 
-test('snapshot v16 preserves active wheeled turn-around maneuver state',()=>{
+test('snapshot v17 preserves active wheeled turn-around maneuver state',()=>{
   const bus=new CommandBus(),sim=new Simulation({registry:new TestRegistry(defs,locos),map:baseMap(),commandBus:bus});
   const e=sim.entities.get('u1');e.yaw=0;e.x=0;e.z=0;
   sim.issueMove(['u1'],{x:0,z:-55});for(let i=0;i<18;i++)sim.step(FIXED_DT);

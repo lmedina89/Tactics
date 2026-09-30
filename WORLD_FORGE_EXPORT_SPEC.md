@@ -37,7 +37,7 @@ Minimum map placement fields are:
 }
 ```
 
-`owner` may be omitted/null for WORLD/CIVILIAN/NEUTRAL content. Full gameplay diplomacy is a separate PlayerRelationMap system planned for v0.7.0.
+`owner` may be omitted/null for WORLD/CIVILIAN/NEUTRAL content. Full gameplay diplomacy is owned by the ForgeRTS PlayerRelationMap runtime and is independent from ContentMeta affiliation.
 
 ## Definition contract
 
@@ -191,3 +191,25 @@ authoritative simulation + disposable renderer
 ```
 
 WorldForge and ForgeRTS may share this data contract. They should not share runtime state or require one another's code to execute.
+
+## Mission authoring metadata — ForgeRTS v0.7.0+
+
+WorldForge may author stable mission-addressable map metadata, but ForgeRTS owns mission execution.
+
+WorldForge exports ordinary map fields such as:
+
+- `waypoints[]`
+- `triggerAreas[]`
+- stable object ids
+- player ids
+- later `MissionArea`, `ObjectiveAnchor`, `SpawnZone`, `ConvoyRoute`, `CaptureZone`, and `DefenseLine` authoring records once their runtime contracts are defined
+
+ForgeRTS v0.7.0 validates and executes trigger areas with these shapes:
+
+```json
+{"id":"town_gate","shape":"circle","x":120,"z":-40,"radius":24}
+{"id":"depot_yard","shape":"rect","x":40,"z":80,"width":60,"depth":35,"yaw":0}
+{"id":"quarry_zone","shape":"polygon","points":[{"x":0,"z":0},{"x":80,"z":10},{"x":55,"z":90}]}
+```
+
+Mission JSON remains a ForgeRTS runtime asset and references those stable exported ids. WorldForge must not embed executable JavaScript into map exports, and ForgeRTS must not require WorldForge code at runtime.

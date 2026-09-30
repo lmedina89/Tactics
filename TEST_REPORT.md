@@ -1,67 +1,67 @@
-# ForgeRTS v0.6.6.10 Test Report
+# ForgeRTS v0.7.0 Test Report
 
-## Automated regression suite
+## Release focus
 
-- **153 / 153 tests passed**
-- **0 failed**
-- Added production-queue regressions covering:
-  - five HMMWVs queued while slot 1 is already actively building
-  - FIFO preservation across all five slots
-  - sixth-slot rejection with `QUEUE_FULL` and no credit charge
-  - `CANCEL LAST` refund after a full queue
-  - snapshot/restore of a five-slot production queue
-  - UI projection of actual + not-yet-simulated `PRODUCE` commands
-  - pending-command queue-capacity and credit reservation before the next 30 Hz tick
-  - a static regression preventing per-tick production progress from re-entering the command-panel DOM rebuild signature
-- All v0.6.6.9 rollout/deadlock recovery tests remain green.
-- Existing construction, economy, harvesting, combat/projectiles, locomotion, collision/local avoidance, player relations, command control, strategic/tactical AI, Team AI, Crimson/Aegis content, animation and content-foundation tests all remain green.
+Mission / Trigger / Objective Foundation built on the verified v0.6.6.10 production-queue baseline.
 
-## Content validation
+## Automated validation
 
-- **0 errors**
-- **0 warnings**
-- 26 registered definitions
-- 34 active catalog assets
-- 3 maps
+- Node test suite: **163/163 passed**
+- Content validation: **0 errors / 0 warnings**
+- Registered content: **26 definitions / 34 assets / 3 maps**
+- Asset audit: **34 assets audited**
+- Tracked production asset hashes: **45/45 SHA-256 checks passed**
+- JS/MJS syntax validation: **75/75 passed**
+- JSON parse validation: **98/98 passed**
 
-## Static validation
+## Mission-system regression coverage
 
-- **97 / 97 JSON files parsed**
-- **68 / 68 JS/MJS files pass `node --check`**
-- release metadata is consistent across package.json, HUD/startup text and asset catalog
+v0.7.0 adds focused coverage for:
 
-## Asset preservation
+1. Mission definition validation against authored players, trigger areas, waypoints, objectives, and typed vocabulary.
+2. Circle, rotated-rectangle, and polygon trigger membership.
+3. Deterministic ENTERED / INSIDE / EXITED transitions.
+4. Objective activation/completion from authored trigger entry.
+5. Mission victory after an authoritative world-state condition.
+6. `FROM_SCRIPT` MOVE orders travelling through the normal CommandBus.
+7. Mission flags, counters, timers, script state, and directional relation actions.
+8. Snapshot v17 exact mission/trigger-state restore and continued deterministic simulation.
+9. Legacy v16 non-mission snapshot restore without false trigger-entry events.
+10. Map-manifest rejection of duplicate/malformed trigger areas.
+11. Browser preservation of the normal construction field test plus opt-in `MISSION` validation mode.
 
-- **45 / 45 files in `ASSET_HASHES.sha256` verified**
-- `/assets` is byte-for-byte unchanged from v0.6.6.9
-- map JSON is byte-for-byte unchanged from v0.6.6.9
-- the authoritative `/engine` directory is byte-for-byte unchanged from v0.6.6.9
-- `engine/production/production-system.js` SHA-256 remains `050386ca36a240543f89ed3d6738c25ee81fd8ae38710b1a21c0442b6f2761fe`
+## Snapshot compatibility
 
-## Root cause
+- Current snapshot version: **17**.
+- Snapshot v17 adds trigger-area occupancy and MissionSystem runtime state.
+- Existing v8-v16 snapshots remain accepted.
+- Restoring a v17 mission snapshot requires the same mission definition id; mission source data remains an external versioned asset.
 
-The authoritative queue already supported `queueLimit: 5`. The failure was in the browser command UI: the context-panel rebuild signature included the active production entry's `progressTicks`. While a unit was building, that value changed at the fixed 30 Hz simulation cadence, causing `context.replaceChildren()` to repeatedly destroy and recreate the production buttons. On iPhone Safari a button could therefore disappear between touch-down and click dispatch, making later queue taps appear blocked even though ProductionSystem itself allowed them.
+## Preservation checks against v0.6.6.10
 
-## v0.6.6.10 behavior
+- `/assets`: **byte-for-byte unchanged**.
+- `/maps`: **byte-for-byte unchanged**.
+- Existing engine changes are restricted to:
+  - `engine/sim/simulation.js`
+  - `engine/maps/map-manifest.js`
+  - new `engine/missions/` subsystem
+- Existing production, construction, combat, projectile, locomotion, local avoidance, economy, resource, AI, Team, player-relation, interaction, and pathfinding source files are unchanged.
+- v0.6.6.10 five-slot mobile queue behavior remains covered by the full regression suite.
+- v0.6.6.9 rollout/deadlock recovery remains covered by the full regression suite.
 
-- Production buttons stay mounted while the same producer remains selected.
-- Dynamic queue state, build percentage, affordability and button lock state update in place rather than reconstructing the control DOM.
-- The command dock shows five explicit slots. Slot 1 reports `BUILDING n%`, `WAITING EXIT`, or `EXIT BLOCKED`; later authoritative entries report `QUEUED`; player commands waiting for the next fixed simulation tick report `ORDER SENT`.
-- Pending `PRODUCE` commands count toward projected UI capacity immediately, so rapid taps cannot make the UI advertise more than five slots.
-- Pending production costs are deducted from projected UI affordability until the authoritative command is processed. Actual credits are still withdrawn only by ProductionSystem when the command is accepted.
-- The sixth authoritative order is rejected with `QUEUE_FULL` and cannot charge credits.
-- `CANCEL LAST` remains present and is enabled whenever an actual or pending production order exists.
-- v0.6.6.9 exit reservation, alternate exit planning and rollout watchdog behavior are unchanged.
+## Browser validation scenario
 
-## Runtime-change boundary
+The normal root page remains the build-from-foundation field test. The new `MISSION` button opens `?mission=first_contact`, which loads the unchanged Training Ground plus `missions/first_contact_validation.json`.
 
-No authoritative simulation subsystem changed in v0.6.6.10. The entire `/engine` directory is unchanged from v0.6.6.9. Changes are limited to the browser production UI/projection helper, command-dock styling, release metadata/docs and regression tests.
+Validation chain:
 
-## Recommended field test
+1. Move an Aegis unit into `center_zone`.
+2. `reach_center` completes and `destroy_enemy_tank` activates.
+3. Destroy `e_tank`.
+4. Second objective completes and the mission outcome becomes `VICTORY`.
 
-1. Select the Vehicle Factory and queue one HMMWV. While its percentage is visibly advancing, tap additional HMMWV/Aegis-X/Harvester buttons until all five slots are occupied.
-2. Confirm every tap appears immediately as either `ORDER SENT` or `QUEUED` and that the command buttons remain tappable while slot 1 advances.
-3. Try a sixth order and confirm the UI shows `QUEUE FULL`; no credits should be lost.
-4. Use `CANCEL LAST` and confirm slot 5 disappears/refunds, then immediately queue another unit into the reopened slot.
-5. Repeat with the Barracks.
-6. Re-test v0.6.6.9 exit congestion: a full queue must continue once the factory exit clears and must never deadlock.
+The mission mode is deliberately small. It proves the new scripting architecture without mixing in reinforcement spawning, cinematics, fog/radar, bridges, upgrades, or WorldForge changes.
+
+## Released-source reference audit
+
+The implementation follows the architectural separation visible in the released Generals/Zero Hour source: GameLogic instantiates separate script actions, script conditions, and script engine subsystems; `Script` carries enabled/one-shot/condition/action and snapshot semantics; object state contains trigger-entry/exit housekeeping. ForgeRTS implements those ideas as original browser-native JavaScript around its existing deterministic CommandBus and snapshot architecture.

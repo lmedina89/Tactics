@@ -133,9 +133,9 @@ test('live relationship changes immediately revoke hostile attack and turret tar
   assert.equal(attacker.combat?.activeTargetId??null,null,'combat system must revoke the target on the same simulation step');
 });
 
-test('snapshot v16 preserves relation overrides; legacy v15 restores map-start relationships',async()=>{
+test('snapshot v17 preserves relation overrides; legacy v15 restores map-start relationships',async()=>{
   const registry=await loadRegistry(),map=mapWith({relations:authoredRelations}),a=new Simulation({registry,map,commandBus:new CommandBus()});
-  a.setPlayerRelation('player','enemy',PlayerRelation.NEUTRAL);const snap=a.snapshot();assert.equal(snap.version,16);assert.equal(a.getPlayerRelation('player','enemy'),'NEUTRAL');
+  a.setPlayerRelation('player','enemy',PlayerRelation.NEUTRAL);const snap=a.snapshot();assert.equal(snap.version,17);assert.equal(a.getPlayerRelation('player','enemy'),'NEUTRAL');
   const b=new Simulation({registry,map,commandBus:new CommandBus()});b.restore(snap);assert.deepEqual(b.snapshot(),snap);assert.equal(b.getPlayerRelation('player','enemy'),'NEUTRAL');
   const legacy=structuredClone(snap);legacy.version=15;delete legacy.playerRelations;
   const c=new Simulation({registry,map,commandBus:new CommandBus()});c.restore(legacy);assert.equal(c.getPlayerRelation('player','ally'),'ALLY');assert.equal(c.getPlayerRelation('player','neutral'),'NEUTRAL');assert.equal(c.getPlayerRelation('player','enemy'),'ENEMY');

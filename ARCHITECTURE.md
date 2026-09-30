@@ -211,3 +211,17 @@ GameObject factory
 Walls/gates use generic `WallConnection` metadata (`connectionGroup`, role, sockets, snapDistance) so future editors can compose them without runtime knowledge of concrete wall IDs. The current release establishes data and deterministic snapping only; drag-build, corner selection and gate pathing remain later behavior layers.
 
 Asset ingestion is intentionally one-way: the auditor may suggest visual bounds/pivots, but no tool may silently write those suggestions into authoritative balance/collision data.
+
+## v0.7.0 mission / trigger / objective rule
+
+Mission logic is an **optional authoritative layer over the existing world simulation**, not a replacement for it.
+
+- `TriggerAreaSystem` owns deterministic ENTERED / INSIDE / EXITED occupancy for authored trigger geometry.
+- `MissionConditions` reads authoritative simulation state; it never reads renderer/UI state.
+- `MissionActions` may mutate mission-owned state directly (flags, counters, timers, objectives, outcome), but unit orders must travel through the normal `CommandBus` with `CommandSource.SCRIPT`.
+- Mission scripts may change simulation-owned diplomacy only through the public PlayerRelationMap API.
+- Mission definitions are typed data. Arbitrary/eval JavaScript hooks are forbidden.
+- Script evaluation order is stable definition order. Commands emitted during script evaluation execute on the next fixed simulation tick, avoiding re-entrant command application.
+- Mission runtime is snapshot state. Snapshot v17 stores script state, timers, objectives, outcome, and trigger occupancy.
+- The persistent world is still primary. A mission references stable map/player/entity/team/area/waypoint IDs; it does not own terrain, maps, content definitions, or region lifetime.
+- New condition/action vocabulary should be added only for concrete mission requirements and backed by deterministic tests.

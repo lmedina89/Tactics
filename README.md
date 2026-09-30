@@ -1,7 +1,21 @@
-# ForgeRTS v0.6.6.5 — Crimson Core Building Set
+# ForgeRTS v0.7.0 — Mission / Trigger / Objective Foundation
 
-## Current release — v0.6.6.10
+## Current release — v0.7.0
 
+
+
+
+### v0.7.0 — Mission / Trigger / Objective Foundation
+
+- Adds the first authoritative `MissionSystem` layer without changing the existing combat, economy, production, AI, terrain, or WorldForge runtime boundaries.
+- Adds deterministic trigger-area occupancy with `ENTERED`, `INSIDE`, and `EXITED` transitions for circle, rotated rectangle, and polygon areas. Existing authored map `triggerAreas` are now validated before runtime.
+- Adds typed mission conditions and actions instead of arbitrary mission JavaScript reaching into simulation internals. Condition expressions support nested `all`, `any`, and `not` composition.
+- Adds an authoritative `ObjectiveManager` with `INACTIVE`, `ACTIVE`, `COMPLETED`, and `FAILED` states.
+- Adds mission flags, counters, timers, script enable/disable state, one-shot/recurring evaluation, and explicit `VICTORY` / `DEFEAT` outcome state.
+- Script-issued movement commands travel through the existing `CommandBus` as `FROM_SCRIPT`; mission scripts do not bypass movement/combat authority.
+- Advances save-state to snapshot v17. Mission runtime, objective state, timers, script state, and trigger occupancy survive deterministic snapshot/restore; legacy v16 saves remain accepted for non-mission play.
+- Includes `missions/first_contact_validation.json` plus a mobile-accessible `MISSION` validation mode (`?mission=first_contact`). The validation chain is: enter the center trigger area → objective transition → destroy the Crimson tank → victory.
+- Architecture follows the useful separation visible in the released Generals/Zero Hour source (`ScriptEngine`, `ScriptConditions`, `ScriptActions`, snapshot-aware `Script`) while remaining original ForgeRTS JavaScript and using the existing ForgeRTS command/state APIs.
 
 ### v0.6.6.10 — Production Queue Reliability + Mobile UI
 
